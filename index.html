@@ -1,0 +1,944 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SIBIM | Sistema de Inventario Municipal - Tzompantepec</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
+    <style>
+        :root {
+            --primary: #1a5f7a;
+            --secondary: #38a3a5;
+            --success: #57cc99;
+            --warning: #ffc107;
+            --danger: #dc3545;
+            --light: #f8f9fa;
+            --dark: #343a40;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a5f7a 0%, #38a3a5 100%);
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        /* Background Animation */
+        .bg-animation {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            overflow: hidden;
+        }
+        
+        .bg-animation div {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            animation: float 20s infinite linear;
+        }
+        
+        .bg-animation div:nth-child(1) {
+            width: 80px;
+            height: 80px;
+            top: 20%;
+            left: 10%;
+            animation-delay: 0s;
+        }
+        
+        .bg-animation div:nth-child(2) {
+            width: 120px;
+            height: 120px;
+            top: 60%;
+            left: 80%;
+            animation-delay: -5s;
+        }
+        
+        .bg-animation div:nth-child(3) {
+            width: 60px;
+            height: 60px;
+            top: 80%;
+            left: 20%;
+            animation-delay: -10s;
+        }
+        
+        .bg-animation div:nth-child(4) {
+            width: 100px;
+            height: 100px;
+            top: 30%;
+            left: 70%;
+            animation-delay: -15s;
+        }
+        
+        @keyframes float {
+            0% {
+                transform: translateY(0) rotate(0deg);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-1000px) rotate(720deg);
+                opacity: 0;
+            }
+        }
+        
+        /* Login Container */
+        .login-container {
+            width: 100%;
+            max-width: 450px;
+            margin: 20px;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+            animation: fadeIn 1s ease-out;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* Header */
+        .login-header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+            padding: 30px 20px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .login-header:before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px);
+            background-size: 50px 50px;
+            animation: moveBackground 20s linear infinite;
+        }
+        
+        @keyframes moveBackground {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .logo-icon {
+            width: 80px;
+            height: 80px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 15px;
+            font-size: 36px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            position: relative;
+            z-index: 2;
+        }
+        
+        .system-title {
+            font-size: 1.8rem;
+            font-weight: 800;
+            margin-bottom: 5px;
+            letter-spacing: -0.5px;
+            position: relative;
+            z-index: 2;
+        }
+        
+        .system-subtitle {
+            font-size: 1rem;
+            opacity: 0.9;
+            margin-bottom: 5px;
+            position: relative;
+            z-index: 2;
+        }
+        
+        .municipality {
+            font-size: 1.1rem;
+            font-weight: 600;
+            position: relative;
+            z-index: 2;
+        }
+        
+        /* Login Body */
+        .login-body {
+            padding: 30px;
+        }
+        
+        .login-form {
+            width: 100%;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-label {
+            font-weight: 600;
+            color: var(--primary);
+            margin-bottom: 8px;
+            display: block;
+            font-size: 0.95rem;
+        }
+        
+        .input-group {
+            position: relative;
+            margin-bottom: 5px;
+        }
+        
+        .input-group-text {
+            background: #f8f9fa;
+            border: 2px solid #e9ecef;
+            border-right: none;
+            border-radius: 10px 0 0 10px;
+            padding: 12px 15px;
+            color: var(--primary);
+        }
+        
+        .form-control {
+            border: 2px solid #e9ecef;
+            border-left: none;
+            border-radius: 0 10px 10px 0;
+            padding: 12px 15px;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+        
+        .form-control:focus {
+            box-shadow: none;
+            border-color: var(--primary);
+        }
+        
+        .input-group:focus-within .input-group-text {
+            border-color: var(--primary);
+        }
+        
+        .password-toggle {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: #6c757d;
+            cursor: pointer;
+            z-index: 3;
+        }
+        
+        /* Role Selection */
+        .role-selection {
+            margin: 25px 0;
+        }
+        
+        .role-title {
+            font-weight: 600;
+            color: var(--primary);
+            margin-bottom: 15px;
+            display: block;
+            font-size: 0.95rem;
+        }
+        
+        .role-options {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .role-option {
+            display: flex;
+            align-items: center;
+            padding: 12px 15px;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: white;
+        }
+        
+        .role-option:hover {
+            border-color: var(--primary);
+            background: rgba(26, 95, 122, 0.05);
+        }
+        
+        .role-option.selected {
+            border-color: var(--primary);
+            background: rgba(26, 95, 122, 0.1);
+        }
+        
+        .role-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            background: rgba(26, 95, 122, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+            color: var(--primary);
+            font-size: 1.2rem;
+        }
+        
+        .role-info {
+            flex: 1;
+        }
+        
+        .role-name {
+            font-weight: 600;
+            color: var(--dark);
+            margin-bottom: 3px;
+        }
+        
+        .role-description {
+            font-size: 0.85rem;
+            color: #6c757d;
+        }
+        
+        .role-check {
+            color: var(--primary);
+            font-size: 1.2rem;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        
+        .role-option.selected .role-check {
+            opacity: 1;
+        }
+        
+        /* Login Button */
+        .btn-login {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            border: none;
+            color: white;
+            font-weight: 600;
+            font-size: 1.1rem;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 5px 15px rgba(26, 95, 122, 0.2);
+            margin-top: 10px;
+        }
+        
+        .btn-login:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(26, 95, 122, 0.3);
+        }
+        
+        .btn-login:active {
+            transform: translateY(0);
+        }
+        
+        .btn-login i {
+            margin-right: 10px;
+        }
+        
+        /* Additional Links */
+        .login-links {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #e9ecef;
+        }
+        
+        .login-link {
+            color: var(--primary);
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+        
+        .login-link:hover {
+            text-decoration: underline;
+        }
+        
+        /* Footer */
+        .login-footer {
+            margin-top: 25px;
+            text-align: center;
+            color: #6c757d;
+            font-size: 0.85rem;
+            padding-top: 20px;
+            border-top: 1px solid #e9ecef;
+        }
+        
+        /* Loading Animation */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s, visibility 0.3s;
+        }
+        
+        .loading-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .loading-spinner {
+            width: 80px;
+            height: 80px;
+            border: 5px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+            margin-bottom: 20px;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .loading-text {
+            color: white;
+            font-size: 1.2rem;
+            font-weight: 500;
+        }
+        
+        /* Responsive */
+        @media (max-width: 576px) {
+            .login-container {
+                margin: 10px;
+                max-width: 95%;
+            }
+            
+            .login-body {
+                padding: 20px;
+            }
+            
+            .login-links {
+                flex-direction: column;
+                gap: 10px;
+                text-align: center;
+            }
+            
+            .role-option {
+                flex-direction: column;
+                text-align: center;
+                padding: 15px;
+            }
+            
+            .role-icon {
+                margin-right: 0;
+                margin-bottom: 10px;
+            }
+            
+            .role-info {
+                margin-bottom: 10px;
+            }
+        }
+        
+        /* Shake Animation */
+        @keyframes shake {
+            0%, 100% {transform: translateX(0);}
+            10%, 30%, 50%, 70%, 90% {transform: translateX(-5px);}
+            20%, 40%, 60%, 80% {transform: translateX(5px);}
+        }
+    </style>
+</head>
+<body>
+    <!-- Background Animation -->
+    <div class="bg-animation">
+        <div></div>
+        <div></div>
+        <div></div>
+        <div></div>
+    </div>
+    
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-spinner"></div>
+        <div class="loading-text">Iniciando sesión...</div>
+    </div>
+    
+    <!-- Login Container -->
+    <div class="login-container">
+        <!-- Header -->
+        <div class="login-header">
+            <div class="logo-icon">
+                <i class="fas fa-landmark"></i>
+            </div>
+            <h1 class="system-title">SIBIM</h1>
+            <p class="system-subtitle">Sistema de Inventario Municipal</p>
+            <div class="municipality">Tzompantepec</div>
+        </div>
+        
+        <!-- Body -->
+        <div class="login-body">
+            <form class="login-form" id="loginForm">
+                <!-- Usuario -->
+                <div class="form-group">
+                    <label class="form-label">Usuario</label>
+                    <div class="input-group">
+                        <span class="input-group-text">
+                            <i class="fas fa-user"></i>
+                        </span>
+                        <input type="text" class="form-control" id="username" 
+                               placeholder="Ingrese su usuario" required>
+                    </div>
+                </div>
+                
+                <!-- Contraseña -->
+                <div class="form-group">
+                    <label class="form-label">Contraseña</label>
+                    <div class="input-group">
+                        <span class="input-group-text">
+                            <i class="fas fa-lock"></i>
+                        </span>
+                        <input type="password" class="form-control" id="password" 
+                               placeholder="Ingrese su contraseña" required>
+                        <button type="button" class="password-toggle" id="togglePassword">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Seleccionar Rol -->
+                <div class="role-selection">
+                    <label class="role-title">Seleccionar Rol</label>
+                    <div class="role-options">
+                        <!-- Administrador -->
+                        <div class="role-option" data-role="admin" onclick="selectRole(this)">
+                            <div class="role-icon">
+                                <i class="fas fa-user-shield"></i>
+                            </div>
+                            <div class="role-info">
+                                <div class="role-name">Administrador</div>
+                                <div class="role-description">Acceso completo al sistema</div>
+                            </div>
+                            <div class="role-check">
+                                <i class="fas fa-check-circle"></i>
+                            </div>
+                        </div>
+                        
+                        <!-- Usuario Normal -->
+                        <div class="role-option" data-role="user" onclick="selectRole(this)">
+                            <div class="role-icon">
+                                <i class="fas fa-user-tie"></i>
+                            </div>
+                            <div class="role-info">
+                                <div class="role-name">Usuario Normal</div>
+                                <div class="role-description">Gestión de inventario y reportes</div>
+                            </div>
+                            <div class="role-check">
+                                <i class="fas fa-check-circle"></i>
+                            </div>
+                        </div>
+                        
+                        <!-- Capturista -->
+                        <div class="role-option" data-role="capturista" onclick="selectRole(this)">
+                            <div class="role-icon">
+                                <i class="fas fa-clipboard-list"></i>
+                            </div>
+                            <div class="role-info">
+                                <div class="role-name">Capturista</div>
+                                <div class="role-description">Solo registro de inventario</div>
+                            </div>
+                            <div class="role-check">
+                                <i class="fas fa-check-circle"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <input type="hidden" id="selectedRole" required>
+                </div>
+                
+                <!-- Botón Iniciar Sesión -->
+                <button type="submit" class="btn-login">
+                    <i class="fas fa-sign-in-alt"></i> Iniciar Sesión
+                </button>
+            </form>
+            
+            <!-- Enlaces adicionales -->
+            <div class="login-links">
+                <a href="#" class="login-link" onclick="showForgotPassword()">
+                    <i class="fas fa-key me-1"></i> ¿Olvidó su contraseña?
+                </a>
+                <a href="#" class="login-link" onclick="showHelp()">
+                    <i class="fas fa-question-circle me-1"></i> Ayuda
+                </a>
+            </div>
+            
+            <!-- Footer -->
+            <div class="login-footer">
+                <p>© 2024 SIBIM - Municipio de Tzompantepec</p>
+                <p>Gobierno 2024-2027</p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Variables globales
+        let selectedRole = null;
+        
+        // Mostrar/ocultar contraseña
+        document.getElementById('togglePassword').addEventListener('click', function() {
+            const passwordInput = document.getElementById('password');
+            const icon = this.querySelector('i');
+            
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            } else {
+                passwordInput.type = 'password';
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            }
+        });
+        
+        // Seleccionar rol
+        function selectRole(element) {
+            // Remover selección anterior
+            document.querySelectorAll('.role-option').forEach(option => {
+                option.classList.remove('selected');
+            });
+            
+            // Agregar selección actual
+            element.classList.add('selected');
+            selectedRole = element.getAttribute('data-role');
+            document.getElementById('selectedRole').value = selectedRole;
+        }
+        
+        // Manejar el envío del formulario
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value.trim();
+            const role = selectedRole;
+            
+            // Validaciones básicas
+            if (!username) {
+                showError('Por favor ingrese su usuario');
+                document.getElementById('username').focus();
+                return;
+            }
+            
+            if (!password) {
+                showError('Por favor ingrese su contraseña');
+                document.getElementById('password').focus();
+                return;
+            }
+            
+            if (!role) {
+                showError('Por favor seleccione un rol');
+                return;
+            }
+            
+            // Mostrar loading
+            const loadingOverlay = document.getElementById('loadingOverlay');
+            loadingOverlay.classList.add('active');
+            
+            // Simular autenticación
+            setTimeout(() => {
+                loadingOverlay.classList.remove('active');
+                
+                // En un sistema real, aquí se haría la validación con el servidor
+                // Por ahora, simulamos una autenticación exitosa
+                authenticateUser(username, password, role);
+            }, 1500);
+        });
+        
+        // Función de autenticación
+       // Función de autenticación con Google Sheets
+function authenticateUser(username, password, role) {
+    // URL de tu Google Apps Script (REEMPLAZA CON TU URL)
+    const scriptUrl = 'https://script.google.com/macros/s/AKfycbxQm7_uvwXYwR6dnB0h6fMX16Ksq2j5ANP_y3Qj4nlDjuqoNlk4qpim0ZY6Fa9oBcZEvw/exec/exec';
+    
+    const payload = {
+        action: 'login',
+        usuario: username,
+        password: password,
+        rol: role
+    };
+    
+    fetch(scriptUrl, {
+        method: 'POST',
+        mode: 'no-cors', // Importante para Google Apps Script
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload)
+    })
+    .then(response => response.json())
+    .then(data => {
+        loadingOverlay.classList.remove('active');
+        
+        if (data.status === 'success') {
+            // Guardar datos de usuario en localStorage
+            localStorage.setItem('currentUser', JSON.stringify({
+                username: username,
+                name: data.data.nombre,
+                role: role,
+                department: data.data.departamento,
+                loginTime: new Date().toLocaleString('es-MX')
+            }));
+            
+            // Mostrar éxito y redirigir
+            Swal.fire({
+                title: '¡Acceso concedido!',
+                html: `
+                    <div class="text-center">
+                        <i class="fas fa-check-circle text-success fa-3x mb-3"></i>
+                        <p class="h5">Bienvenido, ${data.data.nombre}</p>
+                        <p class="text-muted">${getRoleDescription(role)}</p>
+                        <p class="small text-muted">${data.data.departamento}</p>
+                    </div>
+                `,
+                showConfirmButton: true,
+                confirmButtonText: 'Ingresar al Sistema',
+                allowOutsideClick: false
+            }).then(() => {
+                // Redirigir al dashboard
+                window.location.href = 'dashboard.html';
+            });
+        } else {
+            showError(data.data || 'Credenciales incorrectas');
+        }
+    })
+    .catch(error => {
+        loadingOverlay.classList.remove('active');
+        showError('Error de conexión. Verifique su internet.');
+        console.error('Error:', error);
+    });
+}
+            
+            const users = {
+                'admin': { password: 'admin123', name: 'Administrador', role: 'admin' },
+                'usuario': { password: 'usuario123', name: 'Usuario Normal', role: 'user' },
+                'capturista': { password: 'captura123', name: 'Capturista', role: 'capturista' },
+                'jperez': { password: 'jperez123', name: 'Juan Pérez', role: 'user' },
+                'mgarcia': { password: 'mgarcia123', name: 'María García', role: 'user' }
+            };
+            
+            const user = users[username];
+            
+            if (user && user.password === password) {
+                // Validar que el rol seleccionado coincida
+                if (user.role !== role) {
+                    showError('El rol seleccionado no coincide con sus permisos');
+                    return;
+                }
+                
+                // Guardar datos de usuario en localStorage
+                localStorage.setItem('currentUser', JSON.stringify({
+                    username: username,
+                    name: user.name,
+                    role: user.role,
+                    department: getDepartmentByRole(user.role),
+                    loginTime: new Date().toLocaleString('es-MX')
+                }));
+                
+                // Mostrar éxito y redirigir
+                Swal.fire({
+                    title: '¡Acceso concedido!',
+                    html: `
+                        <div class="text-center">
+                            <i class="fas fa-check-circle text-success fa-3x mb-3"></i>
+                            <p class="h5">Bienvenido, ${user.name}</p>
+                            <p class="text-muted">${getRoleDescription(user.role)}</p>
+                        </div>
+                    `,
+                    showConfirmButton: true,
+                    confirmButtonText: 'Ingresar al Sistema',
+                    allowOutsideClick: false
+                }).then(() => {
+                    // Redirigir al dashboard
+                    window.location.href = 'dashboard.html';
+                });
+                
+            } else {
+                showError('Credenciales incorrectas. Por favor verifique su usuario y contraseña.');
+            }
+        }
+        
+        // Obtener departamento según rol
+        function getDepartmentByRole(role) {
+            switch(role) {
+                case 'admin': return 'Departamento de Sistemas';
+                case 'user': return 'Departamento de Administración';
+                case 'capturista': return 'Departamento de Almacén';
+                default: return 'Departamento General';
+            }
+        }
+        
+        // Obtener descripción del rol
+        function getRoleDescription(role) {
+            switch(role) {
+                case 'admin': return 'Acceso completo al sistema';
+                case 'user': return 'Gestión de inventario y reportes';
+                case 'capturista': return 'Solo registro de inventario';
+                default: return 'Usuario del sistema';
+            }
+        }
+        
+        // Mostrar error
+        function showError(message) {
+            Swal.fire({
+                title: 'Error de autenticación',
+                text: message,
+                icon: 'error',
+                confirmButtonText: 'Intentar de nuevo'
+            });
+            
+            // Efecto de shake
+            const form = document.getElementById('loginForm');
+            form.style.animation = 'none';
+            setTimeout(() => {
+                form.style.animation = 'shake 0.5s';
+            }, 10);
+        }
+        
+        // Mostrar ayuda de recuperación de contraseña
+        function showForgotPassword() {
+            Swal.fire({
+                title: 'Recuperar Contraseña',
+                html: `
+                    <div class="text-start">
+                        <p>Si ha olvidado su contraseña:</p>
+                        <ol>
+                            <li>Contacte al administrador del sistema</li>
+                            <li>Llame al soporte técnico: <strong>777-123-4567</strong></li>
+                            <li>Envíe un correo a: <strong>soporte@sibim.tzompantepec.gob.mx</strong></li>
+                        </ol>
+                        <p class="small text-muted mt-3">
+                            <i class="fas fa-info-circle me-1"></i>
+                            Su usuario es proporcionado por el departamento de sistemas
+                        </p>
+                    </div>
+                `,
+                icon: 'info',
+                confirmButtonText: 'Entendido',
+                width: 500
+            });
+        }
+        
+        // Mostrar ayuda
+        function showHelp() {
+            Swal.fire({
+                title: 'Ayuda - SIBIM',
+                html: `
+                    <div class="text-start">
+                        <p class="mb-3"><strong>Sistema de Inventario Municipal</strong></p>
+                        <p>Para acceder al sistema necesita:</p>
+                        <ul>
+                            <li>Usuario proporcionado por el administrador</li>
+                            <li>Contraseña personal</li>
+                            <li>Seleccionar el rol asignado a su cuenta</li>
+                        </ul>
+                        <div class="mt-4">
+                            <p class="small text-muted">
+                                <i class="fas fa-phone me-1"></i>
+                                Soporte técnico: 777-123-4567
+                            </p>
+                            <p class="small text-muted">
+                                <i class="fas fa-envelope me-1"></i>
+                                Email: soporte@sibim.tzompantepec.gob.mx
+                            </p>
+                        </div>
+                    </div>
+                `,
+                icon: 'question',
+                confirmButtonText: 'Cerrar',
+                width: 500
+            });
+        }
+        
+        // Atajos de teclado
+        document.addEventListener('keydown', function(e) {
+            // Ctrl + Enter para enviar formulario
+            if (e.ctrlKey && e.key === 'Enter') {
+                document.getElementById('loginForm').dispatchEvent(new Event('submit'));
+            }
+            
+            // Número 1 para seleccionar Administrador
+            if (e.key === '1' && !e.ctrlKey) {
+                e.preventDefault();
+                selectRole(document.querySelector('[data-role="admin"]'));
+            }
+            
+            // Número 2 para seleccionar Usuario Normal
+            if (e.key === '2' && !e.ctrlKey) {
+                e.preventDefault();
+                selectRole(document.querySelector('[data-role="user"]'));
+            }
+            
+            // Número 3 para seleccionar Capturista
+            if (e.key === '3' && !e.ctrlKey) {
+                e.preventDefault();
+                selectRole(document.querySelector('[data-role="capturista"]'));
+            }
+        });
+        
+        // Auto-seleccionar rol si hay uno en localStorage
+        document.addEventListener('DOMContentLoaded', function() {
+            const rememberedUser = localStorage.getItem('currentUser');
+            if (rememberedUser) {
+                try {
+                    const user = JSON.parse(rememberedUser);
+                    // Seleccionar el rol del usuario recordado
+                    const roleElement = document.querySelector(`[data-role="${user.role}"]`);
+                    if (roleElement) {
+                        selectRole(roleElement);
+                    }
+                } catch (e) {
+                    console.log('No hay usuario recordado');
+                }
+            }
+            
+            // Mostrar mensaje de bienvenida inicial
+            setTimeout(() => {
+                Swal.fire({
+                    title: 'Bienvenido a SIBIM',
+                    text: 'Sistema de Inventario Municipal de Tzompantepec',
+                    icon: 'info',
+                    toast: true,
+                    position: 'top',
+                    showConfirmButton: false,
+                    timer: 3000,
+                    timerProgressBar: true
+                });
+            }, 1000);
+        });
+    </script>
+</body>
+</html>
