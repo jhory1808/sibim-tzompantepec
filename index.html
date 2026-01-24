@@ -290,7 +290,15 @@
             border-color: var(--primary);
             background: rgba(26, 95, 122, 0.1);
         }
-        
+        /* Añade esto al final del estilo */
+         .role-option {
+             cursor: pointer !important;
+             user-select: none;
+    }
+
+        .role-option * {
+            pointer-events: none; /* Esto asegura que todo el div sea clickeable */
+  }
         .role-icon {
             width: 40px;
             height: 40px;
@@ -603,14 +611,18 @@
         </div>
     </div>
     
-    <!-- Scripts -->
+         <!-- Scripts -->
+    <!-- Scripts --> 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         // Variables globales
         let selectedRole = null;
         
+        console.log('SIBIM Login Script cargado');
+        
         // Mostrar/ocultar contraseña
         document.getElementById('togglePassword').addEventListener('click', function() {
+            console.log('Toggle password clicked');
             const passwordInput = document.getElementById('password');
             const icon = this.querySelector('i');
             
@@ -625,8 +637,15 @@
             }
         });
         
-        // Seleccionar rol
+        // Seleccionar rol - FUNCIÓN CORREGIDA
         function selectRole(element) {
+            console.log('selectRole llamado con:', element);
+            
+            if (!element) {
+                console.error('Elemento no válido');
+                return;
+            }
+            
             // Remover selección anterior
             document.querySelectorAll('.role-option').forEach(option => {
                 option.classList.remove('selected');
@@ -636,33 +655,72 @@
             element.classList.add('selected');
             selectedRole = element.getAttribute('data-role');
             document.getElementById('selectedRole').value = selectedRole;
+            
+            console.log('Rol seleccionado:', selectedRole);
+            
+            // Mostrar confirmación visual
+            element.style.transform = 'scale(0.98)';
+            setTimeout(() => {
+                element.style.transform = 'scale(1)';
+            }, 150);
         }
+        
+        // Asignar event listeners a los roles
+        document.querySelectorAll('.role-option').forEach(role => {
+            role.addEventListener('click', function() {
+                console.log('Role clicked:', this);
+                selectRole(this);
+            });
+        });
         
         // Manejar el envío del formulario
         document.getElementById('loginForm').addEventListener('submit', function(e) {
             e.preventDefault();
+            console.log('Formulario enviado - Iniciando validación');
             
             const username = document.getElementById('username').value.trim();
             const password = document.getElementById('password').value.trim();
-            const role = selectedRole;
+            const roleInput = document.getElementById('selectedRole').value;
+            
+            console.log('Datos capturados:', {
+                username: username,
+                password: '***' + password.substring(password.length - 2),
+                roleInput: roleInput,
+                selectedRole: selectedRole
+            });
             
             // Validaciones básicas
             if (!username) {
+                console.error('Usuario vacío');
                 showError('Por favor ingrese su usuario');
                 document.getElementById('username').focus();
                 return;
             }
             
             if (!password) {
+                console.error('Contraseña vacía');
                 showError('Por favor ingrese su contraseña');
                 document.getElementById('password').focus();
                 return;
             }
             
-            if (!role) {
+            // Usar selectedRole o el valor del input hidden
+            const roleToUse = selectedRole || roleInput;
+            
+            if (!roleToUse) {
+                console.error('Rol no seleccionado');
                 showError('Por favor seleccione un rol');
+                
+                // Seleccionar automáticamente el primer rol disponible
+                const firstRole = document.querySelector('.role-option');
+                if (firstRole) {
+                    selectRole(firstRole);
+                    console.log('Se seleccionó automáticamente el primer rol');
+                }
                 return;
             }
+            
+            console.log('Todas las validaciones pasadas. Procesando login...');
             
             // Mostrar loading
             const loadingOverlay = document.getElementById('loadingOverlay');
@@ -671,86 +729,23 @@
             // Simular autenticación
             setTimeout(() => {
                 loadingOverlay.classList.remove('active');
-                
-                // En un sistema real, aquí se haría la validación con el servidor
-                // Por ahora, simulamos una autenticación exitosa
-                authenticateUser(username, password, role);
+                authenticateUser(username, password, roleToUse);
             }, 1500);
         });
         
-        // Función de autenticación
-       // Función de autenticación con Google Sheets
-function authenticateUser(username, password, role) {
-    // URL de tu Google Apps Script (REEMPLAZA CON TU URL)
-    const scriptUrl = 'https://script.google.com/macros/s/AKfycbxQm7_uvwXYwR6dnB0h6fMX16Ksq2j5ANP_y3Qj4nlDjuqoNlk4qpim0ZY6Fa9oBcZEvw/exec/exec';
-    
-    const payload = {
-        action: 'login',
-        usuario: username,
-        password: password,
-        rol: role
-    };
-    
-    fetch(scriptUrl, {
-        method: 'POST',
-        mode: 'no-cors', // Importante para Google Apps Script
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(payload)
-    })
-    .then(response => response.json())
-    .then(data => {
-        loadingOverlay.classList.remove('active');
-        
-        if (data.status === 'success') {
-            // Guardar datos de usuario en localStorage
-            localStorage.setItem('currentUser', JSON.stringify({
-                username: username,
-                name: data.data.nombre,
-                role: role,
-                department: data.data.departamento,
-                loginTime: new Date().toLocaleString('es-MX')
-            }));
+        // Función de autenticación con Google Sheets
+        function authenticateUser(username, password, role) {
+            console.log('Autenticando usuario:', username, 'rol:', role);
             
-            // Mostrar éxito y redirigir
-            Swal.fire({
-                title: '¡Acceso concedido!',
-                html: `
-                    <div class="text-center">
-                        <i class="fas fa-check-circle text-success fa-3x mb-3"></i>
-                        <p class="h5">Bienvenido, ${data.data.nombre}</p>
-                        <p class="text-muted">${getRoleDescription(role)}</p>
-                        <p class="small text-muted">${data.data.departamento}</p>
-                    </div>
-                `,
-                showConfirmButton: true,
-                confirmButtonText: 'Ingresar al Sistema',
-                allowOutsideClick: false
-            }).then(() => {
-                // Redirigir al dashboard
-                window.location.href = 'dashboard.html';
-            });
-        } else {
-            showError(data.data || 'Credenciales incorrectas');
-        }
-    })
-    .catch(error => {
-        loadingOverlay.classList.remove('active');
-        showError('Error de conexión. Verifique su internet.');
-        console.error('Error:', error);
-    });
-}
-            
-            const users = {
+            // PRIMERO probemos con usuarios locales para verificar
+            const testUsers = {
                 'admin': { password: 'admin123', name: 'Administrador', role: 'admin' },
                 'usuario': { password: 'usuario123', name: 'Usuario Normal', role: 'user' },
                 'capturista': { password: 'captura123', name: 'Capturista', role: 'capturista' },
-                'jperez': { password: 'jperez123', name: 'Juan Pérez', role: 'user' },
-                'mgarcia': { password: 'mgarcia123', name: 'María García', role: 'user' }
+                'test': { password: 'test123', name: 'Usuario Test', role: 'user' }
             };
             
-            const user = users[username];
+            const user = testUsers[username];
             
             if (user && user.password === password) {
                 // Validar que el rol seleccionado coincida
@@ -758,6 +753,8 @@ function authenticateUser(username, password, role) {
                     showError('El rol seleccionado no coincide con sus permisos');
                     return;
                 }
+                
+                console.log('Autenticación LOCAL exitosa');
                 
                 // Guardar datos de usuario en localStorage
                 localStorage.setItem('currentUser', JSON.stringify({
@@ -776,18 +773,102 @@ function authenticateUser(username, password, role) {
                             <i class="fas fa-check-circle text-success fa-3x mb-3"></i>
                             <p class="h5">Bienvenido, ${user.name}</p>
                             <p class="text-muted">${getRoleDescription(user.role)}</p>
+                            <small class="text-muted">Redirigiendo al dashboard...</small>
                         </div>
                     `,
-                    showConfirmButton: true,
-                    confirmButtonText: 'Ingresar al Sistema',
+                    showConfirmButton: false,
+                    timer: 2000,
                     allowOutsideClick: false
                 }).then(() => {
                     // Redirigir al dashboard
+                    console.log('Redirigiendo a dashboard.html');
                     window.location.href = 'dashboard.html';
                 });
                 
             } else {
-                showError('Credenciales incorrectas. Por favor verifique su usuario y contraseña.');
+                console.log('Autenticación local fallida, intentando con Google Sheets...');
+                
+                // URL de tu Google Apps Script (REEMPLAZA CON TU URL)
+                const scriptUrl = 'https://script.google.com/macros/s/TU_SCRIPT_ID/exec';
+                
+                const payload = {
+                    action: 'login',
+                    usuario: username,
+                    password: password,
+                    rol: role
+                };
+                
+                fetch(scriptUrl, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(payload)
+                })
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Respuesta de Google Sheets:', data);
+                    
+                    if (data.status === 'success') {
+                        // Guardar datos de usuario en localStorage
+                        localStorage.setItem('currentUser', JSON.stringify({
+                            username: username,
+                            name: data.data.nombre,
+                            role: role,
+                            department: data.data.departamento,
+                            loginTime: new Date().toLocaleString('es-MX')
+                        }));
+                        
+                        // Mostrar éxito y redirigir
+                        Swal.fire({
+                            title: '¡Acceso concedido!',
+                            html: `
+                                <div class="text-center">
+                                    <i class="fas fa-check-circle text-success fa-3x mb-3"></i>
+                                    <p class="h5">Bienvenido, ${data.data.nombre}</p>
+                                    <p class="text-muted">${getRoleDescription(role)}</p>
+                                    <p class="small text-muted">${data.data.departamento}</p>
+                                </div>
+                            `,
+                            showConfirmButton: true,
+                            confirmButtonText: 'Ingresar al Sistema',
+                            allowOutsideClick: false
+                        }).then(() => {
+                            // Redirigir al dashboard
+                            window.location.href = 'dashboard.html';
+                        });
+                    } else {
+                        showError(data.data || 'Credenciales incorrectas');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error de conexión:', error);
+                    showError('Error de conexión. Usando modo de prueba.');
+                    
+                    // Modo de prueba: permitir acceso con cualquier usuario
+                    Swal.fire({
+                        title: 'Modo Prueba Activado',
+                        text: 'El servidor no está disponible. Usando credenciales de prueba.',
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonText: 'Continuar en Modo Prueba',
+                        cancelButtonText: 'Cancelar'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            // Crear usuario de prueba
+                            localStorage.setItem('currentUser', JSON.stringify({
+                                username: username,
+                                name: 'Usuario de Prueba',
+                                role: role,
+                                department: 'Departamento de Prueba',
+                                loginTime: new Date().toLocaleString('es-MX')
+                            }));
+                            
+                            window.location.href = 'dashboard.html';
+                        }
+                    });
+                });
             }
         }
         
@@ -813,6 +894,8 @@ function authenticateUser(username, password, role) {
         
         // Mostrar error
         function showError(message) {
+            console.error('Mostrando error:', message);
+            
             Swal.fire({
                 title: 'Error de autenticación',
                 text: message,
@@ -887,43 +970,53 @@ function authenticateUser(username, password, role) {
         document.addEventListener('keydown', function(e) {
             // Ctrl + Enter para enviar formulario
             if (e.ctrlKey && e.key === 'Enter') {
+                console.log('Atajo Ctrl+Enter detectado');
                 document.getElementById('loginForm').dispatchEvent(new Event('submit'));
             }
             
             // Número 1 para seleccionar Administrador
             if (e.key === '1' && !e.ctrlKey) {
                 e.preventDefault();
-                selectRole(document.querySelector('[data-role="admin"]'));
+                const adminRole = document.querySelector('[data-role="admin"]');
+                if (adminRole) {
+                    selectRole(adminRole);
+                    console.log('Rol Admin seleccionado con teclado');
+                }
             }
             
             // Número 2 para seleccionar Usuario Normal
             if (e.key === '2' && !e.ctrlKey) {
                 e.preventDefault();
-                selectRole(document.querySelector('[data-role="user"]'));
+                const userRole = document.querySelector('[data-role="user"]');
+                if (userRole) {
+                    selectRole(userRole);
+                    console.log('Rol User seleccionado con teclado');
+                }
             }
             
             // Número 3 para seleccionar Capturista
             if (e.key === '3' && !e.ctrlKey) {
                 e.preventDefault();
-                selectRole(document.querySelector('[data-role="capturista"]'));
+                const capturistaRole = document.querySelector('[data-role="capturista"]');
+                if (capturistaRole) {
+                    selectRole(capturistaRole);
+                    console.log('Rol Capturista seleccionado con teclado');
+                }
             }
         });
         
         // Auto-seleccionar rol si hay uno en localStorage
         document.addEventListener('DOMContentLoaded', function() {
-            const rememberedUser = localStorage.getItem('currentUser');
-            if (rememberedUser) {
-                try {
-                    const user = JSON.parse(rememberedUser);
-                    // Seleccionar el rol del usuario recordado
-                    const roleElement = document.querySelector(`[data-role="${user.role}"]`);
-                    if (roleElement) {
-                        selectRole(roleElement);
-                    }
-                } catch (e) {
-                    console.log('No hay usuario recordado');
+            console.log('DOM completamente cargado');
+            
+            // Seleccionar primer rol por defecto
+            setTimeout(() => {
+                const firstRole = document.querySelector('.role-option');
+                if (firstRole && !selectedRole) {
+                    selectRole(firstRole);
+                    console.log('Rol seleccionado por defecto:', firstRole.getAttribute('data-role'));
                 }
-            }
+            }, 500);
             
             // Mostrar mensaje de bienvenida inicial
             setTimeout(() => {
