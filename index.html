@@ -1,0 +1,824 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SIBIM Tzompantepec - Sistema de Inventario</title>
+    
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
+    
+    <style>
+        /* ===== RESET ===== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        
+        .hidden {
+            display: none !important;
+        }
+        
+        /* ===== LOADING ===== */
+        #loadingScreen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            z-index: 10000;
+        }
+        
+        .loader {
+            border: 5px solid rgba(255, 255, 255, 0.3);
+            border-top: 5px solid white;
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* ===== LOGIN ===== */
+        .login-container {
+            max-width: 400px;
+            margin: 50px auto;
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+        }
+        
+        .login-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .login-header h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+        
+        .login-body {
+            padding: 30px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 600;
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+        }
+        
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 16px;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            width: 100%;
+        }
+        
+        .btn-primary:hover {
+            opacity: 0.9;
+        }
+        
+        /* ===== APP LAYOUT ===== */
+        #appContainer {
+            display: none;
+        }
+        
+        .app-header {
+            background: white;
+            padding: 20px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .header-title h1 {
+            font-size: 24px;
+            color: #333;
+        }
+        
+        .header-title p {
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .user-email {
+            font-weight: 600;
+            color: #333;
+        }
+        
+        #userRoleBadge {
+            padding: 8px 16px;
+            background: #4CAF50;
+            color: white;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+        
+        .btn-logout {
+            background: #f44336;
+            color: white;
+            padding: 8px 16px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+        
+        /* ===== MAIN CONTENT ===== */
+        .main-content {
+            padding: 30px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        /* ===== DASHBOARD ===== */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-card {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+            text-align: center;
+        }
+        
+        .stat-card h3 {
+            color: #666;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+        
+        .stat-number {
+            font-size: 36px;
+            font-weight: 800;
+            color: #667eea;
+        }
+        
+        /* ===== INVENTORY TABLE ===== */
+        .table-container {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+        }
+        
+        .inventory-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .inventory-table th {
+            background: #667eea;
+            color: white;
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+        }
+        
+        .inventory-table td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .inventory-table tr:hover {
+            background: #f8f9ff;
+        }
+        
+        .status-badge {
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        
+        .status-disponible {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .status-asignado {
+            background: #d1e7ff;
+            color: #084298;
+        }
+        
+        .status-mantenimiento {
+            background: #fff3cd;
+            color: #664d03;
+        }
+        
+        /* ===== FORM SECTION ===== */
+        .form-section {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+            margin-bottom: 30px;
+        }
+        
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .form-actions {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+        }
+        
+        .btn-success {
+            background: #4CAF50;
+            color: white;
+        }
+        
+        .btn-warning {
+            background: #ff9800;
+            color: white;
+        }
+        
+        /* ===== TOAST ===== */
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 25px;
+            border-radius: 8px;
+            color: white;
+            font-weight: 600;
+            z-index: 1000;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            animation: slideIn 0.3s ease;
+        }
+        
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        
+        .toast-success {
+            background: #4CAF50;
+        }
+        
+        .toast-error {
+            background: #f44336;
+        }
+        
+        .toast-info {
+            background: #2196F3;
+        }
+    </style>
+</head>
+<body>
+    <!-- LOADING SCREEN -->
+    <div id="loadingScreen">
+        <div class="loader"></div>
+        <p style="margin-top: 20px; font-size: 16px;">Inicializando sistema...</p>
+    </div>
+    
+    <!-- LOGIN SECTION -->
+    <div id="loginSection">
+        <div class="login-container">
+            <div class="login-header">
+                <h1>🏠 SIBIM TZOMPANTEPEC</h1>
+                <p>Sistema de Inventario Municipal</p>
+            </div>
+            <div class="login-body">
+                <form id="loginForm">
+                    <div class="form-group">
+                        <label>Correo Electrónico</label>
+                        <input type="email" id="loginEmail" class="form-control" placeholder="admin@tzompantepec.gob.mx" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Contraseña</label>
+                        <input type="password" id="loginPassword" class="form-control" placeholder="••••••••" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">🔐 Iniciar Sesión</button>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <!-- APP SECTION -->
+    <div id="appContainer">
+        <header class="app-header">
+            <div class="header-title">
+                <h1>📦 SISTEMA DE INVENTARIO MUNICIPAL</h1>
+                <p>Gestión y control de activos - Tzompantepec</p>
+            </div>
+            <div class="user-info">
+                <span id="userEmail" class="user-email">usuario@ejemplo.com</span>
+                <span id="userRoleBadge" class="role-badge">Administrador</span>
+                <button id="logoutBtn" class="btn-logout">🚪 Cerrar Sesión</button>
+            </div>
+        </header>
+        
+        <main class="main-content">
+            <!-- DASHBOARD STATS -->
+            <div class="dashboard-grid">
+                <div class="stat-card">
+                    <h3>Artículos Totales</h3>
+                    <div class="stat-number" id="totalItems">0</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Disponibles</h3>
+                    <div class="stat-number" id="availableItems">0</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Asignados</h3>
+                    <div class="stat-number" id="assignedItems">0</div>
+                </div>
+                <div class="stat-card">
+                    <h3>En Mantenimiento</h3>
+                    <div class="stat-number" id="maintenanceItems">0</div>
+                </div>
+            </div>
+            
+            <!-- ADD ITEM FORM -->
+            <div class="form-section">
+                <h2 style="margin-bottom: 20px; color: #333;">➕ Agregar Nuevo Artículo</h2>
+                <form id="itemForm">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="itemName">Nombre del Artículo *</label>
+                            <input type="text" id="itemName" class="form-control" placeholder="Ej: Laptop Dell XPS 15" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="itemCategory">Categoría *</label>
+                            <select id="itemCategory" class="form-control" required>
+                                <option value="">Seleccionar categoría</option>
+                                <option value="Computación">Computación</option>
+                                <option value="Mobiliario">Mobiliario</option>
+                                <option value="Electrónica">Electrónica</option>
+                                <option value="Oficina">Oficina</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="itemStatus">Estado *</label>
+                            <select id="itemStatus" class="form-control" required>
+                                <option value="">Seleccionar estado</option>
+                                <option value="disponible">Disponible</option>
+                                <option value="asignado">Asignado</option>
+                                <option value="mantenimiento">En Mantenimiento</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="itemQuantity">Cantidad *</label>
+                            <input type="number" id="itemQuantity" class="form-control" min="1" value="1" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="itemLocation">Ubicación</label>
+                            <input type="text" id="itemLocation" class="form-control" placeholder="Ej: Almacén principal">
+                        </div>
+                        <div class="form-group">
+                            <label for="itemDescription">Descripción</label>
+                            <input type="text" id="itemDescription" class="form-control" placeholder="Detalles adicionales">
+                        </div>
+                    </div>
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-success">💾 Guardar Artículo</button>
+                        <button type="reset" class="btn btn-warning">🗑️ Limpiar Formulario</button>
+                    </div>
+                </form>
+            </div>
+            
+            <!-- INVENTORY TABLE -->
+            <h2 style="margin-bottom: 20px; color: #333;">📋 Inventario Actual</h2>
+            <div class="table-container">
+                <table class="inventory-table">
+                    <thead>
+                        <tr>
+                            <th>Nombre</th>
+                            <th>Categoría</th>
+                            <th>Estado</th>
+                            <th>Cantidad</th>
+                            <th>Ubicación</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="inventoryBody">
+                        <!-- Los datos se cargarán aquí -->
+                    </tbody>
+                </table>
+            </div>
+        </main>
+    </div>
+    
+    <script>
+        // ===== CONFIGURACIÓN FIREBASE =====
+        const firebaseConfig = {
+            apiKey: "AIzaSyDbLFKFwjt-BynBKRsQOpUBEENFb-xq3AU",
+            authDomain: "sibintzomp.firebaseapp.com",
+            projectId: "sibintzomp",
+            storageBucket: "sibintzomp.appspot.com",
+            messagingSenderId: "1067654344556",
+            appId: "1:1067654344556:web:9ac7d2ff4f14eb270ff793"
+        };
+        
+        // ===== INICIALIZAR FIREBASE =====
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+        
+        console.log('🔥 Firebase inicializado');
+        
+        // ===== VARIABLES GLOBALES =====
+        let authSystem = null;
+        let inventorySystem = null;
+        
+        // ===== SISTEMA DE AUTENTICACIÓN =====
+        class AuthSystem {
+            constructor() {
+                this.currentUser = null;
+                this.userRole = 'usuario';
+            }
+            
+            init() {
+                console.log('🔄 Inicializando AuthSystem...');
+                
+                // Escuchar cambios en autenticación
+                auth.onAuthStateChanged(async (user) => {
+                    console.log('🔑 Estado de autenticación:', user ? 'Conectado' : 'Desconectado');
+                    
+                    if (user) {
+                        this.currentUser = user;
+                        console.log('👤 Usuario:', user.email);
+                        
+                        try {
+                            // Obtener rol del usuario
+                            const userDoc = await db.collection('users').doc(user.uid).get();
+                            if (userDoc.exists) {
+                                const userData = userDoc.data();
+                                this.userRole = userData.role || 'usuario';
+                                console.log('🎭 Rol obtenido:', this.userRole);
+                            }
+                            
+                            // Configurar UI
+                            this.setupSystemWithRole(user);
+                            
+                        } catch (error) {
+                            console.error('❌ Error en autenticación:', error);
+                            this.showToast('Error al cargar datos de usuario', 'error');
+                        }
+                        
+                    } else {
+                        this.showLogin();
+                    }
+                    
+                    // Ocultar loading screen
+                    this.hideLoading();
+                });
+                
+                this.setupEventListeners();
+                console.log('✅ AuthSystem inicializado');
+            }
+            
+            async setupSystemWithRole(user) {
+                console.log('⚙️ Configurando sistema para rol:', this.userRole);
+                
+                // Actualizar UI
+                document.getElementById('userEmail').textContent = user.email;
+                
+                // Configurar badge según rol
+                const roleBadge = document.getElementById('userRoleBadge');
+                roleBadge.textContent = this.userRole === 'admin' ? 'Administrador' : 'Usuario';
+                roleBadge.style.background = this.userRole === 'admin' ? '#f44336' : '#4CAF50';
+                
+                // Mostrar aplicación
+                this.showApp();
+                
+                // Inicializar sistema de inventario
+                if (window.inventorySystem) {
+                    window.inventorySystem.init();
+                }
+            }
+            
+            // ===== UI CONTROLS =====
+            hideLoading() {
+                document.getElementById('loadingScreen').style.display = 'none';
+            }
+            
+            showApp() {
+                document.getElementById('loginSection').style.display = 'none';
+                document.getElementById('appContainer').style.display = 'block';
+            }
+            
+            showLogin() {
+                document.getElementById('appContainer').style.display = 'none';
+                document.getElementById('loginSection').style.display = 'block';
+            }
+            
+            // ===== LOGIN/LOGOUT =====
+            async handleLogin(email, password) {
+                try {
+                    await auth.signInWithEmailAndPassword(email, password);
+                    this.showToast('✅ ¡Bienvenido!', 'success');
+                } catch (error) {
+                    this.showToast(`❌ Error: ${error.message}`, 'error');
+                }
+            }
+            
+            async handleLogout() {
+                try {
+                    await auth.signOut();
+                    this.showToast('👋 Sesión cerrada', 'info');
+                } catch (error) {
+                    this.showToast(`❌ Error: ${error.message}`, 'error');
+                }
+            }
+            
+            // ===== EVENT LISTENERS =====
+            setupEventListeners() {
+                // Login form
+                document.getElementById('loginForm').addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    const email = document.getElementById('loginEmail').value;
+                    const password = document.getElementById('loginPassword').value;
+                    this.handleLogin(email, password);
+                });
+                
+                // Logout button
+                document.getElementById('logoutBtn').addEventListener('click', () => {
+                    this.handleLogout();
+                });
+            }
+            
+            // ===== UTILITIES =====
+            showToast(message, type = 'info') {
+                const toast = document.createElement('div');
+                toast.className = `toast toast-${type}`;
+                toast.textContent = message;
+                document.body.appendChild(toast);
+                
+                setTimeout(() => {
+                    toast.remove();
+                }, 3000);
+            }
+        }
+        
+        // ===== SISTEMA DE INVENTARIO =====
+        class InventorySystem {
+            constructor() {
+                this.items = [];
+            }
+            
+            init() {
+                console.log('📦 Inicializando InventorySystem...');
+                this.setupEventListeners();
+                this.loadInventory();
+                console.log('✅ InventorySystem listo');
+            }
+            
+            async loadInventory() {
+                try {
+                    const snapshot = await db.collection('inventory').get();
+                    this.items = [];
+                    
+                    let total = 0;
+                    let available = 0;
+                    let assigned = 0;
+                    let maintenance = 0;
+                    
+                    const tbody = document.getElementById('inventoryBody');
+                    tbody.innerHTML = '';
+                    
+                    snapshot.forEach(doc => {
+                        const item = { id: doc.id, ...doc.data() };
+                        this.items.push(item);
+                        
+                        // Contar por estado
+                        total++;
+                        if (item.status === 'disponible') available++;
+                        if (item.status === 'asignado') assigned++;
+                        if (item.status === 'mantenimiento') maintenance++;
+                        
+                        // Agregar a la tabla
+                        const row = tbody.insertRow();
+                        row.innerHTML = `
+                            <td>${item.name || 'Sin nombre'}</td>
+                            <td>${item.category || 'Sin categoría'}</td>
+                            <td>
+                                <span class="status-badge status-${item.status || 'desconocido'}">
+                                    ${this.getStatusText(item.status)}
+                                </span>
+                            </td>
+                            <td>${item.quantity || 1}</td>
+                            <td>${item.location || 'Sin ubicación'}</td>
+                            <td>
+                                <button onclick="editInventoryItem('${doc.id}')" style="
+                                    background: #2196F3;
+                                    color: white;
+                                    border: none;
+                                    padding: 6px 12px;
+                                    border-radius: 5px;
+                                    cursor: pointer;
+                                    margin-right: 5px;
+                                ">✏️</button>
+                                <button onclick="deleteInventoryItem('${doc.id}')" style="
+                                    background: #f44336;
+                                    color: white;
+                                    border: none;
+                                    padding: 6px 12px;
+                                    border-radius: 5px;
+                                    cursor: pointer;
+                                ">🗑️</button>
+                            </td>
+                        `;
+                    });
+                    
+                    if (snapshot.empty) {
+                        tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; padding: 30px;">No hay artículos en el inventario</td></tr>';
+                    }
+                    
+                    // Actualizar estadísticas
+                    this.updateStats(total, available, assigned, maintenance);
+                    
+                } catch (error) {
+                    console.error('❌ Error cargando inventario:', error);
+                    this.showToast('Error cargando inventario', 'error');
+                }
+            }
+            
+            updateStats(total, available, assigned, maintenance) {
+                document.getElementById('totalItems').textContent = total;
+                document.getElementById('availableItems').textContent = available;
+                document.getElementById('assignedItems').textContent = assigned;
+                document.getElementById('maintenanceItems').textContent = maintenance;
+            }
+            
+            async saveItem(itemData) {
+                try {
+                    const itemId = itemData.id || this.generateId();
+                    const itemWithMeta = {
+                        ...itemData,
+                        createdAt: new Date().toISOString(),
+                        createdBy: auth.currentUser?.uid,
+                        updatedAt: new Date().toISOString()
+                    };
+                    
+                    await db.collection('inventory').doc(itemId).set(itemWithMeta);
+                    
+                    this.showToast('✅ Artículo guardado', 'success');
+                    this.loadInventory();
+                    document.getElementById('itemForm').reset();
+                    
+                } catch (error) {
+                    console.error('❌ Error guardando artículo:', error);
+                    this.showToast('Error guardando artículo', 'error');
+                }
+            }
+            
+            async deleteItem(itemId) {
+                if (confirm('¿Está seguro de eliminar este artículo?')) {
+                    try {
+                        await db.collection('inventory').doc(itemId).delete();
+                        this.showToast('🗑️ Artículo eliminado', 'success');
+                        this.loadInventory();
+                    } catch (error) {
+                        console.error('❌ Error eliminando artículo:', error);
+                        this.showToast('Error eliminando artículo', 'error');
+                    }
+                }
+            }
+            
+            getStatusText(status) {
+                const statusMap = {
+                    'disponible': 'Disponible',
+                    'asignado': 'Asignado',
+                    'mantenimiento': 'Mantenimiento'
+                };
+                return statusMap[status] || 'Desconocido';
+            }
+            
+            generateId() {
+                return 'item_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+            }
+            
+            setupEventListeners() {
+                // Formulario de agregar artículo
+                document.getElementById('itemForm').addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    this.handleFormSubmit();
+                });
+            }
+            
+            handleFormSubmit() {
+                const itemData = {
+                    name: document.getElementById('itemName').value.trim(),
+                    category: document.getElementById('itemCategory').value,
+                    status: document.getElementById('itemStatus').value,
+                    quantity: parseInt(document.getElementById('itemQuantity').value) || 1,
+                    location: document.getElementById('itemLocation').value.trim(),
+                    description: document.getElementById('itemDescription').value.trim()
+                };
+                
+                if (!itemData.name || !itemData.category || !itemData.status) {
+                    this.showToast('Complete los campos requeridos', 'error');
+                    return;
+                }
+                
+                this.saveItem(itemData);
+            }
+            
+            showToast(message, type = 'info') {
+                if (window.authSystem) {
+                    window.authSystem.showToast(message, type);
+                } else {
+                    alert(message);
+                }
+            }
+        }
+        
+        // ===== FUNCIONES GLOBALES =====
+        function editInventoryItem(itemId) {
+            alert(`Editar artículo ${itemId} - Funcionalidad en desarrollo`);
+        }
+        
+        function deleteInventoryItem(itemId) {
+            if (window.inventorySystem) {
+                window.inventorySystem.deleteItem(itemId);
+            }
+        }
+        
+        // ===== INICIALIZAR APLICACIÓN =====
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('🚀 DOM cargado, iniciando aplicación...');
+            
+            // Crear instancias
+            authSystem = new AuthSystem();
+            inventorySystem = new InventorySystem();
+            
+            // Hacer globales
+            window.authSystem = authSystem;
+            window.inventorySystem = inventorySystem;
+            window.editInventoryItem = editInventoryItem;
+            window.deleteInventoryItem = deleteInventoryItem;
+            
+            // Inicializar
+            authSystem.init();
+            
+            console.log('✅ Aplicación inicializada');
+        });
+    </script>
+</body>
+</html>
