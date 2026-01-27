@@ -1,0 +1,1167 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Inventario - SIBIMTZOMP</title>
+    
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-auth-compat.js"></script>
+    
+    <!-- QR Code Library -->
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+    
+    <!-- PDF Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+        
+        header {
+            background: linear-gradient(90deg, #1e3c72, #2a5298);
+            color: white;
+            padding: 25px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .logo h1 {
+            font-size: 28px;
+            font-weight: 700;
+        }
+        
+        .logo span {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .btn-primary {
+            background: #4CAF50;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #45a049;
+            transform: translateY(-2px);
+        }
+        
+        .btn-secondary {
+            background: #2196F3;
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background: #0b7dda;
+        }
+        
+        .btn-danger {
+            background: #f44336;
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            background: #da190b;
+        }
+        
+        .btn-login {
+            background: #FF9800;
+            color: white;
+        }
+        
+        .main-content {
+            padding: 30px;
+            min-height: 500px;
+        }
+        
+        .tabs {
+            display: flex;
+            gap: 5px;
+            margin-bottom: 30px;
+            background: #f5f5f5;
+            padding: 5px;
+            border-radius: 10px;
+        }
+        
+        .tab {
+            padding: 15px 30px;
+            background: transparent;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            color: #666;
+            transition: all 0.3s;
+            flex: 1;
+            text-align: center;
+        }
+        
+        .tab.active {
+            background: white;
+            color: #1e3c72;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.5s;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* FORMULARIO DE AGREGAR ARTÍCULO */
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .form-group label {
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            padding: 12px 15px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border 0.3s;
+        }
+        
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            border-color: #4CAF50;
+            outline: none;
+        }
+        
+        .form-actions {
+            display: flex;
+            gap: 15px;
+            justify-content: flex-end;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 2px solid #eee;
+        }
+        
+        /* TABLA DE INVENTARIO */
+        .table-container {
+            overflow-x: auto;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+        }
+        
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .table th {
+            background: #1e3c72;
+            color: white;
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+        }
+        
+        .table td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .table tr:hover {
+            background: #f8f9ff;
+        }
+        
+        .status {
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+        
+        .status-bueno {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .status-regular {
+            background: #fff3cd;
+            color: #856404;
+        }
+        
+        .status-malo {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        
+        .actions {
+            display: flex;
+            gap: 5px;
+        }
+        
+        .action-btn {
+            padding: 5px 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+        
+        /* MÓDULO DE REPORTES */
+        .reports-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .report-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+            transition: transform 0.3s;
+            cursor: pointer;
+            text-align: center;
+        }
+        
+        .report-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .report-icon {
+            font-size: 40px;
+            margin-bottom: 15px;
+        }
+        
+        /* MÓDULO DE QR */
+        .qr-container {
+            text-align: center;
+            padding: 30px;
+            background: #f8f9ff;
+            border-radius: 15px;
+            margin-bottom: 30px;
+        }
+        
+        #qrCode {
+            margin: 20px auto;
+            padding: 10px;
+            background: white;
+            border-radius: 10px;
+            display: inline-block;
+        }
+        
+        /* LOGIN */
+        .login-container {
+            max-width: 400px;
+            margin: 100px auto;
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+            text-align: center;
+        }
+        
+        .login-container h2 {
+            margin-bottom: 30px;
+            color: #1e3c72;
+        }
+        
+        /* RESPONSIVE */
+        @media (max-width: 768px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .reports-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            header {
+                flex-direction: column;
+                gap: 20px;
+                text-align: center;
+            }
+            
+            .tabs {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="loginScreen" class="login-container">
+        <h2>🔐 Iniciar Sesión</h2>
+        <div style="margin-bottom: 20px;">
+            <input type="email" id="loginEmail" placeholder="Correo electrónico" style="width: 100%; padding: 12px; margin: 10px 0; border: 2px solid #ddd; border-radius: 8px;">
+            <input type="password" id="loginPassword" placeholder="Contraseña" style="width: 100%; padding: 12px; margin: 10px 0; border: 2px solid #ddd; border-radius: 8px;">
+            <button onclick="login()" class="btn btn-primary" style="width: 100%; margin-top: 20px;">Iniciar Sesión</button>
+        </div>
+        <div style="margin-top: 20px;">
+            <button onclick="showRegister()" class="btn btn-secondary" style="width: 100%;">Crear Nueva Cuenta</button>
+        </div>
+    </div>
+
+    <div id="appContainer" class="container" style="display: none;">
+        <header>
+            <div class="logo">
+                <div>
+                    <h1>📦 SIBIMTZOMP</h1>
+                    <span>Sistema de Inventario Municipal</span>
+                </div>
+            </div>
+            <div class="user-info">
+                <span id="userEmail"></span>
+                <button onclick="logout()" class="btn btn-danger">🚪 Cerrar Sesión</button>
+            </div>
+        </header>
+        
+        <div class="main-content">
+            <div class="tabs">
+                <button class="tab active" onclick="switchTab('dashboard')">📊 Dashboard</button>
+                <button class="tab" onclick="switchTab('inventory')">📦 Inventario</button>
+                <button class="tab" onclick="switchTab('add')">➕ Agregar Artículo</button>
+                <button class="tab" onclick="switchTab('reports')">📄 Reportes</button>
+                <button class="tab" onclick="switchTab('qr')">🔲 Códigos QR</button>
+                <button class="tab" onclick="switchTab('users')">👥 Usuarios</button>
+            </div>
+            
+            <!-- DASHBOARD -->
+            <div id="dashboardTab" class="tab-content active">
+                <h2 style="margin-bottom: 20px;">📊 Panel de Control</h2>
+                <div class="reports-grid">
+                    <div class="report-card" onclick="generateSummaryReport()">
+                        <div class="report-icon">📈</div>
+                        <h3>Resumen General</h3>
+                        <p>Vista general del inventario</p>
+                    </div>
+                    <div class="report-card" onclick="switchTab('inventory')">
+                        <div class="report-icon">📦</div>
+                        <h3 id="totalItems">0 Artículos</h3>
+                        <p>En inventario</p>
+                    </div>
+                    <div class="report-card">
+                        <div class="report-icon">💰</div>
+                        <h3 id="totalValue">$0.00</h3>
+                        <p>Valor total</p>
+                    </div>
+                    <div class="report-card">
+                        <div class="report-icon">✅</div>
+                        <h3 id="goodItems">0 BUENO</h3>
+                        <p>En buen estado</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- INVENTARIO -->
+            <div id="inventoryTab" class="tab-content">
+                <h2 style="margin-bottom: 20px;">📦 Inventario Completo</h2>
+                <div style="display: flex; gap: 15px; margin-bottom: 20px;">
+                    <input type="text" id="searchInput" placeholder="Buscar..." style="flex: 1; padding: 12px; border: 2px solid #ddd; border-radius: 8px;">
+                    <button onclick="searchInventory()" class="btn btn-primary">🔍 Buscar</button>
+                    <button onclick="loadInventory()" class="btn btn-secondary">🔄 Actualizar</button>
+                    <button onclick="exportToCSV()" class="btn btn-secondary">📥 CSV</button>
+                </div>
+                <div class="table-container">
+                    <table class="table" id="inventoryTable">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Código</th>
+                                <th>Nombre</th>
+                                <th>Departamento</th>
+                                <th>Responsable</th>
+                                <th>Valor</th>
+                                <th>Estado</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="inventoryBody">
+                            <!-- Los datos se cargarán aquí -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <!-- AGREGAR ARTÍCULO -->
+            <div id="addTab" class="tab-content">
+                <h2 style="margin-bottom: 20px;">➕ Agregar Nuevo Artículo</h2>
+                <form id="addForm" onsubmit="return addItem(event)">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="id">ID *</label>
+                            <input type="text" id="id" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="codigo">Código *</label>
+                            <input type="text" id="codigo" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="nombre">Nombre *</label>
+                            <input type="text" id="nombre" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="marca">Marca</label>
+                            <input type="text" id="marca">
+                        </div>
+                        <div class="form-group">
+                            <label for="modelo">Modelo</label>
+                            <input type="text" id="modelo">
+                        </div>
+                        <div class="form-group">
+                            <label for="serie">Serie</label>
+                            <input type="text" id="serie">
+                        </div>
+                        <div class="form-group">
+                            <label for="grupo">Grupo *</label>
+                            <select id="grupo" required>
+                                <option value="">Seleccionar...</option>
+                                <option value="OTROS MOBILIARIOS Y EQUIPOS DE ADMINISTRACION">OTROS MOBILIARIOS Y EQUIPOS DE ADMINISTRACION</option>
+                                <option value="MUEBLES, EXCEPTO DE OFICINA Y ESTANTERIA">MUEBLES, EXCEPTO DE OFICINA Y ESTANTERIA</option>
+                                <option value="EQUIPOS DE OFICINA">EQUIPOS DE OFICINA</option>
+                                <option value="EQUIPOS DE COMPUTO">EQUIPOS DE COMPUTO</option>
+                                <option value="EQUIPOS DE COMUNICACIÓN">EQUIPOS DE COMUNICACIÓN</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="departamento">Departamento *</label>
+                            <input type="text" id="departamento" required list="deptList">
+                            <datalist id="deptList"></datalist>
+                        </div>
+                        <div class="form-group">
+                            <label for="responsable">Responsable *</label>
+                            <input type="text" id="responsable" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="area">Área</label>
+                            <input type="text" id="area">
+                        </div>
+                        <div class="form-group">
+                            <label for="proveedor">Proveedor</label>
+                            <input type="text" id="proveedor">
+                        </div>
+                        <div class="form-group">
+                            <label for="valor">Valor *</label>
+                            <input type="number" id="valor" step="0.01" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="fecha">Fecha de Adquisición *</label>
+                            <input type="date" id="fecha" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="estado">Estado *</label>
+                            <select id="estado" required>
+                                <option value="BUENO">BUENO</option>
+                                <option value="REGULAR">REGULAR</option>
+                                <option value="MALO">MALO</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-actions">
+                        <button type="reset" class="btn btn-danger">🗑️ Limpiar</button>
+                        <button type="submit" class="btn btn-primary">💾 Guardar Artículo</button>
+                    </div>
+                </form>
+            </div>
+            
+            <!-- REPORTES -->
+            <div id="reportsTab" class="tab-content">
+                <h2 style="margin-bottom: 20px;">📄 Generar Reportes</h2>
+                <div class="reports-grid">
+                    <div class="report-card" onclick="generateSummaryReport()">
+                        <div class="report-icon">📋</div>
+                        <h3>Reporte Resumen</h3>
+                        <p>Vista general del inventario</p>
+                    </div>
+                    <div class="report-card" onclick="generateDepartmentReport()">
+                        <div class="report-icon">🏢</div>
+                        <h3>Por Departamento</h3>
+                        <p>Agrupado por departamento</p>
+                    </div>
+                    <div class="report-card" onclick="generateStatusReport()">
+                        <div class="report-icon">✅</div>
+                        <h3>Por Estado</h3>
+                        <p>Clasificado por condición</p>
+                    </div>
+                    <div class="report-card" onclick="generateValueReport()">
+                        <div class="report-icon">💰</div>
+                        <h3>Valor Total</h3>
+                        <p>Reporte de valorización</p>
+                    </div>
+                    <div class="report-card" onclick="generateQRReport()">
+                        <div class="report-icon">🔲</div>
+                        <h3>QR Masivo</h3>
+                        <p>Generar códigos QR para todos</p>
+                    </div>
+                    <div class="report-card" onclick="generateCustomReport()">
+                        <div class="report-icon">🎛️</div>
+                        <h3>Reporte Personalizado</h3>
+                        <p>Configurar filtros avanzados</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- CÓDIGOS QR -->
+            <div id="qrTab" class="tab-content">
+                <h2 style="margin-bottom: 20px;">🔲 Generador de Códigos QR</h2>
+                <div class="qr-container">
+                    <div style="margin-bottom: 20px;">
+                        <select id="qrSelect" onchange="generateQRForItem()" style="padding: 12px; width: 300px; border-radius: 8px;">
+                            <option value="">Seleccionar artículo...</option>
+                        </select>
+                    </div>
+                    <div id="qrCode"></div>
+                    <div style="margin-top: 20px;">
+                        <button onclick="printQR()" class="btn btn-primary">🖨️ Imprimir QR</button>
+                        <button onclick="downloadQR()" class="btn btn-secondary">📥 Descargar QR</button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- USUARIOS -->
+            <div id="usersTab" class="tab-content">
+                <h2 style="margin-bottom: 20px;">👥 Gestión de Usuarios</h2>
+                <div style="background: #f8f9ff; padding: 20px; border-radius: 10px; margin-bottom: 30px;">
+                    <h3>Agregar Nuevo Usuario</h3>
+                    <div style="display: flex; gap: 15px; margin-top: 15px;">
+                        <input type="email" id="newUserEmail" placeholder="Correo electrónico" style="flex: 1; padding: 12px; border-radius: 8px;">
+                        <input type="password" id="newUserPassword" placeholder="Contraseña" style="flex: 1; padding: 12px; border-radius: 8px;">
+                        <select id="newUserRole" style="padding: 12px; border-radius: 8px;">
+                            <option value="user">Usuario Normal</option>
+                            <option value="admin">Administrador</option>
+                        </select>
+                        <button onclick="addUser()" class="btn btn-primary">➕ Agregar Usuario</button>
+                    </div>
+                </div>
+                <div class="table-container">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Correo</th>
+                                <th>Rol</th>
+                                <th>Fecha Creación</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="usersBody">
+                            <!-- Usuarios se cargarán aquí -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ========== CONFIGURACIÓN FIREBASE ==========
+        // REEMPLAZA ESTOS VALORES CON TU CONFIGURACIÓN
+        const firebaseConfig = {
+            apiKey: "AIzaSyDbLFKFwjt-BynBKRsQOpUBEENFb-xq3AU",
+            authDomain: "sibimtzomp.firebaseapp.com",
+            projectId: "sibimtzomp",
+            storageBucket: "sibimtzomp.firebasestorage.app",
+            messagingSenderId: "1016892953395",
+            appId: "1:1016892953395:web:afa65dc3d52090c1a8a446"
+        };
+        
+        // Inicializar Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        const auth = firebase.auth();
+        
+        // ========== AUTENTICACIÓN ==========
+        let currentUser = null;
+        
+        auth.onAuthStateChanged((user) => {
+            if (user) {
+                currentUser = user;
+                document.getElementById('loginScreen').style.display = 'none';
+                document.getElementById('appContainer').style.display = 'block';
+                document.getElementById('userEmail').textContent = user.email;
+                loadDashboardData();
+                loadInventory();
+                loadUsers();
+                populateDepartments();
+            } else {
+                currentUser = null;
+                document.getElementById('loginScreen').style.display = 'block';
+                document.getElementById('appContainer').style.display = 'none';
+            }
+        });
+        
+        function login() {
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            
+            auth.signInWithEmailAndPassword(email, password)
+                .catch((error) => {
+                    alert('Error: ' + error.message);
+                });
+        }
+        
+        function logout() {
+            auth.signOut();
+        }
+        
+        function showRegister() {
+            const email = prompt('Correo electrónico:');
+            const password = prompt('Contraseña:');
+            
+            if (email && password) {
+                auth.createUserWithEmailAndPassword(email, password)
+                    .then(() => {
+                        alert('Usuario creado exitosamente');
+                    })
+                    .catch((error) => {
+                        alert('Error: ' + error.message);
+                    });
+            }
+        }
+        
+        // ========== NAVEGACIÓN ==========
+        function switchTab(tabName) {
+            // Ocultar todas las pestañas
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Quitar activo de todos los botones
+            document.querySelectorAll('.tab').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // Mostrar pestaña seleccionada
+            document.getElementById(tabName + 'Tab').classList.add('active');
+            
+            // Activar botón
+            document.querySelectorAll('.tab').forEach(btn => {
+                if (btn.textContent.includes(tabName.charAt(0).toUpperCase() + tabName.slice(1))) {
+                    btn.classList.add('active');
+                }
+            });
+            
+            // Cargar datos específicos
+            if (tabName === 'inventory') {
+                loadInventory();
+            } else if (tabName === 'qr') {
+                loadQRItems();
+            }
+        }
+        
+        // ========== DASHBOARD ==========
+        async function loadDashboardData() {
+            try {
+                const snapshot = await db.collection('inventory').get();
+                let totalValue = 0;
+                let goodCount = 0;
+                
+                snapshot.forEach(doc => {
+                    const item = doc.data();
+                    totalValue += parseFloat(item.valor) || 0;
+                    if (item.estado === 'BUENO') goodCount++;
+                });
+                
+                document.getElementById('totalItems').textContent = snapshot.size + ' Artículos';
+                document.getElementById('totalValue').textContent = '$' + totalValue.toLocaleString('es-MX', { minimumFractionDigits: 2 });
+                document.getElementById('goodItems').textContent = goodCount + ' BUENO';
+            } catch (error) {
+                console.error('Error cargando dashboard:', error);
+            }
+        }
+        
+        // ========== INVENTARIO ==========
+        async function loadInventory() {
+            const tbody = document.getElementById('inventoryBody');
+            tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; padding: 30px;">Cargando...</td></tr>';
+            
+            try {
+                const snapshot = await db.collection('inventory').orderBy('id').get();
+                displayInventory(snapshot);
+            } catch (error) {
+                tbody.innerHTML = `<tr><td colspan="8" style="text-align: center; padding: 30px; color: red;">Error: ${error.message}</td></tr>`;
+            }
+        }
+        
+        function displayInventory(snapshot) {
+            const tbody = document.getElementById('inventoryBody');
+            tbody.innerHTML = '';
+            
+            if (snapshot.empty) {
+                tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; padding: 30px;">No hay artículos en el inventario</td></tr>';
+                return;
+            }
+            
+            snapshot.forEach(doc => {
+                const item = doc.data();
+                const row = tbody.insertRow();
+                
+                row.innerHTML = `
+                    <td>${item.id || ''}</td>
+                    <td>${item.codigo || ''}</td>
+                    <td>${item.nombre || ''}</td>
+                    <td>${item.departamento || ''}</td>
+                    <td>${item.responsable || ''}</td>
+                    <td>$${parseFloat(item.valor || 0).toLocaleString('es-MX', { minimumFractionDigits: 2 })}</td>
+                    <td><span class="status status-${(item.estado || '').toLowerCase()}">${item.estado || ''}</span></td>
+                    <td class="actions">
+                        <button onclick="viewItem('${doc.id}')" class="action-btn" style="background: #2196F3; color: white;">👁️</button>
+                        <button onclick="editItem('${doc.id}')" class="action-btn" style="background: #FF9800; color: white;">✏️</button>
+                        <button onclick="deleteItem('${doc.id}')" class="action-btn" style="background: #f44336; color: white;">🗑️</button>
+                        <button onclick="generateQR('${doc.id}')" class="action-btn" style="background: #4CAF50; color: white;">🔲</button>
+                    </td>
+                `;
+            });
+            
+            loadDashboardData();
+        }
+        
+        async function searchInventory() {
+            const term = document.getElementById('searchInput').value.toLowerCase();
+            const tbody = document.getElementById('inventoryBody');
+            tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; padding: 30px;">Buscando...</td></tr>';
+            
+            try {
+                const snapshot = await db.collection('inventory').get();
+                const filtered = [];
+                
+                snapshot.forEach(doc => {
+                    const item = doc.data();
+                    if (
+                        (item.id && item.id.toLowerCase().includes(term)) ||
+                        (item.codigo && item.codigo.toLowerCase().includes(term)) ||
+                        (item.nombre && item.nombre.toLowerCase().includes(term)) ||
+                        (item.departamento && item.departamento.toLowerCase().includes(term)) ||
+                        (item.responsable && item.responsable.toLowerCase().includes(term))
+                    ) {
+                        filtered.push({ id: doc.id, ...item });
+                    }
+                });
+                
+                displayInventory({
+                    empty: filtered.length === 0,
+                    forEach: (callback) => filtered.forEach(item => callback({ data: () => item }))
+                });
+            } catch (error) {
+                tbody.innerHTML = `<tr><td colspan="8" style="text-align: center; padding: 30px; color: red;">Error: ${error.message}</td></tr>`;
+            }
+        }
+        
+        // ========== AGREGAR ARTÍCULO ==========
+        async function addItem(event) {
+            event.preventDefault();
+            
+            const item = {
+                id: document.getElementById('id').value,
+                codigo: document.getElementById('codigo').value,
+                nombre: document.getElementById('nombre').value,
+                marca: document.getElementById('marca').value,
+                modelo: document.getElementById('modelo').value,
+                serie: document.getElementById('serie').value,
+                grupo: document.getElementById('grupo').value,
+                departamento: document.getElementById('departamento').value,
+                responsable: document.getElementById('responsable').value,
+                area: document.getElementById('area').value,
+                proveedor: document.getElementById('proveedor').value,
+                valor: parseFloat(document.getElementById('valor').value),
+                fecha_adquisicion: document.getElementById('fecha').value,
+                estado: document.getElementById('estado').value,
+                fecha_registro: new Date().toISOString(),
+                usuario_registro: currentUser.email
+            };
+            
+            try {
+                // Verificar si ya existe
+                const existing = await db.collection('inventory').doc(item.id).get();
+                if (existing.exists) {
+                    if (!confirm('Ya existe un artículo con este ID. ¿Desea actualizarlo?')) {
+                        return false;
+                    }
+                }
+                
+                await db.collection('inventory').doc(item.id).set(item);
+                alert('✅ Artículo guardado exitosamente');
+                document.getElementById('addForm').reset();
+                switchTab('inventory');
+                loadInventory();
+            } catch (error) {
+                alert('❌ Error: ' + error.message);
+            }
+            
+            return false;
+        }
+        
+        // ========== FUNCIONES CRUD ==========
+        async function viewItem(docId) {
+            const doc = await db.collection('inventory').doc(docId).get();
+            if (doc.exists) {
+                const item = doc.data();
+                alert(`
+                    📋 DETALLE DEL ARTÍCULO:
+                    
+                    ID: ${item.id}
+                    Código: ${item.codigo}
+                    Nombre: ${item.nombre}
+                    Marca: ${item.marca}
+                    Modelo: ${item.modelo}
+                    Serie: ${item.serie}
+                    Grupo: ${item.grupo}
+                    Departamento: ${item.departamento}
+                    Responsable: ${item.responsable}
+                    Área: ${item.area}
+                    Proveedor: ${item.proveedor}
+                    Valor: $${parseFloat(item.valor || 0).toLocaleString('es-MX', { minimumFractionDigits: 2 })}
+                    Fecha: ${item.fecha_adquisicion || item['fecha de adquisición']}
+                    Estado: ${item.estado}
+                    Registrado por: ${item.usuario_registro || 'N/A'}
+                `);
+            }
+        }
+        
+        async function editItem(docId) {
+            const doc = await db.collection('inventory').doc(docId).get();
+            if (doc.exists) {
+                const item = doc.data();
+                
+                // Llenar formulario
+                document.getElementById('id').value = item.id;
+                document.getElementById('codigo').value = item.codigo;
+                document.getElementById('nombre').value = item.nombre;
+                document.getElementById('marca').value = item.marca;
+                document.getElementById('modelo').value = item.modelo;
+                document.getElementById('serie').value = item.serie;
+                document.getElementById('grupo').value = item.grupo;
+                document.getElementById('departamento').value = item.departamento;
+                document.getElementById('responsable').value = item.responsable;
+                document.getElementById('area').value = item.area;
+                document.getElementById('proveedor').value = item.proveedor;
+                document.getElementById('valor').value = item.valor;
+                document.getElementById('fecha').value = item.fecha_adquisicion || '';
+                document.getElementById('estado').value = item.estado;
+                
+                switchTab('add');
+                alert('Modifica los datos y guarda para actualizar');
+            }
+        }
+        
+        async function deleteItem(docId) {
+            if (confirm('¿Está seguro de eliminar este artículo?')) {
+                try {
+                    await db.collection('inventory').doc(docId).delete();
+                    alert('✅ Artículo eliminado');
+                    loadInventory();
+                } catch (error) {
+                    alert('❌ Error: ' + error.message);
+                }
+            }
+        }
+        
+        // ========== REPORTES PDF ==========
+        async function generateSummaryReport() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            
+            // Título
+            doc.setFontSize(20);
+            doc.text('REPORTE DE INVENTARIO - SIBIMTZOMP', 105, 20, { align: 'center' });
+            doc.setFontSize(12);
+            doc.text(`Generado: ${new Date().toLocaleDateString('es-MX')}`, 105, 30, { align: 'center' });
+            
+            // Estadísticas
+            const snapshot = await db.collection('inventory').get();
+            let totalValue = 0;
+            let counts = { BUENO: 0, REGULAR: 0, MALO: 0 };
+            let deptCounts = {};
+            
+            snapshot.forEach(doc => {
+                const item = doc.data();
+                totalValue += parseFloat(item.valor) || 0;
+                counts[item.estado] = (counts[item.estado] || 0) + 1;
+                deptCounts[item.departamento] = (deptCounts[item.departamento] || 0) + 1;
+            });
+            
+            doc.setFontSize(14);
+            doc.text('📊 ESTADÍSTICAS GENERALES', 20, 50);
+            doc.setFontSize(11);
+            doc.text(`• Total de artículos: ${snapshot.size}`, 20, 60);
+            doc.text(`• Valor total del inventario: $${totalValue.toLocaleString('es-MX', { minimumFractionDigits: 2 })}`, 20, 67);
+            doc.text(`• Estado BUENO: ${counts.BUENO} artículos`, 20, 74);
+            doc.text(`• Estado REGULAR: ${counts.REGULAR} artículos`, 20, 81);
+            doc.text(`• Estado MALO: ${counts.MALO} artículos`, 20, 88);
+            
+            // Tabla de departamentos
+            doc.setFontSize(14);
+            doc.text('🏢 DISTRIBUCIÓN POR DEPARTAMENTO', 20, 105);
+            
+            let y = 115;
+            Object.entries(deptCounts).forEach(([dept, count]) => {
+                doc.text(`• ${dept}: ${count} artículos`, 20, y);
+                y += 7;
+                if (y > 270) {
+                    doc.addPage();
+                    y = 20;
+                }
+            });
+            
+            doc.save(`Reporte_Inventario_${new Date().toISOString().split('T')[0]}.pdf`);
+        }
+        
+        async function generateDepartmentReport() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            const autoTable = doc.autoTable;
+            
+            const snapshot = await db.collection('inventory').get();
+            const dataByDept = {};
+            
+            snapshot.forEach(doc => {
+                const item = doc.data();
+                if (!dataByDept[item.departamento]) {
+                    dataByDept[item.departamento] = [];
+                }
+                dataByDept[item.departamento].push([
+                    item.id,
+                    item.nombre.substring(0, 30),
+                    `$${parseFloat(item.valor || 0).toLocaleString('es-MX', { minimumFractionDigits: 2 })}`,
+                    item.estado
+                ]);
+            });
+            
+            let page = 1;
+            Object.entries(dataByDept).forEach(([dept, items]) => {
+                if (page > 1) doc.addPage();
+                
+                doc.setFontSize(16);
+                doc.text(`Departamento: ${dept}`, 20, 20);
+                doc.setFontSize(10);
+                doc.text(`Total artículos: ${items.length}`, 20, 28);
+                
+                autoTable(doc, {
+                    startY: 35,
+                    head: [['ID', 'Nombre', 'Valor', 'Estado']],
+                    body: items,
+                    theme: 'striped',
+                    headStyles: { fillColor: [30, 60, 114] }
+                });
+                
+                page++;
+            });
+            
+            doc.save(`Reporte_Por_Departamento_${new Date().toISOString().split('T')[0]}.pdf`);
+        }
+        
+        function exportToCSV() {
+            alert('Funcionalidad de CSV en desarrollo...');
+            // Implementación similar a los reportes PDF pero en CSV
+        }
+        
+        // ========== CÓDIGOS QR ==========
+        async function loadQRItems() {
+            const select = document.getElementById('qrSelect');
+            select.innerHTML = '<option value="">Seleccionar artículo...</option>';
+            
+            try {
+                const snapshot = await db.collection('inventory').get();
+                snapshot.forEach(doc => {
+                    const item = doc.data();
+                    const option = document.createElement('option');
+                    option.value = doc.id;
+                    option.textContent = `${item.id} - ${item.nombre}`;
+                    select.appendChild(option);
+                });
+            } catch (error) {
+                console.error('Error cargando items para QR:', error);
+            }
+        }
+        
+        async function generateQRForItem() {
+            const docId = document.getElementById('qrSelect').value;
+            if (!docId) return;
+            
+            const doc = await db.collection('inventory').doc(docId).get();
+            if (doc.exists) {
+                const item = doc.data();
+                const qrData = `
+                    ID: ${item.id}
+                    Código: ${item.codigo}
+                    Nombre: ${item.nombre}
+                    Departamento: ${item.departamento}
+                    Responsable: ${item.responsable}
+                    Valor: $${item.valor}
+                    Estado: ${item.estado}
+                    Fecha: ${item.fecha_adquisicion || item['fecha de adquisición']}
+                    
+                    SIBIMTZOMP - Sistema de Inventario Municipal
+                `;
+                
+                QRCode.toCanvas(document.getElementById('qrCode'), qrData, {
+                    width: 200,
+                    margin: 2,
+                    color: {
+                        dark: '#1e3c72',
+                        light: '#ffffff'
+                    }
+                }, function (error) {
+                    if (error) console.error(error);
+                });
+            }
+        }
+        
+        function generateQR(docId) {
+            document.getElementById('qrSelect').value = docId;
+            switchTab('qr');
+            setTimeout(() => generateQRForItem(), 500);
+        }
+        
+        function printQR() {
+            const qrCanvas = document.querySelector('#qrCode canvas');
+            if (qrCanvas) {
+                const printWindow = window.open('', '_blank');
+                printWindow.document.write(`
+                    <html>
+                        <head>
+                            <title>Imprimir QR</title>
+                            <style>
+                                body { display: flex; justify-content: center; align-items: center; height: 100vh; }
+                            </style>
+                        </head>
+                        <body>
+                            <img src="${qrCanvas.toDataURL()}">
+                        </body>
+                    </html>
+                `);
+                printWindow.document.close();
+                printWindow.print();
+            }
+        }
+        
+        function downloadQR() {
+            const qrCanvas = document.querySelector('#qrCode canvas');
+            if (qrCanvas) {
+                const link = document.createElement('a');
+                link.download = 'codigo_qr.png';
+                link.href = qrCanvas.toDataURL();
+                link.click();
+            }
+        }
+        
+        // ========== GESTIÓN DE USUARIOS ==========
+        async function loadUsers() {
+            // Nota: En producción, esto debería manejarse con Cloud Functions
+            // ya que Firebase no permite listar usuarios desde el cliente
+            const tbody = document.getElementById('usersBody');
+            tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; padding: 30px;">La gestión de usuarios requiere Cloud Functions</td></tr>';
+        }
+        
+        async function addUser() {
+            const email = document.getElementById('newUserEmail').value;
+            const password = document.getElementById('newUserPassword').value;
+            const role = document.getElementById('newUserRole').value;
+            
+            if (!email || !password) {
+                alert('Por favor complete todos los campos');
+                return;
+            }
+            
+            // Nota: En producción, esto debería hacerse con Cloud Functions
+            // para evitar exponer la creación de usuarios
+            alert('La creación de usuarios debe manejarse desde el backend por seguridad');
+        }
+        
+        // ========== UTILIDADES ==========
+        async function populateDepartments() {
+            try {
+                const snapshot = await db.collection('inventory').get();
+                const departments = new Set();
+                
+                snapshot.forEach(doc => {
+                    const dept = doc.data().departamento;
+                    if (dept) departments.add(dept);
+                });
+                
+                const datalist = document.getElementById('deptList');
+                datalist.innerHTML = '';
+                
+                [...departments].sort().forEach(dept => {
+                    const option = document.createElement('option');
+                    option.value = dept;
+                    datalist.appendChild(option);
+                });
+            } catch (error) {
+                console.error('Error cargando departamentos:', error);
+            }
+        }
+        
+        // ========== INICIALIZACIÓN ==========
+        document.addEventListener('DOMContentLoaded', function() {
+            // Configurar fecha por defecto en formulario
+            document.getElementById('fecha').valueAsDate = new Date();
+        });
+    </script>
+</body>
+</html>
