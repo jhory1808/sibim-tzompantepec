@@ -1,0 +1,2089 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Sistema de Inventario Municipal</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-storage-compat.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+    
+    <style>
+        :root {
+            --primary: #1a365d;
+            --secondary: #2d6bcc;
+            --accent: #48bb78;
+            --warning: #ed8936;
+            --danger: #e53e3e;
+            --light: #f7fafc;
+            --dark: #2d3748;
+            --shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f7fa;
+            color: var(--dark);
+        }
+
+        .dashboard-container {
+            display: grid;
+            grid-template-columns: 250px 1fr;
+            min-height: 100vh;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            background: var(--primary);
+            color: white;
+            padding: 30px 20px;
+            position: fixed;
+            width: 250px;
+            height: 100vh;
+        }
+
+        .sidebar-header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .nav-menu {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 15px;
+            color: rgba(255,255,255,0.8);
+            text-decoration: none;
+            border-radius: 8px;
+            transition: var(--transition);
+            cursor: pointer;
+        }
+
+        .nav-item:hover, .nav-item.active {
+            background: rgba(255,255,255,0.1);
+            color: white;
+        }
+
+        /* Main Content */
+        .main-content {
+            margin-left: 250px;
+            padding: 20px;
+        }
+
+        .top-bar {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: var(--shadow);
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .logout-btn {
+            background: var(--danger);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            transition: var(--transition);
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+
+        /* Quick Actions */
+        .quick-actions {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            margin-bottom: 40px;
+            box-shadow: var(--shadow);
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            color: var(--primary);
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid var(--light);
+        }
+
+        .actions-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+
+        .action-btn {
+            background: var(--light);
+            border: none;
+            padding: 25px 20px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: var(--transition);
+            text-align: center;
+        }
+
+        .action-btn:hover {
+            background: var(--secondary);
+            color: white;
+            transform: translateY(-3px);
+        }
+
+        /* Modals */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            z-index: 3000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 16px;
+            width: 90%;
+            max-width: 800px;
+            max-height: 90vh;
+            overflow-y: auto;
+            padding: 30px;
+            position: relative;
+        }
+
+        .close-modal {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .upload-area {
+            border: 3px dashed #e2e8f0;
+            border-radius: 12px;
+            padding: 40px;
+            text-align: center;
+            cursor: pointer;
+            margin: 20px 0;
+        }
+
+        .upload-area:hover {
+            border-color: var(--secondary);
+        }
+
+        .preview-container {
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .preview-image {
+            max-width: 200px;
+            max-height: 200px;
+            border-radius: 8px;
+            margin: 0 auto;
+        }
+
+        .qr-container {
+            text-align: center;
+            padding: 20px;
+        }
+
+        #qrcode {
+            display: inline-block;
+            margin: 20px 0;
+        }
+
+        .item-image-preview {
+            max-width: 200px;
+            max-height: 200px;
+            border-radius: 8px;
+            margin: 10px auto;
+            display: block;
+        }
+
+        .search-result-item {
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 10px;
+        }
+
+        @media (max-width: 992px) {
+            .dashboard-container {
+                grid-template-columns: 1fr;
+            }
+            .sidebar {
+                position: relative;
+                width: 100%;
+                height: auto;
+            }
+            .main-content {
+                margin-left: 0;
+            }
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h2>Inventario Municipal</h2>
+                <p>Tzompantepec 2024-2027</p>
+            </div>
+            
+            <nav class="nav-menu">
+                <div class="nav-item active" onclick="showSection('dashboard')">
+                    <i class="fas fa-home"></i>
+                    <span>Dashboard</span>
+                </div>
+                
+                <div class="nav-item" onclick="showUploadModal()">
+                    <i class="fas fa-cloud-upload-alt"></i>
+                    <span>Subir Archivos</span>
+                </div>
+                
+                <div class="nav-item" onclick="showPDFModal()">
+                    <i class="fas fa-file-pdf"></i>
+                    <span>Generar Reporte PDF</span>
+                </div>
+                
+                <div class="nav-item" onclick="showQRModal()">
+                    <i class="fas fa-qrcode"></i>
+                    <span>Generar Código QR</span>
+                </div>
+                
+                <div class="nav-item" onclick="showInventoryModal()">
+                    <i class="fas fa-boxes"></i>
+                    <span>Gestión de Inventario</span>
+                </div>
+                
+                <div class="nav-item" onclick="showSearchModal()">
+                    <i class="fas fa-search"></i>
+                    <span>Búsqueda Avanzada</span>
+                </div>
+            </nav>
+            
+            <div style="margin-top: 40px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.1);">
+                <div style="color: rgba(255,255,255,0.6); font-size: 0.9rem;">
+                    Sistema Completo con:
+                </div>
+                <div style="margin-top: 10px; font-size: 0.8rem; color: rgba(255,255,255,0.8);">
+                    • Firebase Storage<br>
+                    • Reportes PDF<br>
+                    • Códigos QR<br>
+                    • Gestión de Inventario
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Top Bar -->
+            <div class="top-bar">
+                <div class="user-info">
+                    <div style="width: 50px; height: 50px; background: var(--secondary); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white;">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div>
+                        <h3 id="userName">Cargando...</h3>
+                        <p id="userRole" style="color: var(--gray); font-size: 0.9rem;">Cargando...</p>
+                    </div>
+                </div>
+                
+                <button class="logout-btn" id="logoutBtn">
+                    <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
+                </button>
+            </div>
+
+            <!-- Stats Grid -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div style="width: 60px; height: 60px; background: var(--secondary); border-radius: 12px; display: flex; align-items: center; justify-content: center; color: white; font-size: 1.5rem;">
+                        <i class="fas fa-box"></i>
+                    </div>
+                    <div>
+                        <h3 style="font-size: 0.9rem; color: var(--gray); margin-bottom: 5px;">Artículos Totales</h3>
+                        <div style="font-size: 2rem; font-weight: bold;" id="totalItems">0</div>
+                    </div>
+                </div>
+                
+                <div class="stat-card">
+                    <div style="width: 60px; height: 60px; background: var(--accent); border-radius: 12px; display: flex; align-items: center; justify-content: center; color: white; font-size: 1.5rem;">
+                        <i class="fas fa-file-pdf"></i>
+                    </div>
+                    <div>
+                        <h3 style="font-size: 0.9rem; color: var(--gray); margin-bottom: 5px;">Reportes PDF</h3>
+                        <div style="font-size: 2rem; font-weight: bold;" id="totalReports">0</div>
+                    </div>
+                </div>
+                
+                <div class="stat-card">
+                    <div style="width: 60px; height: 60px; background: var(--warning); border-radius: 12px; display: flex; align-items: center; justify-content: center; color: white; font-size: 1.5rem;">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                    </div>
+                    <div>
+                        <h3 style="font-size: 0.9rem; color: var(--gray); margin-bottom: 5px;">Archivos Subidos</h3>
+                        <div style="font-size: 2rem; font-weight: bold;" id="totalFiles">0</div>
+                    </div>
+                </div>
+                
+                <div class="stat-card">
+                    <div style="width: 60px; height: 60px; background: #9f7aea; border-radius: 12px; display: flex; align-items: center; justify-content: center; color: white; font-size: 1.5rem;">
+                        <i class="fas fa-qrcode"></i>
+                    </div>
+                    <div>
+                        <h3 style="font-size: 0.9rem; color: var(--gray); margin-bottom: 5px;">Códigos QR</h3>
+                        <div style="font-size: 2rem; font-weight: bold;" id="totalQR">0</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="quick-actions">
+                <h2 class="section-title">Acciones Rápidas</h2>
+                <div class="actions-grid">
+                    <button class="action-btn" onclick="showUploadModal()">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                        <span>Subir Archivo</span>
+                    </button>
+                    
+                    <button class="action-btn" onclick="showPDFModal()">
+                        <i class="fas fa-file-pdf"></i>
+                        <span>Generar PDF</span>
+                    </button>
+                    
+                    <button class="action-btn" onclick="showQRModal()">
+                        <i class="fas fa-qrcode"></i>
+                        <span>Generar QR</span>
+                    </button>
+                    
+                    <button class="action-btn" onclick="showInventoryModal()">
+                        <i class="fas fa-plus-circle"></i>
+                        <span>Nuevo Artículo</span>
+                    </button>
+                    
+                    <button class="action-btn" onclick="showSearchModal()">
+                        <i class="fas fa-search"></i>
+                        <span>Buscar Artículo</span>
+                    </button>
+                    
+                    <button class="action-btn" onclick="showFilesModal()">
+                        <i class="fas fa-folder-open"></i>
+                        <span>Ver Archivos</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Recent Files -->
+            <div class="quick-actions">
+                <h2 class="section-title">Archivos Recientes</h2>
+                <div id="recentFiles" style="min-height: 100px;">
+                    <p style="text-align: center; color: var(--gray); padding: 30px;">
+                        <i class="fas fa-cloud-upload-alt" style="font-size: 2rem; margin-bottom: 10px; display: block;"></i>
+                        Sube tu primer archivo usando el botón "Subir Archivo"
+                    </p>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- ================= MODALES ================= -->
+
+    <!-- Modal: Subir Archivos -->
+    <div class="modal" id="uploadModal">
+        <div class="modal-content">
+            <button class="close-modal" onclick="closeModal('uploadModal')">&times;</button>
+            <h2>Subir Archivos a Firebase Storage</h2>
+            <p style="color: var(--gray); margin-bottom: 20px;">Sube imágenes y documentos PDF al almacenamiento en la nube</p>
+            
+            <div class="form-group">
+                <label for="fileName">Nombre del Archivo</label>
+                <input type="text" id="fileName" placeholder="Ej: factura-junio-2024">
+            </div>
+            
+            <div class="form-group">
+                <label for="fileType">Tipo de Archivo</label>
+                <select id="fileType">
+                    <option value="image">Imagen (JPG, PNG, GIF)</option>
+                    <option value="pdf">Documento PDF</option>
+                    <option value="document">Documento (DOC, DOCX)</option>
+                    <option value="excel">Excel (XLS, XLSX)</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="fileCategory">Categoría</label>
+                <select id="fileCategory">
+                    <option value="facturas">Facturas</option>
+                    <option value="contratos">Contratos</option>
+                    <option value="inventario">Inventario</option>
+                    <option value="reportes">Reportes</option>
+                    <option value="otros">Otros</option>
+                </select>
+            </div>
+            
+            <div class="upload-area" id="dropZone" onclick="document.getElementById('fileInput').click()">
+                <i class="fas fa-cloud-upload-alt" style="font-size: 3rem; color: var(--gray); margin-bottom: 15px;"></i>
+                <p style="font-weight: 500;">Arrastra y suelta archivos aquí</p>
+                <p style="color: var(--gray); font-size: 0.9rem;">o haz clic para seleccionar</p>
+                <p style="color: var(--gray); font-size: 0.8rem; margin-top: 10px;">
+                    Límite: 10MB por archivo
+                </p>
+            </div>
+            
+            <input type="file" id="fileInput" style="display: none;" onchange="previewFile()">
+            
+            <div class="preview-container" id="filePreview"></div>
+            
+            <div id="uploadProgress" style="margin: 20px 0; display: none;">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                    <span>Progreso</span>
+                    <span id="progressPercent">0%</span>
+                </div>
+                <div style="height: 10px; background: #e2e8f0; border-radius: 5px; overflow: hidden;">
+                    <div id="progressBar" style="height: 100%; background: var(--accent); width: 0%;"></div>
+                </div>
+            </div>
+            
+            <div id="uploadMessage" style="margin: 15px 0; text-align: center;"></div>
+            
+            <div style="display: flex; gap: 15px; margin-top: 30px;">
+                <button class="btn" onclick="closeModal('uploadModal')" style="background: var(--gray);">Cancelar</button>
+                <button class="btn btn-accent" onclick="uploadFile()" id="uploadBtn">
+                    <i class="fas fa-upload"></i> Subir Archivo
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Generar PDF -->
+    <div class="modal" id="pdfModal">
+        <div class="modal-content">
+            <button class="close-modal" onclick="closeModal('pdfModal')">&times;</button>
+            <h2>Generar Reporte PDF</h2>
+            <p style="color: var(--gray); margin-bottom: 20px;">Genera reportes profesionales en formato PDF</p>
+            
+            <div class="form-group">
+                <label for="reportType">Tipo de Reporte</label>
+                <select id="reportType" onchange="changeReportType()">
+                    <option value="inventory">Inventario Completo</option>
+                    <option value="department">Por Departamento</option>
+                    <option value="category">Por Categoría</option>
+                    <option value="status">Por Estado</option>
+                    <option value="custom">Personalizado</option>
+                </select>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="startDate">Fecha Inicio</label>
+                    <input type="date" id="startDate">
+                </div>
+                <div class="form-group">
+                    <label for="endDate">Fecha Fin</label>
+                    <input type="date" id="endDate">
+                </div>
+            </div>
+            
+            <div class="form-group" id="departmentSelect" style="display: none;">
+                <label for="department">Departamento</label>
+                <select id="department">
+                    <option value="">Seleccionar departamento</option>
+                    <option value="administracion">Administración</option>
+                    <option value="tesoreria">Tesorería</option>
+                    <option value="obras">Obras Públicas</option>
+                    <option value="desarrollo">Desarrollo Social</option>
+                    <option value="contabilidad">Contabilidad</option>
+                    <option value="seguridad">Seguridad</option>
+                    <option value="salud">Salud</option>
+                    <option value="educacion">Educación</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="reportTitle">Título del Reporte</label>
+                <input type="text" id="reportTitle" placeholder="Ej: Reporte de Inventario Q1 2024">
+            </div>
+            
+            <div class="form-group">
+                <label>
+                    <input type="checkbox" id="includeImages" checked>
+                    Incluir imágenes de artículos
+                </label>
+            </div>
+            
+            <div class="form-group">
+                <label>
+                    <input type="checkbox" id="includeQR" checked>
+                    Incluir códigos QR
+                </label>
+            </div>
+            
+            <div style="background: #f7fafc; padding: 20px; border-radius: 8px; margin: 20px 0;">
+                <h4 style="margin-bottom: 10px;">Vista Previa del Reporte</h4>
+                <div id="reportPreview" style="min-height: 100px; padding: 15px; background: white; border-radius: 6px;">
+                    <p style="color: var(--gray); text-align: center;">
+                        Configura las opciones para ver la vista previa
+                    </p>
+                </div>
+            </div>
+            
+            <div id="pdfMessage" style="margin: 15px 0; text-align: center;"></div>
+            
+            <div style="display: flex; gap: 15px; margin-top: 30px;">
+                <button class="btn" onclick="previewPDF()" style="background: var(--warning);">
+                    <i class="fas fa-eye"></i> Vista Previa
+                </button>
+                <button class="btn btn-accent" onclick="generatePDF()">
+                    <i class="fas fa-file-pdf"></i> Generar PDF
+                </button>
+                <button class="btn" onclick="downloadPDF()" style="background: var(--secondary);">
+                    <i class="fas fa-download"></i> Descargar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Generar QR -->
+    <div class="modal" id="qrModal">
+        <div class="modal-content">
+            <button class="close-modal" onclick="closeModal('qrModal')">&times;</button>
+            <h2>Generar Código QR</h2>
+            <p style="color: var(--gray); margin-bottom: 20px;">Genera códigos QR para artículos, ubicaciones o URLs</p>
+            
+            <div class="form-group">
+                <label for="qrType">Tipo de QR</label>
+                <select id="qrType" onchange="changeQRType()">
+                    <option value="item">Artículo de Inventario</option>
+                    <option value="url">URL/Página Web</option>
+                    <option value="text">Texto Simple</option>
+                    <option value="location">Ubicación</option>
+                    <option value="wifi">Wi-Fi</option>
+                </select>
+            </div>
+            
+            <div class="form-group" id="itemSelect">
+                <label for="qrItem">Seleccionar Artículo</label>
+                <select id="qrItem">
+                    <option value="">Cargando artículos...</option>
+                </select>
+            </div>
+            
+            <div class="form-group" id="urlInput" style="display: none;">
+                <label for="qrUrl">URL</label>
+                <input type="url" id="qrUrl" placeholder="https://ejemplo.com">
+            </div>
+            
+            <div class="form-group" id="textInput" style="display: none;">
+                <label for="qrText">Texto</label>
+                <textarea id="qrText" rows="3" placeholder="Ingrese el texto para el código QR"></textarea>
+            </div>
+            
+            <div class="form-group">
+                <label for="qrSize">Tamaño del QR</label>
+                <select id="qrSize">
+                    <option value="128">128x128px (Pequeño)</option>
+                    <option value="256" selected>256x256px (Mediano)</option>
+                    <option value="512">512x512px (Grande)</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="qrColor">Color del QR</label>
+                <input type="color" id="qrColor" value="#000000">
+            </div>
+            
+            <div class="qr-container">
+                <div id="qrcode"></div>
+                <div id="qrInfo" style="margin-top: 15px; color: var(--gray);">
+                    El código QR aparecerá aquí
+                </div>
+            </div>
+            
+            <div id="qrMessage" style="margin: 15px 0; text-align: center;"></div>
+            
+            <div style="display: flex; gap: 15px; margin-top: 30px;">
+                <button class="btn" onclick="generateQRCode()">
+                    <i class="fas fa-qrcode"></i> Generar QR
+                </button>
+                <button class="btn btn-accent" onclick="downloadQR()">
+                    <i class="fas fa-download"></i> Descargar PNG
+                </button>
+                <button class="btn" onclick="printQR()" style="background: var(--warning);">
+                    <i class="fas fa-print"></i> Imprimir
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Gestión de Inventario -->
+    <div class="modal" id="inventoryModal">
+        <div class="modal-content">
+            <button class="close-modal" onclick="closeModal('inventoryModal')">&times;</button>
+            <h2>Gestión de Inventario</h2>
+            
+            <div style="display: flex; gap: 10px; margin-bottom: 20px;">
+                <button class="btn" onclick="showInventoryTab('new')" id="tabNew">Nuevo Artículo</button>
+                <button class="btn" onclick="showInventoryTab('update')" id="tabUpdate">Actualizar</button>
+                <button class="btn" onclick="showInventoryTab('search')" id="tabSearch">Buscar</button>
+            </div>
+            
+            <!-- Nuevo Artículo -->
+            <div id="newItemTab" class="inventory-tab">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="itemCode">Código *</label>
+                        <input type="text" id="itemCode" placeholder="MTT-2024-001">
+                    </div>
+                    <div class="form-group">
+                        <label for="itemName">Nombre *</label>
+                        <input type="text" id="itemName" placeholder="Computadora de escritorio">
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="itemSerial">Número de Serie</label>
+                        <input type="text" id="itemSerial" placeholder="SN123456789">
+                    </div>
+                    <div class="form-group">
+                        <label for="itemCategory">Categoría *</label>
+                        <select id="itemCategory">
+                            <option value="">Seleccionar</option>
+                            <option value="computo">Equipo de Cómputo</option>
+                            <option value="mobiliario">Mobiliario</option>
+                            <option value="vehiculos">Vehículos</option>
+                            <option value="electrodomesticos">Electrodomésticos</option>
+                            <option value="herramientas">Herramientas</option>
+                            <option value="otros">Otros</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="itemDepartment">Departamento *</label>
+                        <select id="itemDepartment">
+                            <option value="">Seleccionar</option>
+                            <option value="administracion">Administración</option>
+                            <option value="contabilidad">Contabilidad</option>
+                            <option value="obras_publicas">Obras Públicas</option>
+                            <option value="seguridad">Seguridad</option>
+                            <option value="salud">Salud</option>
+                            <option value="educacion">Educación</option>
+                            <option value="otros">Otros</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="itemStatus">Estado *</label>
+                        <select id="itemStatus">
+                            <option value="activo">Activo</option>
+                            <option value="mantenimiento">En Mantenimiento</option>
+                            <option value="baja">Dado de Baja</option>
+                            <option value="extraviado">Extraviado</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="itemValue">Valor ($)</label>
+                        <input type="number" id="itemValue" placeholder="15000">
+                    </div>
+                    <div class="form-group">
+                        <label for="itemLocation">Ubicación</label>
+                        <input type="text" id="itemLocation" placeholder="Oficina 101">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="itemDescription">Descripción</label>
+                    <textarea id="itemDescription" rows="3" placeholder="Descripción detallada del artículo"></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label for="itemImage">Imagen del Artículo</label>
+                    <input type="file" id="itemImage" accept="image/*" onchange="previewItemImage()">
+                    <div id="itemImagePreview" class="preview-container"></div>
+                </div>
+                
+                <div id="inventoryMessage" style="margin: 15px 0; text-align: center;"></div>
+                
+                <div style="display: flex; gap: 15px;">
+                    <button class="btn" onclick="closeModal('inventoryModal')" style="background: var(--gray);">Cancelar</button>
+                    <button class="btn btn-accent" onclick="saveInventoryItem()" id="saveItemBtn">
+                        <i class="fas fa-save"></i> Guardar Artículo
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Buscar Artículos -->
+            <div id="searchItemTab" class="inventory-tab" style="display: none;">
+                <div class="form-group">
+                    <label for="searchCategory">Buscar por Categoría</label>
+                    <select id="searchCategory" onchange="searchInventoryItems()">
+                        <option value="">Todas las categorías</option>
+                        <option value="computo">Equipo de Cómputo</option>
+                        <option value="mobiliario">Mobiliario</option>
+                        <option value="vehiculos">Vehículos</option>
+                        <option value="electrodomesticos">Electrodomésticos</option>
+                        <option value="herramientas">Herramientas</option>
+                        <option value="otros">Otros</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="searchStatus">Filtrar por Estado</label>
+                    <select id="searchStatus" onchange="searchInventoryItems()">
+                        <option value="">Todos los estados</option>
+                        <option value="activo">Activo</option>
+                        <option value="mantenimiento">En Mantenimiento</option>
+                        <option value="baja">Dado de Baja</option>
+                        <option value="extraviado">Extraviado</option>
+                    </select>
+                </div>
+                
+                <div id="inventorySearchResults" style="margin-top: 20px;">
+                    <p style="text-align: center; color: var(--gray); padding: 30px;">
+                        Usa los filtros para buscar artículos
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Búsqueda -->
+    <div class="modal" id="searchModal">
+        <div class="modal-content">
+            <button class="close-modal" onclick="closeModal('searchModal')">&times;</button>
+            <h2>Búsqueda Avanzada</h2>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="searchType">Buscar por</label>
+                    <select id="searchType">
+                        <option value="all">Todo</option>
+                        <option value="code">Código</option>
+                        <option value="name">Nombre</option>
+                        <option value="serial">Número de Serie</option>
+                        <option value="category">Categoría</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="searchKeyword">Palabra clave</label>
+                    <input type="text" id="searchKeyword" placeholder="Ingrese término de búsqueda">
+                </div>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="searchDateFrom">Fecha desde</label>
+                    <input type="date" id="searchDateFrom">
+                </div>
+                <div class="form-group">
+                    <label for="searchDateTo">Fecha hasta</label>
+                    <input type="date" id="searchDateTo">
+                </div>
+            </div>
+            
+            <button class="btn btn-accent" onclick="performSearch()" style="width: 100%;">
+                <i class="fas fa-search"></i> Realizar Búsqueda
+            </button>
+            
+            <div id="searchResultsContainer" style="margin-top: 30px;"></div>
+        </div>
+    </div>
+
+    <!-- Modal: Archivos -->
+    <div class="modal" id="filesModal">
+        <div class="modal-content">
+            <button class="close-modal" onclick="closeModal('filesModal')">&times;</button>
+            <h2>Archivos en Firebase Storage</h2>
+            
+            <div style="display: flex; gap: 10px; margin-bottom: 20px;">
+                <button class="btn" onclick="filterFiles('all')">Todos</button>
+                <button class="btn" onclick="filterFiles('image')">Imágenes</button>
+                <button class="btn" onclick="filterFiles('pdf')">PDFs</button>
+                <button class="btn" onclick="filterFiles('document')">Documentos</button>
+            </div>
+            
+            <div id="filesList" style="min-height: 300px;">
+                <p style="text-align: center; padding: 50px; color: var(--gray);">
+                    <i class="fas fa-spinner fa-spin"></i> Cargando archivos...
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ================= CONFIGURACIÓN FIREBASE =================
+        const firebaseConfig = {
+            apiKey: "AIzaSyBZvHJHALxUuXL3BcTkzXlW3En8f99n_5U",
+            authDomain: "sibimtzomp.firebaseapp.com",
+            projectId: "sibimtzomp",
+            storageBucket: "sibimtzomp.appspot.com",
+            messagingSenderId: "123456789012",
+            appId: "1:123456789012:web:abcdef1234567890abcdef"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+        const storage = firebase.storage();
+
+        // ================= CLASES DE GESTIÓN DE INVENTARIO =================
+        class ItemManager {
+            constructor() {
+                this.collection = 'inventory_items';
+                this.categories = [
+                    'computo', 'mobiliario', 'electrodomesticos', 
+                    'herramientas', 'vehiculos', 'otros'
+                ];
+                this.statuses = ['activo', 'mantenimiento', 'baja', 'extraviado'];
+                this.departments = [
+                    'administracion', 'contabilidad', 'obras_publicas',
+                    'seguridad', 'salud', 'educacion', 'otros'
+                ];
+            }
+
+            async createItem(itemData) {
+                try {
+                    // Validar campos requeridos
+                    if (!itemData.code || !itemData.name || !itemData.category) {
+                        throw new Error('Faltan campos requeridos: código, nombre, categoría');
+                    }
+
+                    // Generar ID único
+                    const itemId = db.collection(this.collection).doc().id;
+                    
+                    // Preparar datos con timestamp
+                    const completeItemData = {
+                        ...itemData,
+                        id: itemId,
+                        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                        updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+                        createdBy: auth.currentUser ? auth.currentUser.email : 'system',
+                        isActive: true
+                    };
+
+                    // Guardar en Firestore
+                    await db.collection(this.collection).doc(itemId).set(completeItemData);
+                    
+                    console.log(`Artículo creado: ${itemData.code} - ${itemData.name}`);
+                    return { success: true, itemId, data: completeItemData };
+                    
+                } catch (error) {
+                    console.error('Error creando artículo:', error);
+                    throw error;
+                }
+            }
+
+            async getItem(itemId) {
+                try {
+                    const doc = await db.collection(this.collection).doc(itemId).get();
+                    
+                    if (!doc.exists) {
+                        throw new Error('Artículo no encontrado');
+                    }
+                    
+                    return { id: doc.id, ...doc.data() };
+                } catch (error) {
+                    console.error('Error obteniendo artículo:', error);
+                    throw error;
+                }
+            }
+
+            async updateItem(itemId, updateData) {
+                try {
+                    const updateObject = {
+                        ...updateData,
+                        updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+                        updatedBy: auth.currentUser ? auth.currentUser.email : 'system'
+                    };
+
+                    await db.collection(this.collection).doc(itemId).update(updateObject);
+                    
+                    console.log(`Artículo actualizado: ${itemId}`);
+                    return { success: true, itemId };
+                    
+                } catch (error) {
+                    console.error('Error actualizando artículo:', error);
+                    throw error;
+                }
+            }
+
+            async deleteItem(itemId) {
+                try {
+                    // Soft delete: marcar como inactivo
+                    await db.collection(this.collection).doc(itemId).update({
+                        isActive: false,
+                        deletedAt: firebase.firestore.FieldValue.serverTimestamp(),
+                        deletedBy: auth.currentUser ? auth.currentUser.email : 'system'
+                    });
+                    
+                    console.log(`Artículo eliminado (soft delete): ${itemId}`);
+                    return { success: true, itemId };
+                    
+                } catch (error) {
+                    console.error('Error eliminando artículo:', error);
+                    throw error;
+                }
+            }
+
+            async searchItems(filters = {}) {
+                try {
+                    let query = db.collection(this.collection).where('isActive', '==', true);
+                    
+                    // Aplicar filtros
+                    if (filters.category) {
+                        query = query.where('category', '==', filters.category);
+                    }
+                    
+                    if (filters.status) {
+                        query = query.where('status', '==', filters.status);
+                    }
+                    
+                    if (filters.department) {
+                        query = query.where('department', '==', filters.department);
+                    }
+                    
+                    if (filters.searchText) {
+                        // Para búsqueda de texto, necesitamos una solución diferente
+                        // Por ahora, filtramos en memoria después de obtener los resultados
+                        const snapshot = await query.get();
+                        const results = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                        
+                        const searchLower = filters.searchText.toLowerCase();
+                        return results.filter(item => 
+                            item.name.toLowerCase().includes(searchLower) ||
+                            item.code.toLowerCase().includes(searchLower) ||
+                            item.description?.toLowerCase().includes(searchLower)
+                        );
+                    }
+                    
+                    // Sin búsqueda de texto, ejecutar query directamente
+                    const snapshot = await query.get();
+                    return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                    
+                } catch (error) {
+                    console.error('Error buscando artículos:', error);
+                    throw error;
+                }
+            }
+
+            async uploadItemImage(itemId, imageFile) {
+                try {
+                    // Validar que sea una imagen
+                    if (!imageFile.type.startsWith('image/')) {
+                        throw new Error('El archivo debe ser una imagen');
+                    }
+                    
+                    // Crear referencia de almacenamiento
+                    const storageRef = storage.ref();
+                    const imageRef = storageRef.child(`inventory_images/${itemId}/${Date.now()}_${imageFile.name}`);
+                    
+                    // Subir imagen
+                    const uploadTask = await imageRef.put(imageFile);
+                    const downloadURL = await uploadTask.ref.getDownloadURL();
+                    
+                    // Actualizar artículo con URL de imagen
+                    await this.updateItem(itemId, {
+                        imageUrl: downloadURL,
+                        imageUpdatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                    
+                    console.log(`Imagen subida para artículo ${itemId}: ${downloadURL}`);
+                    return { success: true, imageUrl: downloadURL };
+                    
+                } catch (error) {
+                    console.error('Error subiendo imagen:', error);
+                    throw error;
+                }
+            }
+
+            async generateInventoryReport(options = {}) {
+                try {
+                    // Obtener todos los artículos activos
+                    let query = db.collection(this.collection).where('isActive', '==', true);
+                    
+                    if (options.department) {
+                        query = query.where('department', '==', options.department);
+                    }
+                    
+                    const snapshot = await query.get();
+                    const items = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                    
+                    // Generar estadísticas
+                    const report = {
+                        totalItems: items.length,
+                        generatedAt: new Date().toISOString(),
+                        generatedBy: auth.currentUser ? auth.currentUser.email : 'system',
+                        items: items,
+                        statistics: {
+                            byCategory: {},
+                            byStatus: {},
+                            byDepartment: {},
+                            totalValue: 0
+                        }
+                    };
+                    
+                    // Calcular estadísticas
+                    items.forEach(item => {
+                        // Por categoría
+                        if (!report.statistics.byCategory[item.category]) {
+                            report.statistics.byCategory[item.category] = 0;
+                        }
+                        report.statistics.byCategory[item.category]++;
+                        
+                        // Por estado
+                        if (!report.statistics.byStatus[item.status]) {
+                            report.statistics.byStatus[item.status] = 0;
+                        }
+                        report.statistics.byStatus[item.status]++;
+                        
+                        // Por departamento
+                        if (!report.statistics.byDepartment[item.department]) {
+                            report.statistics.byDepartment[item.department] = 0;
+                        }
+                        report.statistics.byDepartment[item.department]++;
+                        
+                        // Valor total
+                        if (item.value) {
+                            report.statistics.totalValue += parseFloat(item.value) || 0;
+                        }
+                    });
+                    
+                    console.log(`Reporte generado: ${report.totalItems} artículos`);
+                    return report;
+                    
+                } catch (error) {
+                    console.error('Error generando reporte:', error);
+                    throw error;
+                }
+            }
+        }
+
+        class InventoryManager {
+            constructor() {
+                this.itemManager = new ItemManager();
+                this.currentUser = null;
+                this.userRole = null;
+            }
+
+            async initialize(user) {
+                this.currentUser = user;
+                console.log('Inventory Manager inicializado para:', user.email);
+                
+                // Obtener rol del usuario desde Firestore si existe
+                if (user) {
+                    try {
+                        const userDoc = await db.collection('users').doc(user.uid).get();
+                        if (userDoc.exists) {
+                            this.userRole = userDoc.data().role;
+                            console.log('Rol del usuario:', this.userRole);
+                        }
+                    } catch (error) {
+                        console.warn('No se pudo obtener el rol del usuario:', error);
+                    }
+                }
+                
+                return this;
+            }
+
+            async createItem(itemData) {
+                // Verificar permisos según rol
+                if (!this.hasPermission('create')) {
+                    throw new Error('No tiene permisos para crear artículos');
+                }
+                
+                return await this.itemManager.createItem(itemData);
+            }
+
+            async searchItems(filters = {}) {
+                return await this.itemManager.searchItems(filters);
+            }
+
+            async uploadItemImage(itemId, imageFile) {
+                // Verificar permisos según rol
+                if (!this.hasPermission('edit')) {
+                    throw new Error('No tiene permisos para subir imágenes');
+                }
+                
+                return await this.itemManager.uploadItemImage(itemId, imageFile);
+            }
+
+            async generateInventoryReport(options = {}) {
+                // Verificar permisos según rol
+                if (!this.hasPermission('view_reports')) {
+                    throw new Error('No tiene permisos para generar reportes');
+                }
+                
+                return await this.itemManager.generateInventoryReport(options);
+            }
+
+            hasPermission(action) {
+                // Lógica de permisos basada en roles
+                if (!this.userRole) return false;
+                
+                const permissions = {
+                    'admin': ['create', 'edit', 'delete', 'view_reports', 'manage_users'],
+                    'user': ['create', 'edit', 'view_reports'],
+                    'capturist': ['create']
+                };
+                
+                return permissions[this.userRole]?.includes(action) || false;
+            }
+
+            // Métodos adicionales
+            async getCategories() {
+                return this.itemManager.categories;
+            }
+
+            async getStatuses() {
+                return this.itemManager.statuses;
+            }
+
+            async getDepartments() {
+                return this.itemManager.departments;
+            }
+        }
+
+        // ================= VARIABLES GLOBALES =================
+        let currentUser = null;
+        let currentFile = null;
+        let currentQRData = null;
+        let inventoryManager = null;
+
+        // ================= VERIFICAR AUTENTICACIÓN =================
+        auth.onAuthStateChanged(async (user) => {
+            if (!user) {
+                window.location.href = 'index.html';
+            } else {
+                currentUser = user;
+                
+                // Inicializar Inventory Manager
+                inventoryManager = new InventoryManager();
+                await inventoryManager.initialize(currentUser);
+                window.inventoryManager = inventoryManager;
+                
+                loadUserData();
+                loadDashboardStats();
+                loadRecentFiles();
+            }
+        });
+
+        // ================= CARGAR DATOS DEL USUARIO =================
+        function loadUserData() {
+            const userEmail = currentUser.email;
+            const userRole = localStorage.getItem('userRole') || 'Usuario';
+            
+            document.getElementById('userName').textContent = userEmail;
+            document.getElementById('userRole').textContent = `Rol: ${userRole}`;
+        }
+
+        // ================= CARGAR ESTADÍSTICAS =================
+        async function loadDashboardStats() {
+            try {
+                // Usar InventoryManager para contar artículos
+                const items = await inventoryManager.searchItems({});
+                document.getElementById('totalItems').textContent = items.length;
+                
+                // Archivos en storage
+                const filesRef = storage.ref().child('files');
+                const filesList = await filesRef.listAll();
+                document.getElementById('totalFiles').textContent = filesList.items.length;
+                
+                // Reportes PDF generados
+                const reportsSnapshot = await db.collection('reports').get();
+                document.getElementById('totalReports').textContent = reportsSnapshot.size;
+                
+                // Códigos QR generados
+                const qrSnapshot = await db.collection('qrcodes').get();
+                document.getElementById('totalQR').textContent = qrSnapshot.size;
+                
+            } catch (error) {
+                console.error('Error cargando estadísticas:', error);
+                // Valores por defecto
+                document.getElementById('totalItems').textContent = '0';
+                document.getElementById('totalFiles').textContent = '0';
+                document.getElementById('totalReports').textContent = '0';
+                document.getElementById('totalQR').textContent = '0';
+            }
+        }
+
+        // ================= CARGAR ARCHIVOS RECIENTES =================
+        async function loadRecentFiles() {
+            try {
+                const filesRef = storage.ref().child('files');
+                const filesList = await filesRef.listAll();
+                
+                const recentFilesDiv = document.getElementById('recentFiles');
+                recentFilesDiv.innerHTML = '';
+                
+                if (filesList.items.length === 0) {
+                    recentFilesDiv.innerHTML = `
+                        <p style="text-align: center; color: var(--gray); padding: 30px;">
+                            <i class="fas fa-cloud-upload-alt" style="font-size: 2rem; margin-bottom: 10px; display: block;"></i>
+                            Sube tu primer archivo usando el botón "Subir Archivo"
+                        </p>
+                    `;
+                    return;
+                }
+                
+                // Mostrar últimos 5 archivos
+                const recentItems = filesList.items.slice(0, 5);
+                
+                for (const itemRef of recentItems) {
+                    const metadata = await itemRef.getMetadata();
+                    const url = await itemRef.getDownloadURL();
+                    
+                    const fileDiv = document.createElement('div');
+                    fileDiv.style.cssText = `
+                        display: flex; align-items: center; gap: 15px; padding: 15px; 
+                        background: white; border-radius: 8px; margin-bottom: 10px;
+                        border: 1px solid #e2e8f0;
+                    `;
+                    
+                    const icon = metadata.contentType.includes('image') ? 'fa-image' :
+                                metadata.contentType.includes('pdf') ? 'fa-file-pdf' :
+                                'fa-file';
+                    
+                    fileDiv.innerHTML = `
+                        <div style="width: 40px; height: 40px; background: var(--secondary); 
+                             border-radius: 8px; display: flex; align-items: center; 
+                             justify-content: center; color: white;">
+                            <i class="fas ${icon}"></i>
+                        </div>
+                        <div style="flex: 1;">
+                            <div style="font-weight: 500;">${metadata.name}</div>
+                            <div style="font-size: 0.9rem; color: var(--gray);">
+                                ${formatBytes(metadata.size)} • ${formatDate(metadata.timeCreated)}
+                            </div>
+                        </div>
+                        <button onclick="downloadFile('${url}', '${metadata.name}')" 
+                                style="background: none; border: none; color: var(--secondary); 
+                                cursor: pointer;">
+                            <i class="fas fa-download"></i>
+                        </button>
+                    `;
+                    
+                    recentFilesDiv.appendChild(fileDiv);
+                }
+                
+            } catch (error) {
+                console.error('Error cargando archivos:', error);
+            }
+        }
+
+        // ================= FUNCIONES DE FORMATEO =================
+        function formatBytes(bytes, decimals = 2) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const dm = decimals < 0 ? 0 : decimals;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
+        }
+
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('es-MX');
+        }
+
+        // ================= FUNCIONES DE SUBIDA DE ARCHIVOS =================
+        function previewFile() {
+            const fileInput = document.getElementById('fileInput');
+            const file = fileInput.files[0];
+            currentFile = file;
+            
+            const previewDiv = document.getElementById('filePreview');
+            previewDiv.innerHTML = '';
+            
+            if (file) {
+                if (file.size > 10 * 1024 * 1024) {
+                    alert('El archivo es demasiado grande. Máximo 10MB.');
+                    fileInput.value = '';
+                    currentFile = null;
+                    return;
+                }
+                
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    if (file.type.startsWith('image/')) {
+                        previewDiv.innerHTML = `
+                            <img src="${e.target.result}" class="preview-image" alt="Vista previa">
+                            <p style="margin-top: 10px; color: var(--gray);">${file.name} (${formatBytes(file.size)})</p>
+                        `;
+                    } else {
+                        previewDiv.innerHTML = `
+                            <div style="padding: 20px; background: #f7fafc; border-radius: 8px;">
+                                <i class="fas fa-file" style="font-size: 3rem; color: var(--gray);"></i>
+                                <p style="margin-top: 10px; font-weight: 500;">${file.name}</p>
+                                <p style="color: var(--gray);">${formatBytes(file.size)} • ${file.type}</p>
+                            </div>
+                        `;
+                    }
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        async function uploadFile() {
+            if (!currentFile) {
+                showMessage('uploadMessage', 'Por favor, selecciona un archivo', 'error');
+                return;
+            }
+            
+            const fileName = document.getElementById('fileName').value || currentFile.name;
+            const fileType = document.getElementById('fileType').value;
+            const fileCategory = document.getElementById('fileCategory').value;
+            
+            try {
+                const uploadBtn = document.getElementById('uploadBtn');
+                uploadBtn.disabled = true;
+                uploadBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Subiendo...';
+                
+                // Mostrar progreso
+                const progressDiv = document.getElementById('uploadProgress');
+                const progressBar = document.getElementById('progressBar');
+                const progressPercent = document.getElementById('progressPercent');
+                progressDiv.style.display = 'block';
+                
+                // Crear referencia en storage
+                const timestamp = Date.now();
+                const filePath = `files/${fileCategory}/${timestamp}_${fileName}`;
+                const storageRef = storage.ref().child(filePath);
+                
+                // Subir archivo
+                const uploadTask = storageRef.put(currentFile);
+                
+                // Monitorear progreso
+                uploadTask.on('state_changed',
+                    (snapshot) => {
+                        const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+                        progressBar.style.width = progress + '%';
+                        progressPercent.textContent = Math.round(progress) + '%';
+                    },
+                    (error) => {
+                        showMessage('uploadMessage', 'Error subiendo archivo: ' + error.message, 'error');
+                        uploadBtn.disabled = false;
+                        uploadBtn.innerHTML = '<i class="fas fa-upload"></i> Subir Archivo';
+                    },
+                    async () => {
+                        // Completado
+                        const downloadURL = await uploadTask.snapshot.ref.getDownloadURL();
+                        
+                        // Guardar metadata en Firestore
+                        await db.collection('files').add({
+                            name: fileName,
+                            originalName: currentFile.name,
+                            type: fileType,
+                            category: fileCategory,
+                            size: currentFile.size,
+                            url: downloadURL,
+                            path: filePath,
+                            uploadedBy: currentUser.email,
+                            uploadedAt: firebase.firestore.FieldValue.serverTimestamp()
+                        });
+                        
+                        showMessage('uploadMessage', '✓ Archivo subido exitosamente', 'success');
+                        progressDiv.style.display = 'none';
+                        
+                        // Resetear formulario
+                        document.getElementById('fileName').value = '';
+                        document.getElementById('fileInput').value = '';
+                        document.getElementById('filePreview').innerHTML = '';
+                        currentFile = null;
+                        
+                        uploadBtn.disabled = false;
+                        uploadBtn.innerHTML = '<i class="fas fa-upload"></i> Subir Archivo';
+                        
+                        // Actualizar estadísticas
+                        setTimeout(() => {
+                            loadDashboardStats();
+                            loadRecentFiles();
+                        }, 1000);
+                    }
+                );
+                
+            } catch (error) {
+                showMessage('uploadMessage', 'Error: ' + error.message, 'error');
+            }
+        }
+
+        // ================= FUNCIONES DE GESTIÓN DE INVENTARIO =================
+        async function saveInventoryItem() {
+            const code = document.getElementById('itemCode').value;
+            const name = document.getElementById('itemName').value;
+            const serial = document.getElementById('itemSerial').value;
+            const category = document.getElementById('itemCategory').value;
+            const department = document.getElementById('itemDepartment').value;
+            const status = document.getElementById('itemStatus').value;
+            const value = document.getElementById('itemValue').value;
+            const location = document.getElementById('itemLocation').value;
+            const description = document.getElementById('itemDescription').value;
+            const imageFile = document.getElementById('itemImage').files[0];
+            
+            if (!code || !name || !category || !department || !status) {
+                showMessage('inventoryMessage', 'Por favor, completa los campos requeridos (*)', 'error');
+                return;
+            }
+            
+            try {
+                const saveBtn = document.getElementById('saveItemBtn');
+                saveBtn.disabled = true;
+                saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...';
+                
+                // Crear objeto del artículo
+                const itemData = {
+                    code: code,
+                    name: name,
+                    serialNumber: serial,
+                    category: category,
+                    department: department,
+                    status: status,
+                    value: value ? parseFloat(value) : 0,
+                    location: location,
+                    description: description
+                };
+                
+                // Crear artículo usando InventoryManager
+                const result = await inventoryManager.createItem(itemData);
+                
+                // Subir imagen si hay
+                if (imageFile && result.success) {
+                    await inventoryManager.uploadItemImage(result.itemId, imageFile);
+                }
+                
+                showMessage('inventoryMessage', '✓ Artículo guardado exitosamente', 'success');
+                
+                // Limpiar formulario
+                ['itemCode', 'itemName', 'itemSerial', 'itemValue', 'itemLocation', 'itemDescription'].forEach(id => {
+                    document.getElementById(id).value = '';
+                });
+                document.getElementById('itemCategory').selectedIndex = 0;
+                document.getElementById('itemDepartment').selectedIndex = 0;
+                document.getElementById('itemImagePreview').innerHTML = '';
+                document.getElementById('itemImage').value = '';
+                
+                saveBtn.disabled = false;
+                saveBtn.innerHTML = '<i class="fas fa-save"></i> Guardar Artículo';
+                
+                // Actualizar estadísticas
+                setTimeout(() => {
+                    loadDashboardStats();
+                }, 1000);
+                
+            } catch (error) {
+                showMessage('inventoryMessage', 'Error: ' + error.message, 'error');
+                document.getElementById('saveItemBtn').disabled = false;
+                document.getElementById('saveItemBtn').innerHTML = '<i class="fas fa-save"></i> Guardar Artículo';
+            }
+        }
+
+        async function searchInventoryItems() {
+            const category = document.getElementById('searchCategory').value;
+            const status = document.getElementById('searchStatus').value;
+            
+            const filters = {};
+            if (category) filters.category = category;
+            if (status) filters.status = status;
+            
+            try {
+                const resultsDiv = document.getElementById('inventorySearchResults');
+                resultsDiv.innerHTML = '<p style="text-align: center; padding: 30px; color: var(--gray);"><i class="fas fa-spinner fa-spin"></i> Buscando...</p>';
+                
+                // Usar InventoryManager para buscar
+                const results = await inventoryManager.searchItems(filters);
+                
+                if (results.length === 0) {
+                    resultsDiv.innerHTML = '<p style="text-align: center; padding: 30px; color: var(--gray);">No se encontraron artículos</p>';
+                    return;
+                }
+                
+                let html = '<div style="display: grid; gap: 15px;">';
+                
+                results.forEach(item => {
+                    html += `
+                        <div class="search-result-item">
+                            <div style="display: flex; justify-content: space-between; align-items: start;">
+                                <div>
+                                    <h4 style="margin-bottom: 5px;">${item.name || 'Sin nombre'}</h4>
+                                    <p style="color: var(--gray); font-size: 0.9rem;">
+                                        Código: ${item.code || 'N/A'} | 
+                                        Serie: ${item.serialNumber || 'N/A'} | 
+                                        Categoría: ${item.category || 'N/A'}
+                                    </p>
+                                </div>
+                                <span style="background: ${item.status === 'activo' ? '#48bb78' : 
+                                                          item.status === 'mantenimiento' ? '#ed8936' : 
+                                                          item.status === 'baja' ? '#e53e3e' : '#718096'}; 
+                                      color: white; padding: 5px 10px; border-radius: 4px; font-size: 0.8rem;">
+                                    ${item.status || 'Desconocido'}
+                                </span>
+                            </div>
+                            ${item.description ? `<p style="margin-top: 10px; font-size: 0.9rem;">${item.description}</p>` : ''}
+                            ${item.location ? `<p style="margin-top: 5px; font-size: 0.9rem; color: var(--gray);"><i class="fas fa-map-marker-alt"></i> ${item.location}</p>` : ''}
+                            ${item.value ? `<p style="margin-top: 5px; font-size: 0.9rem; color: var(--gray);"><i class="fas fa-dollar-sign"></i> ${formatCurrency(item.value)}</p>` : ''}
+                            ${item.imageUrl ? `<img src="${item.imageUrl}" style="max-width: 100px; max-height: 100px; border-radius: 4px; margin-top: 10px;">` : ''}
+                        </div>
+                    `;
+                });
+                
+                html += '</div>';
+                resultsDiv.innerHTML = html;
+                
+            } catch (error) {
+                console.error('Error buscando artículos:', error);
+                document.getElementById('inventorySearchResults').innerHTML = '<p style="text-align: center; padding: 30px; color: var(--gray);">Error en la búsqueda</p>';
+            }
+        }
+
+        function previewItemImage() {
+            const fileInput = document.getElementById('itemImage');
+            const file = fileInput.files[0];
+            
+            const previewDiv = document.getElementById('itemImagePreview');
+            previewDiv.innerHTML = '';
+            
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    previewDiv.innerHTML = `
+                        <img src="${e.target.result}" class="item-image-preview" alt="Vista previa">
+                        <p style="margin-top: 5px; color: var(--gray);">${file.name} (${formatBytes(file.size)})</p>
+                    `;
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        // ================= FUNCIONES DE REPORTES PDF =================
+        function changeReportType() {
+            const type = document.getElementById('reportType').value;
+            const deptSelect = document.getElementById('departmentSelect');
+            
+            if (type === 'department') {
+                deptSelect.style.display = 'block';
+            } else {
+                deptSelect.style.display = 'none';
+            }
+            
+            updateReportPreview();
+        }
+
+        function updateReportPreview() {
+            const type = document.getElementById('reportType').value;
+            const title = document.getElementById('reportTitle').value || 'Reporte de Inventario';
+            
+            let previewHTML = `
+                <h4 style="color: var(--primary); margin-bottom: 10px;">${title}</h4>
+                <p style="color: var(--gray); margin-bottom: 15px;">
+                    ${getCurrentDate()} • Generado por: ${currentUser.email}
+                </p>
+            `;
+            
+            switch(type) {
+                case 'inventory':
+                    previewHTML += '<p>• Listado completo de inventario</p>';
+                    previewHTML += '<p>• Detalles de todos los artículos</p>';
+                    previewHTML += '<p>• Estadísticas generales</p>';
+                    break;
+                case 'department':
+                    const dept = document.getElementById('department').value || 'Todos';
+                    previewHTML += `<p>• Artículos del departamento: ${dept}</p>`;
+                    previewHTML += '<p>• Distribución por categoría</p>';
+                    break;
+                case 'category':
+                    previewHTML += '<p>• Agrupado por categorías</p>';
+                    previewHTML += '<p>• Conteo por tipo</p>';
+                    break;
+                case 'status':
+                    previewHTML += '<p>• Artículos por estado</p>';
+                    previewHTML += '<p>• Activos vs Inactivos</p>';
+                    break;
+            }
+            
+            document.getElementById('reportPreview').innerHTML = previewHTML;
+        }
+
+        async function generatePDF() {
+            try {
+                showMessage('pdfMessage', 'Generando reporte PDF...', 'info');
+                
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF();
+                
+                const title = document.getElementById('reportTitle').value || 'Reporte de Inventario';
+                const reportType = document.getElementById('reportType').value;
+                const department = document.getElementById('department').value;
+                
+                // Configurar documento
+                doc.setFontSize(20);
+                doc.setTextColor(26, 54, 93);
+                doc.text(title, 105, 20, { align: 'center' });
+                
+                doc.setFontSize(10);
+                doc.setTextColor(100, 100, 100);
+                doc.text(`Fecha: ${getCurrentDate()}`, 14, 30);
+                doc.text(`Generado por: ${currentUser.email}`, 14, 35);
+                
+                // Obtener datos usando InventoryManager
+                const filters = {};
+                if (department) filters.department = department;
+                
+                const items = await inventoryManager.searchItems(filters);
+                
+                // Crear tabla
+                const tableData = items.map(item => [
+                    item.code || 'N/A',
+                    item.name || 'Sin nombre',
+                    item.category || 'Sin categoría',
+                    item.status || 'Activo',
+                    item.department || 'Sin asignar',
+                    item.value ? formatCurrency(item.value) : '$0'
+                ]);
+                
+                doc.autoTable({
+                    head: [['Código', 'Nombre', 'Categoría', 'Estado', 'Departamento', 'Valor']],
+                    body: tableData,
+                    startY: 45,
+                    theme: 'grid',
+                    headStyles: { fillColor: [26, 54, 93] }
+                });
+                
+                // Estadísticas
+                const finalY = doc.lastAutoTable.finalY + 10;
+                doc.setFontSize(12);
+                doc.setTextColor(26, 54, 93);
+                doc.text('Estadísticas del Reporte', 14, finalY);
+                
+                doc.setFontSize(10);
+                doc.setTextColor(0, 0, 0);
+                doc.text(`• Total de artículos: ${items.length}`, 20, finalY + 10);
+                
+                // Calcular estadísticas
+                let totalValue = 0;
+                const categories = {};
+                const statuses = {};
+                const departments = {};
+                
+                items.forEach(item => {
+                    // Por categoría
+                    categories[item.category] = (categories[item.category] || 0) + 1;
+                    
+                    // Por estado
+                    statuses[item.status] = (statuses[item.status] || 0) + 1;
+                    
+                    // Por departamento
+                    departments[item.department] = (departments[item.department] || 0) + 1;
+                    
+                    // Valor total
+                    if (item.value) {
+                        totalValue += parseFloat(item.value) || 0;
+                    }
+                });
+                
+                let yPos = finalY + 20;
+                doc.text(`• Valor total: ${formatCurrency(totalValue)}`, 20, yPos);
+                yPos += 10;
+                
+                doc.text('• Por categoría:', 20, yPos);
+                yPos += 7;
+                Object.entries(categories).forEach(([category, count]) => {
+                    doc.text(`  ${category}: ${count}`, 25, yPos);
+                    yPos += 7;
+                });
+                
+                // Guardar reporte en Firestore
+                const pdfBlob = doc.output('blob');
+                const timestamp = Date.now();
+                const pdfPath = `reports/reporte_${timestamp}.pdf`;
+                const pdfRef = storage.ref().child(pdfPath);
+                
+                await pdfRef.put(pdfBlob);
+                const pdfUrl = await pdfRef.getDownloadURL();
+                
+                await db.collection('reports').add({
+                    title: title,
+                    type: reportType,
+                    itemsCount: items.length,
+                    totalValue: totalValue,
+                    generatedBy: currentUser.email,
+                    pdfUrl: pdfUrl,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                
+                showMessage('pdfMessage', '✓ Reporte PDF generado exitosamente', 'success');
+                
+                // Descargar automáticamente
+                doc.save(`reporte_inventario_${timestamp}.pdf`);
+                
+                // Actualizar estadísticas
+                setTimeout(() => {
+                    loadDashboardStats();
+                }, 1000);
+                
+            } catch (error) {
+                console.error('Error generando PDF:', error);
+                showMessage('pdfMessage', 'Error generando PDF: ' + error.message, 'error');
+            }
+        }
+
+        // ================= FUNCIONES DE CÓDIGOS QR =================
+        function changeQRType() {
+            const type = document.getElementById('qrType').value;
+            document.getElementById('itemSelect').style.display = type === 'item' ? 'block' : 'none';
+            document.getElementById('urlInput').style.display = type === 'url' ? 'block' : 'none';
+            document.getElementById('textInput').style.display = type === 'text' ? 'block' : 'none';
+        }
+
+        async function loadItemsForQR() {
+            try {
+                const select = document.getElementById('qrItem');
+                select.innerHTML = '<option value="">Cargando artículos...</option>';
+                
+                // Usar InventoryManager para cargar artículos
+                const items = await inventoryManager.searchItems({});
+                
+                select.innerHTML = '<option value="">Seleccionar artículo</option>';
+                
+                items.forEach(item => {
+                    const option = document.createElement('option');
+                    option.value = item.id;
+                    option.textContent = `${item.code || 'Sin código'} - ${item.name || 'Sin nombre'}`;
+                    select.appendChild(option);
+                });
+                
+            } catch (error) {
+                console.error('Error cargando artículos:', error);
+            }
+        }
+
+        function generateQRCode() {
+            const type = document.getElementById('qrType').value;
+            const size = parseInt(document.getElementById('qrSize').value);
+            const color = document.getElementById('qrColor').value.replace('#', '');
+            
+            let qrData = '';
+            let qrInfo = '';
+            
+            switch(type) {
+                case 'item':
+                    const itemId = document.getElementById('qrItem').value;
+                    if (!itemId) {
+                        showMessage('qrMessage', 'Selecciona un artículo', 'error');
+                        return;
+                    }
+                    qrData = `INVENTARIO:${itemId}`;
+                    qrInfo = 'Código QR para artículo de inventario';
+                    break;
+                    
+                case 'url':
+                    const url = document.getElementById('qrUrl').value;
+                    if (!url) {
+                        showMessage('qrMessage', 'Ingresa una URL', 'error');
+                        return;
+                    }
+                    qrData = url;
+                    qrInfo = `QR para URL: ${url}`;
+                    break;
+                    
+                case 'text':
+                    const text = document.getElementById('qrText').value;
+                    if (!text) {
+                        showMessage('qrMessage', 'Ingresa texto', 'error');
+                        return;
+                    }
+                    qrData = text;
+                    qrInfo = 'QR con texto personalizado';
+                    break;
+                    
+                default:
+                    qrData = 'Sistema de Inventario Municipal Tzompantepec';
+                    qrInfo = 'QR del sistema';
+            }
+            
+            currentQRData = qrData;
+            
+            // Limpiar QR anterior
+            document.getElementById('qrcode').innerHTML = '';
+            
+            // Generar nuevo QR
+            QRCode.toCanvas(document.getElementById('qrcode'), qrData, {
+                width: size,
+                height: size,
+                color: {
+                    dark: color,
+                    light: '#ffffff'
+                }
+            }, function(error) {
+                if (error) {
+                    showMessage('qrMessage', 'Error generando QR: ' + error.message, 'error');
+                } else {
+                    document.getElementById('qrInfo').textContent = qrInfo;
+                    showMessage('qrMessage', '✓ Código QR generado', 'success');
+                    
+                    // Guardar en base de datos
+                    saveQRCode(qrData, type, size);
+                }
+            });
+        }
+
+        async function saveQRCode(data, type, size) {
+            try {
+                await db.collection('qrcodes').add({
+                    data: data,
+                    type: type,
+                    size: size,
+                    generatedBy: currentUser.email,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                
+                // Actualizar estadísticas
+                setTimeout(() => {
+                    loadDashboardStats();
+                }, 1000);
+                
+            } catch (error) {
+                console.error('Error guardando QR:', error);
+            }
+        }
+
+        // ================= FUNCIONES UTILITARIAS =================
+        function showMessage(elementId, message, type) {
+            const element = document.getElementById(elementId);
+            element.textContent = message;
+            element.style.color = type === 'error' ? 'var(--danger)' : 
+                                 type === 'success' ? 'var(--accent)' : 
+                                 type === 'info' ? 'var(--secondary)' : 
+                                 'var(--dark)';
+            
+            if (type === 'success') {
+                setTimeout(() => {
+                    element.textContent = '';
+                }, 3000);
+            }
+        }
+
+        function getCurrentDate() {
+            return new Date().toLocaleDateString('es-MX', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+        }
+
+        function formatCurrency(amount) {
+            return new Intl.NumberFormat('es-MX', {
+                style: 'currency',
+                currency: 'MXN'
+            }).format(amount);
+        }
+
+        function openModal(modalId) {
+            document.getElementById(modalId).style.display = 'flex';
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+        }
+
+        function showSection(sectionId) {
+            console.log('Mostrar sección:', sectionId);
+        }
+
+        function showInventoryTab(tabName) {
+            // Actualizar botones
+            ['tabNew', 'tabUpdate', 'tabSearch'].forEach(id => {
+                document.getElementById(id).style.background = 'var(--gray)';
+            });
+            document.getElementById('tab' + tabName.charAt(0).toUpperCase() + tabName.slice(1)).style.background = 'var(--secondary)';
+            
+            // Mostrar tab correspondiente
+            ['newItemTab', 'updateItemTab', 'searchItemTab'].forEach(id => {
+                const element = document.getElementById(id);
+                if (element) element.style.display = 'none';
+            });
+            
+            const tabElement = document.getElementById(tabName + 'ItemTab');
+            if (tabElement) {
+                tabElement.style.display = 'block';
+            }
+            
+            // Cargar datos si es necesario
+            if (tabName === 'search') {
+                searchInventoryItems();
+            }
+        }
+
+        function downloadFile(url, fileName) {
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = fileName;
+            link.click();
+        }
+
+        // ================= EVENT LISTENERS =================
+        document.getElementById('logoutBtn').addEventListener('click', () => {
+            auth.signOut().then(() => {
+                localStorage.clear();
+                window.location.href = 'index.html';
+            });
+        });
+
+        // Inicializar arrastrar y soltar
+        document.addEventListener('DOMContentLoaded', () => {
+            const dropZone = document.getElementById('dropZone');
+            
+            if (dropZone) {
+                dropZone.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    dropZone.style.borderColor = 'var(--secondary)';
+                    dropZone.style.background = '#f0f7ff';
+                });
+                
+                dropZone.addEventListener('dragleave', () => {
+                    dropZone.style.borderColor = '#e2e8f0';
+                    dropZone.style.background = '';
+                });
+                
+                dropZone.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    dropZone.style.borderColor = '#e2e8f0';
+                    dropZone.style.background = '';
+                    
+                    const files = e.dataTransfer.files;
+                    if (files.length > 0) {
+                        const fileInput = document.getElementById('fileInput');
+                        fileInput.files = files;
+                        previewFile();
+                    }
+                });
+            }
+            
+            // Cargar items para QR
+            loadItemsForQR();
+            
+            // Actualizar vista previa del reporte
+            updateReportPreview();
+        });
+
+        // ================= FUNCIONES DE APERTURA DE MODALES =================
+        function showUploadModal() {
+            openModal('uploadModal');
+        }
+
+        function showPDFModal() {
+            openModal('pdfModal');
+            updateReportPreview();
+        }
+
+        function showQRModal() {
+            openModal('qrModal');
+        }
+
+        function showInventoryModal() {
+            openModal('inventoryModal');
+            showInventoryTab('new');
+        }
+
+        function showSearchModal() {
+            openModal('searchModal');
+        }
+
+        function showFilesModal() {
+            openModal('filesModal');
+            loadAllFiles();
+        }
+
+        // ================= INICIALIZACIÓN =================
+        console.log('Sistema de Inventario Municipal - Dashboard Completo 1.0');
+        console.log('Firebase Storage ✓ | Reportes PDF ✓ | Códigos QR ✓ | Gestión de Inventario ✓');
+    </script>
+</body>
+</html>
