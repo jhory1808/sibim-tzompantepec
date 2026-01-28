@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login | SIBIM Tzompantepec</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore-compat.js"></script>
+    
+    <style>
+        :root {
+            --primary-color: #1a365d;
+            --secondary-color: #2d6bcc;
+            --accent-color: #48bb78;
+            --warning-color: #ed8936;
+            --danger-color: #e53e3e;
+            --light-color: #f7fafc;
+            --dark-color: #2d3748;
+            --gray-color: #718096;
+            --shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: var(--dark-color);
+            background: linear-gradient(rgba(26, 54, 93, 0.95), rgba(45, 107, 204, 0.95)), 
+                        url('https://images.unsplash.com/photo-1551288049-bebda4e38f71?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80');
+            background-size: cover;
+            background-position: center;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .login-container {
+            width: 100%;
+            max-width: 450px;
+        }
+
+        .login-card {
+            background: white;
+            border-radius: 16px;
+            padding: 50px 40px;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .login-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, var(--secondary-color), var(--accent-color));
+        }
+
+        .login-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .logo-icon {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(45deg, var(--secondary-color), var(--primary-color));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 25px;
+            color: white;
+            font-size: 2.5rem;
+            box-shadow: 0 8px 25px rgba(45, 107, 204, 0.3);
+        }
+
+        .system-title {
+            font-weight: 800;
+            font-size: 2.2rem;
+            background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+        }
+
+        .system-subtitle {
+            color: var(--gray-color);
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .login-form {
+            margin-bottom: 30px;
+        }
+
+        .input-group {
+            margin-bottom: 25px;
+            position: relative;
+        }
+
+        .input-label {
+            display: block;
+            color: var(--primary-color);
+            margin-bottom: 10px;
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+
+        .input-field {
+            width: 100%;
+            background: white;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 16px 20px;
+            font-size: 1rem;
+            color: var(--dark-color);
+            transition: var(--transition);
+        }
+
+        .input-field:focus {
+            outline: none;
+            border-color: var(--secondary-color);
+            box-shadow: 0 0 0 3px rgba(45, 107, 204, 0.1);
+        }
+
+        .input-icon {
+            position: absolute;
+            right: 15px;
+            top: 42px;
+            color: var(--secondary-color);
+        }
+
+        .login-button {
+            width: 100%;
+            background: linear-gradient(45deg, var(--secondary-color), var(--primary-color));
+            border: none;
+            border-radius: 8px;
+            padding: 18px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: white;
+            cursor: pointer;
+            transition: var(--transition);
+            margin-top: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .login-button:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow);
+        }
+
+        .login-button:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+
+        .message {
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            text-align: center;
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .error-message {
+            background: rgba(229, 62, 62, 0.1);
+            border: 1px solid rgba(229, 62, 62, 0.2);
+            color: var(--danger-color);
+        }
+
+        .success-message {
+            background: rgba(72, 187, 120, 0.1);
+            border: 1px solid rgba(72, 187, 120, 0.2);
+            color: var(--accent-color);
+        }
+
+        .firebase-info {
+            text-align: center;
+            margin-top: 30px;
+            color: var(--gray-color);
+            font-size: 0.9rem;
+            padding-top: 20px;
+            border-top: 1px solid #e2e8f0;
+        }
+
+        @media (max-width: 600px) {
+            .login-card {
+                padding: 30px 20px;
+            }
+            
+            .system-title {
+                font-size: 1.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-card">
+            
+            <div class="login-header">
+                <div class="logo-icon">
+                    <i class="fas fa-warehouse"></i>
+                </div>
+                <h1 class="system-title">SIBIM TZOMPANTEPEC</h1>
+                <p class="system-subtitle">Sistema Integral de Bienes Municipales</p>
+            </div>
+            
+            <div class="login-form">
+                <div class="input-group">
+                    <label class="input-label">
+                        <i class="fas fa-envelope"></i> Correo Electrónico
+                    </label>
+                    <input type="email" class="input-field" id="email" 
+                           placeholder="usuario@tzompantepec.gob.mx" required>
+                    <div class="input-icon">
+                        <i class="fas fa-user"></i>
+                    </div>
+                </div>
+                
+                <div class="input-group">
+                    <label class="input-label">
+                        <i class="fas fa-key"></i> Contraseña
+                    </label>
+                    <input type="password" class="input-field" id="password" 
+                           placeholder="••••••••••••" required>
+                    <div class="input-icon">
+                        <i class="fas fa-lock"></i>
+                    </div>
+                </div>
+                
+                <button class="login-button" id="loginBtn">
+                    <i class="fas fa-sign-in-alt"></i> Iniciar Sesión
+                </button>
+                
+                <div id="errorMessage" class="message error-message">
+                    <i class="fas fa-exclamation-circle"></i>
+                    <span id="errorText"></span>
+                </div>
+                
+                <div id="successMessage" class="message success-message">
+                    <i class="fas fa-check-circle"></i>
+                    <span>Acceso concedido • Redirigiendo...</span>
+                </div>
+            </div>
+            
+            <div class="firebase-info">
+                <p><i class="fas fa-database"></i> Conectado a Firebase</p>
+                <p style="font-size: 0.8rem; margin-top: 5px;">sibimtzomp.firebaseapp.com</p>
+            </div>
+            
+        </div>
+    </div>
+
+    <!-- Firebase Config -->
+    <script src="firebaseConfig.js"></script>
+    
+    <script>
+        // Referencias a elementos del DOM
+        const emailInput = document.getElementById('email');
+        const passwordInput = document.getElementById('password');
+        const loginBtn = document.getElementById('loginBtn');
+        const errorDiv = document.getElementById('errorMessage');
+        const successDiv = document.getElementById('successMessage');
+        const errorText = document.getElementById('errorText');
+
+        // Verificar si ya hay usuario autenticado
+        auth.onAuthStateChanged((user) => {
+            if (user) {
+                // Usuario ya autenticado, redirigir al dashboard
+                console.log('Usuario ya autenticado:', user.email);
+                showMessage(successDiv, 'Redirigiendo al dashboard...');
+                setTimeout(() => {
+                    window.location.href = 'dashboard.html';
+                }, 1000);
+            }
+        });
+
+        // Función para mostrar mensajes
+        function showMessage(element, text) {
+            errorDiv.style.display = 'none';
+            successDiv.style.display = 'none';
+            
+            if (text) {
+                element.querySelector('span').textContent = text;
+                element.style.display = 'block';
+            }
+        }
+
+        // Función de login
+        async function loginUser() {
+            const email = emailInput.value.trim();
+            const password = passwordInput.value.trim();
+
+            // Validar campos
+            if (!email || !password) {
+                showMessage(errorDiv, 'Por favor, complete todos los campos');
+                return;
+            }
+
+            try {
+                // Deshabilitar botón y mostrar carga
+                loginBtn.disabled = true;
+                loginBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Autenticando...';
+
+                // Intentar login con Firebase
+                const userCredential = await auth.signInWithEmailAndPassword(email, password);
+                const user = userCredential.user;
+
+                console.log('Login exitoso:', user.email);
+                
+                // Mostrar mensaje de éxito
+                showMessage(successDiv, 'Autenticación exitosa');
+
+                // Redirigir al dashboard
+                setTimeout(() => {
+                    window.location.href = 'dashboard.html';
+                }, 1500);
+
+            } catch (error) {
+                console.error('Error en login:', error);
+                
+                // Restaurar botón
+                loginBtn.disabled = false;
+                loginBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Iniciar Sesión';
+
+                // Mostrar error específico
+                let errorMessage = 'Error de autenticación';
+                switch(error.code) {
+                    case 'auth/user-not-found':
+                        errorMessage = 'Usuario no encontrado';
+                        break;
+                    case 'auth/wrong-password':
+                        errorMessage = 'Contraseña incorrecta';
+                        break;
+                    case 'auth/invalid-email':
+                        errorMessage = 'Email inválido';
+                        break;
+                    case 'auth/too-many-requests':
+                        errorMessage = 'Demasiados intentos. Intente más tarde';
+                        break;
+                    case 'auth/user-disabled':
+                        errorMessage = 'Usuario deshabilitado';
+                        break;
+                }
+
+                showMessage(errorDiv, errorMessage);
+            }
+        }
+
+        // Event Listeners
+        loginBtn.addEventListener('click', loginUser);
+
+        // Permitir Enter para login
+        passwordInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                loginUser();
+            }
+        });
+
+        // Mostrar info de Firebase
+        console.log('🔥 Sistema de Inventario Municipal - Tzompantepec');
+        console.log('📱 URL: https://sibimtzomp.web.app/');
+        console.log('🔐 Firebase Project: sibimtzomp');
+        console.log('✅ Login conectado a Firebase Authentication');
+    </script>
+</body>
+</html>
