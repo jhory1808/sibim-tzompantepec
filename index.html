@@ -1,0 +1,630 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ACCESO | SIBIMTZOMPANTEPEC</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Roboto+Mono:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        /* ESTILOS CYBERPUNK PARA LOGIN */
+        :root {
+            --cyber-black: #0a0a0a;
+            --cyber-dark: #121212;
+            --cyber-gray: #1a1a1a;
+            --cyber-neon-cyan: #00f3ff;
+            --cyber-neon-purple: #b967ff;
+            --cyber-neon-green: #00ff9d;
+            --cyber-neon-pink: #ff00ff;
+            --cyber-text: #e0e0e0;
+            --cyber-text-dim: #888888;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background: var(--cyber-black);
+            color: var(--cyber-text);
+            font-family: 'Roboto Mono', monospace;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        /* EFECTOS DE FONDO */
+        .cyber-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.1;
+        }
+        
+        .grid-lines {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(rgba(0, 243, 255, 0.1) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 243, 255, 0.1) 1px, transparent 1px);
+            background-size: 50px 50px;
+        }
+        
+        .floating-shapes {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+        }
+        
+        .shape {
+            position: absolute;
+            border: 1px solid rgba(0, 243, 255, 0.3);
+            animation: float 20s infinite linear;
+        }
+        
+        .shape:nth-child(1) {
+            top: 10%;
+            left: 10%;
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            animation-delay: 0s;
+        }
+        
+        .shape:nth-child(2) {
+            top: 70%;
+            left: 80%;
+            width: 150px;
+            height: 150px;
+            border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%;
+            animation-delay: 5s;
+        }
+        
+        .shape:nth-child(3) {
+            top: 30%;
+            left: 85%;
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            animation-delay: 10s;
+        }
+        
+        .shape:nth-child(4) {
+            top: 80%;
+            left: 15%;
+            width: 120px;
+            height: 120px;
+            border-radius: 40% 60% 60% 40% / 40% 40% 60% 60%;
+            animation-delay: 15s;
+        }
+        
+        @keyframes float {
+            0% { transform: translate(0, 0) rotate(0deg); }
+            25% { transform: translate(20px, -20px) rotate(90deg); }
+            50% { transform: translate(0, -40px) rotate(180deg); }
+            75% { transform: translate(-20px, -20px) rotate(270deg); }
+            100% { transform: translate(0, 0) rotate(360deg); }
+        }
+        
+        /* CONTAINER LOGIN */
+        .login-container {
+            width: 100%;
+            max-width: 500px;
+            padding: 20px;
+            z-index: 2;
+        }
+        
+        /* TARJETA DE LOGIN */
+        .cyber-login-card {
+            background: rgba(18, 18, 18, 0.85);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(0, 243, 255, 0.3);
+            border-radius: 20px;
+            padding: 50px 40px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 
+                0 25px 50px rgba(0, 0, 0, 0.5),
+                0 0 50px rgba(0, 243, 255, 0.1);
+        }
+        
+        .cyber-login-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, 
+                var(--cyber-neon-cyan),
+                var(--cyber-neon-purple),
+                var(--cyber-neon-green)
+            );
+        }
+        
+        /* LOGO Y TÍTULO */
+        .login-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        
+        .logo-icon {
+            font-size: 4rem;
+            color: var(--cyber-neon-cyan);
+            margin-bottom: 20px;
+            text-shadow: 0 0 20px var(--cyber-neon-cyan);
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; text-shadow: 0 0 30px var(--cyber-neon-cyan); }
+        }
+        
+        .system-title {
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 900;
+            font-size: 2.5rem;
+            background: linear-gradient(45deg, 
+                var(--cyber-neon-cyan), 
+                var(--cyber-neon-purple)
+            );
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+            letter-spacing: 2px;
+        }
+        
+        .system-subtitle {
+            color: var(--cyber-text-dim);
+            font-size: 0.9rem;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+        }
+        
+        /* FORMULARIO */
+        .login-form {
+            margin-bottom: 30px;
+        }
+        
+        .input-group {
+            margin-bottom: 25px;
+            position: relative;
+        }
+        
+        .input-label {
+            display: block;
+            color: var(--cyber-neon-cyan);
+            margin-bottom: 10px;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .input-field {
+            width: 100%;
+            background: rgba(26, 26, 26, 0.8);
+            border: 2px solid rgba(0, 243, 255, 0.2);
+            border-radius: 10px;
+            padding: 18px 20px;
+            font-size: 1.1rem;
+            color: var(--cyber-text);
+            font-family: 'Roboto Mono', monospace;
+            transition: all 0.3s;
+        }
+        
+        .input-field:focus {
+            outline: none;
+            border-color: var(--cyber-neon-cyan);
+            box-shadow: 
+                0 0 25px rgba(0, 243, 255, 0.2),
+                inset 0 0 15px rgba(0, 243, 255, 0.1);
+        }
+        
+        .input-icon {
+            position: absolute;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--cyber-neon-cyan);
+        }
+        
+        /* BOTÓN DE LOGIN */
+        .login-button {
+            width: 100%;
+            background: linear-gradient(45deg, 
+                var(--cyber-neon-cyan), 
+                var(--cyber-neon-green)
+            );
+            border: none;
+            border-radius: 10px;
+            padding: 20px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            font-family: 'Orbitron', sans-serif;
+            color: var(--cyber-black);
+            cursor: pointer;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .login-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 
+                0 15px 35px rgba(0, 243, 255, 0.3),
+                0 0 30px rgba(0, 255, 157, 0.2);
+        }
+        
+        .login-button:active {
+            transform: translateY(-1px);
+        }
+        
+        .login-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, 
+                transparent, 
+                rgba(255, 255, 255, 0.2), 
+                transparent
+            );
+            transition: left 0.5s;
+        }
+        
+        .login-button:hover::before {
+            left: 100%;
+        }
+        
+        /* MENSAJES */
+        .error-message {
+            background: rgba(255, 0, 0, 0.1);
+            border: 1px solid rgba(255, 0, 0, 0.3);
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 20px;
+            text-align: center;
+            display: none;
+            animation: shake 0.5s;
+        }
+        
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+        
+        .success-message {
+            background: rgba(0, 255, 157, 0.1);
+            border: 1px solid rgba(0, 255, 157, 0.3);
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 20px;
+            text-align: center;
+            display: none;
+        }
+        
+        /* CREDENCIALES */
+        .credentials-panel {
+            background: rgba(26, 26, 26, 0.8);
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 30px;
+            border-left: 4px solid var(--cyber-neon-purple);
+        }
+        
+        .credentials-title {
+            color: var(--cyber-neon-purple);
+            margin-bottom: 15px;
+            font-size: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .credentials-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+        }
+        
+        .credential {
+            background: rgba(10, 10, 10, 0.8);
+            border: 1px solid rgba(185, 103, 255, 0.2);
+            border-radius: 8px;
+            padding: 12px;
+        }
+        
+        .credential-label {
+            color: var(--cyber-text-dim);
+            font-size: 0.8rem;
+            margin-bottom: 5px;
+        }
+        
+        .credential-value {
+            color: var(--cyber-neon-green);
+            font-family: 'Roboto Mono', monospace;
+            font-weight: bold;
+        }
+        
+        /* TERMINAL */
+        .terminal-output {
+            margin-top: 30px;
+            background: rgba(0, 0, 0, 0.8);
+            border-radius: 10px;
+            padding: 20px;
+            font-family: 'Roboto Mono', monospace;
+            font-size: 0.9rem;
+            border: 1px solid rgba(0, 243, 255, 0.2);
+        }
+        
+        .terminal-line {
+            margin-bottom: 5px;
+            color: var(--cyber-neon-green);
+        }
+        
+        .terminal-cursor {
+            display: inline-block;
+            width: 8px;
+            height: 16px;
+            background: var(--cyber-neon-cyan);
+            animation: blink 1s infinite;
+        }
+        
+        /* RESPONSIVE */
+        @media (max-width: 600px) {
+            .cyber-login-card {
+                padding: 30px 20px;
+            }
+            
+            .system-title {
+                font-size: 2rem;
+            }
+            
+            .logo-icon {
+                font-size: 3rem;
+            }
+            
+            .credentials-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- FONDO CYBERPUNK -->
+    <div class="cyber-bg">
+        <div class="grid-lines"></div>
+        <div class="floating-shapes">
+            <div class="shape"></div>
+            <div class="shape"></div>
+            <div class="shape"></div>
+            <div class="shape"></div>
+        </div>
+    </div>
+    
+    <!-- CONTENEDOR PRINCIPAL -->
+    <div class="login-container">
+        <div class="cyber-login-card">
+            
+            <!-- ENCABEZADO -->
+            <div class="login-header">
+                <div class="logo-icon">
+                    <i class="fas fa-satellite-dish"></i>
+                </div>
+                <h1 class="system-title">SIBIMTZOMP</h1>
+                <p class="system-subtitle">SISTEMA INTEGRAL DE BIENES MUNICIPALES</p>
+                <p style="color: var(--cyber-text-dim); margin-top: 10px; font-size: 0.8rem;">
+                    TZOMPANTEPEC • ACCESO RESTRINGIDO
+                </p>
+            </div>
+            
+            <!-- FORMULARIO -->
+            <div class="login-form">
+                <div class="input-group">
+                    <label class="input-label">
+                        <i class="fas fa-user-secret"></i> IDENTIFICACIÓN DE USUARIO
+                    </label>
+                    <input type="text" class="input-field" id="username" 
+                           placeholder="INGRESE SU ID DE ACCESO" value="admin">
+                    <div class="input-icon">
+                        <i class="fas fa-id-card"></i>
+                    </div>
+                </div>
+                
+                <div class="input-group">
+                    <label class="input-label">
+                        <i class="fas fa-key"></i> CÓDIGO DE SEGURIDAD
+                    </label>
+                    <input type="password" class="input-field" id="password" 
+                           placeholder="••••••••••••" value="admin123">
+                    <div class="input-icon">
+                        <i class="fas fa-lock"></i>
+                    </div>
+                </div>
+                
+                <button class="login-button" onclick="login()">
+                    <i class="fas fa-terminal"></i> INICIAR SESIÓN
+                </button>
+                
+                <!-- MENSAJES -->
+                <div id="errorMessage" class="error-message">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <span id="errorText">CREDENCIALES NO RECONOCIDAS</span>
+                </div>
+                
+                <div id="successMessage" class="success-message">
+                    <i class="fas fa-check-circle"></i>
+                    <span>ACCESO CONCEDIDO • REDIRIGIENDO...</span>
+                </div>
+            </div>
+            
+            <!-- PANEL DE CREDENCIALES -->
+            <div class="credentials-panel">
+                <h3 class="credentials-title">
+                    <i class="fas fa-info-circle"></i> ACCESOS AUTORIZADOS
+                </h3>
+                <div class="credentials-grid">
+                    <div class="credential">
+                        <div class="credential-label">ADMINISTRADOR</div>
+                        <div class="credential-value">admin / admin123</div>
+                    </div>
+                    <div class="credential">
+                        <div class="credential-label">MUNICIPIO</div>
+                        <div class="credential-value">municipio / tzomp2024</div>
+                    </div>
+                    <div class="credential">
+                        <div class="credential-label">INVENTARIO</div>
+                        <div class="credential-value">inventario / sibim2024</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- TERMINAL -->
+            <div class="terminal-output">
+                <div class="terminal-line">> INICIALIZANDO SISTEMA DE AUTENTICACIÓN...</div>
+                <div class="terminal-line">> CONECTANDO CON SERVIDORES MUNICIPALES...</div>
+                <div class="terminal-line">> SISTEMA DE SEGURIDAD ACTIVO: NIVEL 4</div>
+                <div class="terminal-line">> ESPERANDO CREDENCIALES DE ACCESO <span class="terminal-cursor"></span></div>
+            </div>
+            
+        </div>
+    </div>
+    
+    <script>
+        // FUNCIÓN DE LOGIN CYBERPUNK
+        function login() {
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value.trim();
+            const errorDiv = document.getElementById('errorMessage');
+            const successDiv = document.getElementById('successMessage');
+            const errorText = document.getElementById('errorText');
+            
+            // Ocultar mensajes previos
+            errorDiv.style.display = 'none';
+            successDiv.style.display = 'none';
+            
+            // Validar campos
+            if (!username || !password) {
+                errorText.textContent = 'ERROR: CAMPOS DE ACCESO REQUERIDOS';
+                errorDiv.style.display = 'block';
+                playSound('error');
+                return;
+            }
+            
+            // Credenciales válidas
+            const validUsers = {
+                'admin': 'admin123',
+                'municipio': 'tzomp2024',
+                'inventario': 'sibim2024'
+            };
+            
+            // Verificar credenciales
+            if (validUsers[username] && validUsers[username] === password) {
+                // Efecto de éxito
+                playSound('success');
+                
+                // Animación de botón
+                const loginBtn = document.querySelector('.login-button');
+                const originalText = loginBtn.innerHTML;
+                loginBtn.innerHTML = '<i class="fas fa-cog fa-spin"></i> VERIFICANDO ACCESO...';
+                loginBtn.disabled = true;
+                
+                // Mostrar mensaje de éxito
+                successDiv.style.display = 'block';
+                
+                // Actualizar terminal
+                const terminal = document.querySelector('.terminal-output');
+                const newLine = document.createElement('div');
+                newLine.className = 'terminal-line';
+                newLine.textContent = `> ACCESO CONCEDIDO PARA: ${username.toUpperCase()}`;
+                terminal.appendChild(newLine);
+                
+                // Redirigir después de 2 segundos
+                setTimeout(() => {
+                    window.location.href = 'dashboard.html';
+                }, 2000);
+            } else {
+                // Efecto de error
+                errorText.textContent = 'ERROR: CREDENCIALES NO RECONOCIDAS';
+                errorDiv.style.display = 'block';
+                playSound('error');
+                
+                // Efecto shake
+                errorDiv.style.animation = 'none';
+                setTimeout(() => {
+                    errorDiv.style.animation = 'shake 0.5s';
+                }, 10);
+                
+                // Actualizar terminal
+                const terminal = document.querySelector('.terminal-output');
+                const newLine = document.createElement('div');
+                newLine.className = 'terminal-line';
+                newLine.style.color = 'var(--cyber-neon-pink)';
+                newLine.textContent = `> INTENTO DE ACCESO FALLIDO: ${username}`;
+                terminal.appendChild(newLine);
+            }
+        }
+        
+        // EFECTOS DE SONIDO (simulados)
+        function playSound(type) {
+            // En una implementación real, aquí irían los sonidos
+            console.log(`🔊 Efecto de sonido: ${type}`);
+            
+            // Para una experiencia completa, puedes agregar:
+            // if (type === 'success') { /* reproducir sonido de éxito */ }
+            // if (type === 'error') { /* reproducir sonido de error */ }
+        }
+        
+        // PERMITIR ENTER PARA LOGIN
+        document.getElementById('password').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                login();
+            }
+        });
+        
+        // EFECTO DE TYPING EN TERMINAL
+        setTimeout(() => {
+            const terminal = document.querySelector('.terminal-output');
+            const lines = [
+                '> ESCANEANDO DISPOSITIVO...',
+                '> VERIFICANDO PERMISOS...',
+                '> SISTEMA LISTO PARA AUTENTICACIÓN'
+            ];
+            
+            let lineIndex = 0;
+            function addTerminalLine() {
+                if (lineIndex < lines.length) {
+                    const newLine = document.createElement('div');
+                    newLine.className = 'terminal-line';
+                    newLine.textContent = lines[lineIndex];
+                    terminal.appendChild(newLine);
+                    lineIndex++;
+                    setTimeout(addTerminalLine, 1000);
+                }
+            }
+            
+            setTimeout(addTerminalLine, 1000);
+        }, 500);
+        
+        // CONSOLA DE INICIALIZACIÓN
+        console.log('🔐 SISTEMA DE AUTENTICACIÓN CYBERPUNK INICIADO');
+        console.log('📡 CONECTANDO CON SIBIMTZOMPANTEPEC...');
+    </script>
+</body>
+</html>
