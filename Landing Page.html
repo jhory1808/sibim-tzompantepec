@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Inventario Municipal - Tzompantepec</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #1a365d;
+            --secondary-color: #2d6bcc;
+            --accent-color: #48bb78;
+            --light-color: #f7fafc;
+            --dark-color: #2d3748;
+            --shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: var(--dark-color);
+            background: linear-gradient(rgba(26, 54, 93, 0.95), rgba(45, 107, 204, 0.95)), 
+                        url('https://images.unsplash.com/photo-1551288049-bebda4e38f71?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80');
+            background-size: cover;
+            background-position: center;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .landing-container {
+            width: 100%;
+            max-width: 800px;
+            text-align: center;
+            color: white;
+        }
+
+        .logo {
+            margin-bottom: 40px;
+        }
+
+        .logo-icon {
+            width: 100px;
+            height: 100px;
+            background: linear-gradient(45deg, var(--secondary-color), var(--accent-color));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 25px;
+            color: white;
+            font-size: 3rem;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+        }
+
+        h1 {
+            font-size: 3.5rem;
+            margin-bottom: 20px;
+            font-weight: 800;
+        }
+
+        p {
+            font-size: 1.2rem;
+            margin-bottom: 40px;
+            opacity: 0.9;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 18px 50px;
+            background: linear-gradient(45deg, var(--accent-color), #38a169);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            margin: 0 auto;
+            box-shadow: 0 10px 30px rgba(72, 187, 120, 0.3);
+        }
+
+        .btn:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(72, 187, 120, 0.4);
+        }
+
+        .firebase-info {
+            margin-top: 60px;
+            padding-top: 30px;
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .firebase-info p {
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2.5rem;
+            }
+            
+            p {
+                font-size: 1.1rem;
+            }
+            
+            .logo-icon {
+                width: 80px;
+                height: 80px;
+                font-size: 2.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="landing-container">
+        <div class="logo">
+            <div class="logo-icon">
+                <i class="fas fa-warehouse"></i>
+            </div>
+        </div>
+        
+        <h1>SIBIM Tzompantepec</h1>
+        <p>
+            Sistema Integral de Bienes Municipales<br>
+            Plataforma en la nube para la gestión eficiente del inventario municipal
+        </p>
+        
+        <button class="btn" onclick="window.location.href='index.html'">
+            <i class="fas fa-sign-in-alt"></i>
+            Acceder al Sistema
+        </button>
+        
+        <div class="firebase-info">
+            <p><i class="fas fa-database"></i> Alojado en Firebase - Google Cloud Platform</p>
+            <p>Proyecto: sibimtzomp • Dominio: sibimtzomp.firebaseapp.com</p>
+        </div>
+    </div>
+    
+    <script>
+        console.log('🚀 Sistema de Inventario Municipal - Tzompantepec');
+        console.log('🔥 Proyecto Firebase: sibimtzomp');
+        console.log('📱 URL de producción: https://sibimtzomp.web.app/');
+        console.log('👤 Sistema de autenticación implementado');
+        console.log('📁 Firestore para almacenamiento de datos');
+    </script>
+</body>
+</html>
