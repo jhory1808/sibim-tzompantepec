@@ -1,0 +1,100 @@
+<!DOCTYPE html> 
+<html lang="es"> 
+<head> 
+<meta charset="UTF-8"> 
+<meta name="viewport" content="width=device-width, initial-scale=1.0"> 
+<style> 
+body { font-family: Arial; background: #1a365d; margin: 0; padding: 20px; display: flex; justify-content: center; align-items: center; height: 100vh; } 
+.login-box { background: white; padding: 40px; border-radius: 10px; width: 100%25; max-width: 400px; text-align: center; } 
+h2 { color: #1a365d; margin-bottom: 30px; } 
+input { width: 100%25; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 5px; box-sizing: border-box; } 
+button { background: #2d6bcc; color: white; border: none; padding: 14px; width: 100%25; border-radius: 5px; cursor: pointer; margin-top: 10px; } 
+#error { color: red; margin-top: 15px; } 
+</style> 
+</head> 
+<body> 
+<div class="login-box"> 
+<h2>SIBIM Login</h2> 
+<input type="email" id="email" placeholder="Email"> 
+<input type="password" id="password" placeholder="Contraseña"> 
+<button onclick="login()">Iniciar Sesión</button> 
+<p id="error"></p> 
+</div> 
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script> 
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script> 
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script> 
+<script src="js/firebase-config.js"></script>
+<script> 
+initializeFirebase(); 
+
+async function login() {
+    const email = document.getElementById('email').value;
+    const password = document.getElementById('password').value;
+    const errorElement = document.getElementById('error');
+    errorElement.textContent = '';
+    
+    try {
+        const userCredential = await firebase.auth().signInWithEmailAndPassword(email, password);
+        
+        // Obtener rol del usuario
+        const db = firebase.firestore();
+        const userDoc = await db.collection('usuarios').doc(userCredential.user.uid).get();
+        
+        let redirectTo = 'user/dashboard.html'; // Por defecto
+        
+        if (userDoc.exists) {
+            const userData = userDoc.data();
+            const userRole = (userData.rol || 'user').toLowerCase();
+            
+            if (userRole.includes('admin')) {
+                redirectTo = 'admin/dashboard.html';
+            } else if (userRole.includes('capturista')) {
+                redirectTo = 'capturista/dashboard.html';
+            }
+            // Si es 'user' o cualquier otro, se va a user/dashboard.html
+        }
+        
+        console.log('Redirigiendo a:', redirectTo);
+        window.location.href = redirectTo;
+        
+    } catch (error) {
+        errorElement.textContent = 'Error: ' + error.message;
+    }
+}
+
+firebase.auth().onAuthStateChanged((user) => {
+    if (user) {
+        // El usuario ya está autenticado, redirigir según rol
+        const db = firebase.firestore();
+        db.collection('usuarios').doc(user.uid).get()
+            .then((userDoc) => {
+                let redirectTo = 'user/dashboard.html'; // Por defecto
+                
+                if (userDoc.exists) {
+                    const userData = userDoc.data();
+                    const userRole = (userData.rol || 'user').toLowerCase();
+                    
+                    if (userRole.includes('admin')) {
+                        redirectTo = 'admin/dashboard.html';
+                    } else if (userRole.includes('capturista')) {
+                        redirectTo = 'capturista/dashboard.html';
+                    }
+                }
+                
+                window.location.href = redirectTo;
+            })
+            .catch((error) => {
+                console.error('Error al obtener rol:', error);
+                window.location.href = 'user/dashboard.html';
+            });
+    }
+});
+
+document.getElementById('password').addEventListener('keypress', function(e) { 
+    if (e.key === 'Enter') { 
+        login(); 
+    } 
+}); 
+</script> 
+</body> 
+</html>
