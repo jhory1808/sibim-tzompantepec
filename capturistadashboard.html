@@ -1,0 +1,196 @@
+<!-- capturista/dashboard.html -->
+<!DOCTYPE html>
+<html lang="es" data-bs-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de Capturista | SIBIM</title>
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    
+    <!-- DataTables CSS -->
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap5.min.css">
+    
+    <!-- Select2 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet">
+    
+    <!-- SweetAlert2 -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.3/dist/sweetalert2.min.css">
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="../css/styles.css">
+    
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-storage.js"></script>
+    
+    <!-- Configuración Firebase -->
+    <script src="../js/firebase-config.js"></script>
+</head>
+<body>
+    <!-- Loading inicial -->
+    <div id="loading" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: white; z-index: 9999; display: flex; justify-content: center; align-items: center;">
+        <div class="text-center">
+            <div class="loading-spinner"></div>
+            <p class="mt-3">Cargando panel de capturista...</p>
+        </div>
+    </div>
+
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark" style="background: linear-gradient(135deg, #2c6e49 0%, #4a9e6e 100%);">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">
+                <i class="bi bi-clipboard-data"></i> SIBIM Capturista
+            </a>
+            
+            <div class="d-flex align-items-center">
+                <span class="badge bg-light text-dark me-3">
+                    <i class="bi bi-clock"></i> <span id="currentTime">--:--:--</span>
+                </span>
+                <div class="dropdown">
+                    <button class="btn btn-outline-light dropdown-toggle" type="button" id="userDropdown" data-bs-toggle="dropdown">
+                        <i class="bi bi-person-badge"></i>
+                        <span id="userName">Capturista</span>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li><span class="dropdown-item-text"><small id="userEmail"></small></span></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="#" onclick="showStats()"><i class="bi bi-graph-up"></i> Mis Estadísticas</a></li>
+                        <li><a class="dropdown-item" href="#" onclick="showQuickHelp()"><i class="bi bi-question-circle"></i> Ayuda Rápida</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="#" onclick="logout()"><i class="bi bi-box-arrow-right"></i> Cerrar Sesión</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container-fluid mt-3">
+        <div class="row">
+            <!-- Sidebar -->
+            <div class="col-md-3 col-lg-2">
+                <div class="card shadow-sm mb-3">
+                    <div class="card-body">
+                        <h6 class="card-title text-center mb-3">
+                            <i class="bi bi-menu-button-wide"></i> Menú Principal
+                        </h6>
+                        <div class="list-group list-group-flush">
+                            <a href="#" class="list-group-item list-group-item-action active" data-section="inicio">
+                                <i class="bi bi-house-door"></i> Inicio
+                            </a>
+                            <a href="#" class="list-group-item list-group-item-action" data-section="registrar">
+                                <i class="bi bi-plus-circle"></i> Registrar Bien
+                            </a>
+                            <a href="#" class="list-group-item list-group-item-action" data-section="consultar">
+                                <i class="bi bi-search"></i> Consultar Bienes
+                            </a>
+                            <a href="#" class="list-group-item list-group-item-action" data-section="editar">
+                                <i class="bi bi-pencil-square"></i> Editar Registros
+                            </a>
+                            <a href="#" class="list-group-item list-group-item-action" data-section="importar">
+                                <i class="bi bi-upload"></i> Importar Datos
+                            </a>
+                            <a href="#" class="list-group-item list-group-item-action" data-section="reportes">
+                                <i class="bi bi-file-earmark-text"></i> Mis Reportes
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Stats rápidas -->
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <h6 class="card-title">
+                            <i class="bi bi-speedometer2"></i> Mi Actividad Hoy
+                        </h6>
+                        <div class="row text-center">
+                            <div class="col-6 mb-3">
+                                <div class="stat-number-sm" id="registrosHoy">0</div>
+                                <small class="text-muted">Registros</small>
+                            </div>
+                            <div class="col-6 mb-3">
+                                <div class="stat-number-sm" id="edicionesHoy">0</div>
+                                <small class="text-muted">Ediciones</small>
+                            </div>
+                        </div>
+                        <div class="progress mb-2" style="height: 8px;">
+                            <div class="progress-bar bg-success" id="progressBar" style="width: 0%"></div>
+                        </div>
+                        <small class="text-muted">Meta diaria: <span id="metaDiaria">50</span> registros</small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main content -->
+            <main class="col-md-9 col-lg-10">
+                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                    <h1 class="h2" id="sectionTitle">Inicio - Panel de Capturista</h1>
+                    <div class="btn-toolbar mb-2 mb-md-0">
+                        <button class="btn btn-sm btn-outline-success me-2" onclick="capturistaDashboard.quickAdd()">
+                            <i class="bi bi-lightning"></i> Registro Rápido
+                        </button>
+                        <button class="btn btn-sm btn-outline-primary" onclick="capturistaDashboard.showHelp()">
+                            <i class="bi bi-info-circle"></i> Ayuda
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Alertas y notificaciones -->
+                <div id="alertsContainer"></div>
+
+                <!-- Contenido dinámico -->
+                <div id="dynamicContent">
+                    <!-- Contenido se carga aquí -->
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Modal para registro rápido -->
+    <div class="modal fade" id="quickAddModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Registro Rápido de Bien</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="quickAddForm">
+                        <!-- Formulario se carga aquí -->
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
+    <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.13.4/js/dataTables.bootstrap5.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.3/dist/sweetalert2.all.min.js"></script>
+    
+    <!-- Librerías adicionales -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
+
+    <!-- Nuestros sistemas -->
+    <script src="../js/reports-system.js"></script>
+    <script src="../js/notifications-service.js"></script>
+    <script src="../js/qr-system.js"></script>
+    
+    <!-- Scripts del capturista -->
+    <script src="../js/capturista-dashboard.js"></script>
+</body>
+</html>
