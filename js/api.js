@@ -8,6 +8,7 @@ const API = {
                 ...params
             });
             const url = `${CONFIG.scriptUrl}?${queryParams.toString()}`;
+            console.log(`[DIAGNÓSTICO] Haz clic aquí para probar el backend: ${url}`);
 
             // Probando con redirect: 'follow' explícito y sin 'mode: cors' forzado para dejar que el navegador decida
             const response = await fetch(url, { method: 'GET', redirect: 'follow' });
