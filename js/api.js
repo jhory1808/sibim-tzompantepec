@@ -9,8 +9,8 @@ const API = {
             });
             const url = `${CONFIG.scriptUrl}?${queryParams.toString()}`;
 
-            // Re-intento de fetch simplificado al máximo para evitar problemas de CORS/Redirección en GAS
-            const response = await fetch(url);
+            // Probando con redirect: 'follow' explícito y sin 'mode: cors' forzado para dejar que el navegador decida
+            const response = await fetch(url, { method: 'GET', redirect: 'follow' });
 
             if (!response.ok) throw new Error(`HTTP ${response.status}`);
             const data = await response.json();
