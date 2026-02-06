@@ -41,5 +41,10 @@ const CONFIG = {
 // Logger Global para Mantenimiento
 const Logger = {
     log: (msg, data = '') => CONFIG.settings.debugMode && console.log(`[SIBIM LOG]: ${msg}`, data),
-    error: (msg, err) => console.error(`[SIBIM ERROR]: ${msg}`, err)
+    error: (msg, err) => {
+        console.error(`[SIBIM ERROR]: ${msg}`, err);
+        if (err && (JSON.stringify(err).includes('getSheetByName') || (err.message && err.message.includes('getSheetByName')))) {
+            alert("DIAGNÓSTICO CLOUD: El servidor indica que no encuentra una pestaña en tu Google Sheet. Por favor, asegúrate de que tu Spreadsheet tenga las pestañas: 'Inventario', 'Departamentos', 'Usuarios', 'Movimientos', 'Actualizaciones' y 'Configuración' con esos nombres exactos.");
+        }
+    }
 };
