@@ -17,7 +17,8 @@ const API = {
 
             Logger.log('Caché expirado. Sincronizando con Google Cloud...');
             const url = `${CONFIG.scriptUrl}?action=getItems&t=${Date.now()}`;
-            const response = await fetch(url);
+            // 'credentials: omit' ayuda a evitar redirecciones de login de Google que causan error de CORS
+            const response = await fetch(url, { credentials: 'omit' });
 
             if (!response.ok) throw new Error(`HTTP Error: ${response.status}`);
 
@@ -151,7 +152,7 @@ const API = {
         try {
             Logger.log('Consultando base de datos de departamentos...');
             const url = `${CONFIG.scriptUrl}?action=getDepartments&t=${Date.now()}`;
-            const response = await fetch(url);
+            const response = await fetch(url, { credentials: 'omit' });
             const data = await response.json();
 
             if (data.error) {
@@ -191,7 +192,7 @@ const API = {
         try {
             Logger.log('Consultando historial de movimientos...');
             const url = `${CONFIG.scriptUrl}?action=getMovements&t=${Date.now()}`;
-            const response = await fetch(url);
+            const response = await fetch(url, { credentials: 'omit' });
             const data = await response.json();
             return data.movements || data || [];
         } catch (error) {
@@ -204,7 +205,7 @@ const API = {
         try {
             Logger.log('Consultando registro de actualizaciones...');
             const url = `${CONFIG.scriptUrl}?action=getUpdates&t=${Date.now()}`;
-            const response = await fetch(url);
+            const response = await fetch(url, { credentials: 'omit' });
             const data = await response.json();
             return data.updates || data || [];
         } catch (error) {
@@ -217,7 +218,7 @@ const API = {
         try {
             Logger.log('Consultando parámetros de configuración...');
             const url = `${CONFIG.scriptUrl}?action=getConfig&t=${Date.now()}`;
-            const response = await fetch(url);
+            const response = await fetch(url, { credentials: 'omit' });
             const data = await response.json();
             return data.config || data || [];
         } catch (error) {

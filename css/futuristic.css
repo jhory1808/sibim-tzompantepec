@@ -474,9 +474,10 @@ header {
     padding: 0 5%;
     position: sticky;
     top: 0;
-    z-index: 9000;
-    background: rgba(10, 25, 47, 0.9);
+    z-index: 10000;
+    background: rgba(10, 25, 47, 0.95);
     backdrop-filter: blur(15px);
+    border-bottom: 1px solid rgba(0, 210, 255, 0.2);
 }
 
 .logo {
@@ -494,27 +495,34 @@ header {
 /* Navigation - Horizontal */
 .nav-bar {
     display: flex;
-    gap: 15px;
-    padding: 10px 25px;
-    border-radius: 20px;
+    gap: 5px;
+    padding: 6px;
+    border-radius: 12px;
     z-index: 50;
-    /* Lower z-index */
     position: relative;
     max-width: fit-content;
-    margin-left: auto;
-    margin-right: auto;
+    margin: 0 auto 30px auto;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 .nav-item {
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     align-items: center;
+    gap: 8px;
     color: var(--text-secondary);
     text-decoration: none;
-    font-size: 0.8rem;
+    font-size: 0.85rem;
     transition: var(--transition);
-    padding: 8px 15px;
-    border-radius: 10px;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-weight: 500;
+}
+
+.nav-item i {
+    font-size: 1rem;
+    margin-bottom: 0;
 }
 
 .nav-item i {
