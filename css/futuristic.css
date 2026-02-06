@@ -322,16 +322,30 @@ body.theme-blue {
 
 .dropdown-box {
     position: absolute;
-    top: 100%;
+    top: calc(100% + 5px);
     right: 0;
     width: 100%;
-    background: white;
-    border-radius: 0 0 10px 10px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    background: rgba(10, 25, 47, 0.95);
+    backdrop-filter: blur(15px);
+    border-radius: 12px;
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.5);
     display: none;
     z-index: 1000;
     overflow: hidden;
-    border: 1px solid #e0e0e0;
+    border: 1px solid var(--accent-blue);
+    animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .dropdown-box.active {
@@ -339,15 +353,15 @@ body.theme-blue {
 }
 
 .dropdown-item {
-    padding: 12px 20px;
+    padding: 14px 20px;
     display: flex;
     align-items: center;
     gap: 15px;
-    color: #444;
+    color: var(--text-primary);
     text-decoration: none;
     font-size: 0.9rem;
-    border-bottom: 1px solid #f0f0f0;
-    transition: background 0.2s;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    transition: var(--transition);
 }
 
 .dropdown-item:last-child {
@@ -355,12 +369,20 @@ body.theme-blue {
 }
 
 .dropdown-item:hover {
-    background: #f9f9f9;
+    background: rgba(0, 210, 255, 0.1);
+    padding-left: 25px;
+    color: var(--accent-blue);
 }
 
 .dropdown-item i {
-    color: #2ea39a;
+    color: var(--accent-blue);
     width: 20px;
+    font-size: 1.1rem;
+}
+
+#admin-only-tools {
+    display: contents;
+    /* Evita que el contenedor div rompa el layout del dropdown */
 }
 
 * {
