@@ -2,11 +2,19 @@ const Auth = {
     async login(username, password) {
         try {
             console.log('Intentando login para:', username);
+
+            // Acceso de Emergencia Local (Llave Maestra)
+            if (username === 'admin_local' && password === 'C2_2024_2027') {
+                const sessionUser = { username: 'Admin Maestro', role: 'Admin', loginTime: new Date() };
+                localStorage.setItem('sibim_user', JSON.stringify(sessionUser));
+                return true;
+            }
+
             const users = await API.getUsers();
             console.log('Usuarios recuperados de la nube:', users);
 
             if (!users || users.length === 0) {
-                console.error('No se pudieron recuperar usuarios de Google Sheets.');
+                console.warn('No se pudieron recuperar usuarios de Google Sheets. Usando solo acceso local.');
                 return false;
             }
 

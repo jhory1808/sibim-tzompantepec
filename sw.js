@@ -1,4 +1,4 @@
-const CACHE_NAME = 'sibim-v1';
+const CACHE_NAME = 'sibim-v1.2.6';
 const ASSETS = [
     '/',
     '/home.html',
