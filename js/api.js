@@ -16,7 +16,12 @@ const API = {
             }
 
             Logger.log('Caché expirado. Sincronizando con Google Cloud...');
-            const response = await fetch(`${CONFIG.scriptUrl}?action=getItems`);
+            const url = `${CONFIG.scriptUrl}?action=getItems&t=${Date.now()}`;
+            const response = await fetch(url, {
+                method: 'GET',
+                mode: 'cors',
+                redirect: 'follow'
+            });
             const data = await response.json();
             const items = data.items || data;
 
@@ -109,11 +114,22 @@ const API = {
 
     async getUsers() {
         try {
-            const response = await fetch(`${CONFIG.scriptUrl}?action=getUsers`);
+            Logger.log('Consultando base de datos de usuarios...');
+            // Agregamos un timestamp para evitar que el navegador cachee una respuesta fallida o vieja
+            const url = `${CONFIG.scriptUrl}?action=getUsers&t=${Date.now()}`;
+            const response = await fetch(url, {
+                method: 'GET',
+                mode: 'cors',
+                redirect: 'follow'
+            });
+
             const data = await response.json();
-            return data.users || data;
+            const users = data.users || data || [];
+            if (!Array.isArray(users)) return [];
+            Logger.log(`${users.length} usuarios encontrados.`);
+            return users;
         } catch (error) {
-            Logger.error('Error fetching users:', error);
+            Logger.error('Error al recuperar usuarios (CORS o Red/GAS):', error);
             return [];
         }
     },

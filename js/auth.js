@@ -1,13 +1,26 @@
 const Auth = {
     async login(username, password) {
         try {
+            console.log('Intentando login para:', username);
             const users = await API.getUsers();
-            const user = users.find(u => u.username === username && u.password === password);
+            console.log('Usuarios recuperados de la nube:', users);
+
+            if (!users || users.length === 0) {
+                console.error('No se pudieron recuperar usuarios de Google Sheets.');
+                return false;
+            }
+
+            // Normalizamos búsqueda para soportar columnas en Inglés o Español
+            const user = users.find(u => {
+                const uName = u.username || u.Usuario || u.nombre;
+                const uPass = u.password || u.Contraseña || u.clave;
+                return uName === username && String(uPass) === String(password);
+            });
 
             if (user) {
                 const sessionUser = {
-                    username: user.username,
-                    role: user.role || 'User',
+                    username: user.username || user.Usuario || username,
+                    role: user.role || user.Rol || 'User',
                     loginTime: new Date()
                 };
                 localStorage.setItem('sibim_user', JSON.stringify(sessionUser));
@@ -15,7 +28,7 @@ const Auth = {
             }
             return false;
         } catch (error) {
-            console.error('Login error:', error);
+            console.error('Error crítico en el proceso de login:', error);
             return false;
         }
     },
