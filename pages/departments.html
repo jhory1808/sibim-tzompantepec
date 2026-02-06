@@ -29,26 +29,37 @@
     <script src="../js/config.js"></script>
     <script src="../js/api.js"></script>
     <script src="../js/auth.js"></script>
+    <script src="../js/app.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', async () => {
             Auth.checkAccess();
             Auth.initTheme();
             const items = await API.fetchItems();
-            const depts = [...new Set(items.map(i => i.departamento))];
+
+            // Extract unique departments handling case-sensitivity and alternate names
+            const depts = [...new Set(items.map(i => i.Departamento || i.departamento || 'Sin Asignar'))];
 
             const list = document.getElementById('dept-list');
             if (depts.length) {
-                list.innerHTML = depts.map(dept => `
-                    <div class="glass stat-card neon-border-blue">
-                        <i class="fas fa-building" style="font-size:30px; color:var(--accent-blue);"></i>
-                        <h3 style="margin-top:15px;">${dept}</h3>
-                        <p style="color:var(--text-secondary); margin-top:5px;">
-                            ${items.filter(i => i.departamento === dept).length} Artículos
-                        </p>
-                    </div>
-                `).join('');
+                list.innerHTML = depts.map(dept => {
+                    const itemCount = items.filter(i => (i.Departamento || i.departamento || 'Sin Asignar') === dept).length;
+                    return `
+                        <div class="glass stat-card" style="text-align: center; padding: 30px; border-left: 4px solid var(--accent-blue);">
+                            <div style="background: rgba(0, 210, 255, 0.1); width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px;">
+                                <i class="fas fa-building" style="font-size: 24px; color: var(--accent-blue);"></i>
+                            </div>
+                            <h3 style="margin-bottom: 10px; font-size: 1.2rem;">${dept}</h3>
+                            <div style="display: flex; justify-content: center; align-items: center; gap: 10px;">
+                                <span style="background: rgba(255,255,255,0.05); padding: 5px 12px; border-radius: 15px; font-size: 0.85rem;">
+                                    <i class="fas fa-boxes" style="margin-right: 5px; color: var(--accent-blue);"></i> ${itemCount} Bienes
+                                </span>
+                            </div>
+                            <button class="btn glass" style="margin-top: 20px; width: 100%; font-size: 0.8rem;" onclick="location.href='inventory.html?dept=${encodeURIComponent(dept)}'">Ver Inventario</button>
+                        </div>
+                    `;
+                }).join('');
             } else {
-                list.innerHTML = '<p>No se encontraron departamentos.</p>';
+                list.innerHTML = '<div class="glass" style="grid-column: 1/-1; padding: 50px; text-align: center;"><i class="fas fa-info-circle fa-2x"></i><p style="margin-top:15px;">No se encontraron departamentos registrados en la base de datos.</p></div>';
             }
         });
     </script>

@@ -5,34 +5,42 @@ const API = {
         const TTL = 300000; // 5 minutos de caché
 
         try {
-            // Inteligencia de Caché (Simulación SQLite)
             const cachedData = localStorage.getItem(CACHE_KEY);
             const lastFetch = localStorage.getItem(CACHE_TIME_KEY);
             const now = Date.now();
 
             if (cachedData && lastFetch && (now - lastFetch < TTL)) {
                 Logger.log('Usando Caché Local (Velocidad SQLite)...');
-                return JSON.parse(cachedData);
+                const parsed = JSON.parse(cachedData);
+                if (Array.isArray(parsed)) return parsed;
             }
 
             Logger.log('Caché expirado. Sincronizando con Google Cloud...');
             const url = `${CONFIG.scriptUrl}?action=getItems&t=${Date.now()}`;
-            const response = await fetch(url, {
-                method: 'GET',
-                mode: 'cors',
-                redirect: 'follow'
-            });
+            const response = await fetch(url);
+
+            if (!response.ok) throw new Error(`HTTP Error: ${response.status}`);
+
             const data = await response.json();
             const items = data.items || data;
 
-            // Guardar en "Base de Datos" del Navegador
+            if (!Array.isArray(items)) {
+                Logger.error('Formato de datos inválido desde GAS:', data);
+                return [];
+            }
+
+            if (items.length > 0) {
+                Logger.log('Muestra del primer registro:', items[0]);
+                Logger.log('Columnas detectadas:', Object.keys(items[0]).join(', '));
+            }
+
             localStorage.setItem(CACHE_KEY, JSON.stringify(items));
             localStorage.setItem(CACHE_TIME_KEY, now.toString());
 
-            Logger.log(`${items.length} bienes sincronizados y cacheados.`);
+            Logger.log(`${items.length} bienes sincronizados.`);
             return items;
         } catch (error) {
-            Logger.error('Error de red, intentando usar último caché disponible', error);
+            Logger.error('Error de red/GAS:', error);
             const emergencyCache = localStorage.getItem(CACHE_KEY);
             return emergencyCache ? JSON.parse(emergencyCache) : [];
         }

@@ -400,6 +400,7 @@
     <script src="../js/config.js"></script>
     <script src="../js/api.js"></script>
     <script src="../js/auth.js"></script>
+    <script src="../js/app.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             Auth.checkAccess();
@@ -409,39 +410,53 @@
 
         async function loadInventory() {
             const tableBody = document.querySelector('tbody');
-            tableBody.innerHTML = '<tr><td colspan="8" style="text-align:center; padding:50px;"><i class="fas fa-spinner fa-spin"></i> Cargando...</td></tr>';
+            tableBody.innerHTML = '<tr><td colspan="8" style="text-align:center; padding:50px;"><i class="fas fa-spinner fa-spin"></i> Cargando base de datos...</td></tr>';
 
-            const items = await API.fetchItems();
+            try {
+                const items = await API.fetchItems();
+                console.log("Inventario cargado:", items ? items.length : 0, "elementos");
 
-            if (items && items.length > 0) {
-                tableBody.innerHTML = items.map(item => {
-                    const code = item.Codigo || item.codigo || item.id || '---';
-                    const name = item.Nombre || item.nombre || '---';
-                    const brand = item.Marca || item.marca || '';
-                    const model = item.Modelo || item.modelo || '';
-                    const serie = item['Numero de Serie'] || item.Serie || item.serie || 'N/A';
-                    const dept = item.Departamento || item.departamento || '---';
-                    const resp = item.Responsable || item.responsable || '---';
-                    const status = item.Estado || item.estado || 'Activo';
+                if (items && items.length > 0) {
+                    tableBody.innerHTML = items.map(item => {
+                        const code = item.Codigo || item.codigo || item.id || '---';
+                        const name = item.Nombre || item.nombre || '---';
+                        const brand = item.Marca || item.marca || '';
+                        const model = item.Modelo || item.modelo || '';
+                        const serie = item['Numero de Serie'] || item.Serie || item.serie || 'N/A';
+                        const dept = item.Departamento || item.departamento || '---';
+                        const resp = item.Responsable || item.responsable || '---';
+                        const status = String(item.Estado || item.estado || 'Activo').toLowerCase();
 
-                    return `
-                    <tr>
-                        <td>${code}</td>
-                        <td>${name}</td>
-                        <td>${brand} ${model}</td>
-                        <td>${serie}</td>
-                        <td>${dept}</td>
-                        <td>${resp}</td>
-                        <td><span class="badge badge-active">${status}</span></td>
-                        <td>
-                            <button class="action-btn" title="Editar"><i class="fas fa-edit"></i></button>
-                            <button class="action-btn" onclick="printLabelFromData('${code}', '${name}')" title="Imprimir"><i class="fas fa-print"></i></button>
-                            <button class="action-btn" style="color: #e74c3c;"><i class="fas fa-trash"></i></button>
-                        </td>
-                    </tr>
-                `}).join('');
-            } else {
-                tableBody.innerHTML = '<tr><td colspan="8" style="text-align:center; padding:50px;">Sin datos.</td></tr>';
+                        let badgeClass = 'badge-active';
+                        if (status.includes('baja')) badgeClass = 'badge-baja';
+                        if (status.includes('inactivo') || status.includes('malo')) badgeClass = 'badge-inactive';
+                        if (status.includes('extraviado')) badgeClass = 'badge-extraviado';
+                        if (status.includes('encomodato')) badgeClass = 'badge-comodato';
+                        if (status.includes('no se recibio')) badgeClass = 'badge-norecibido';
+
+
+                        return `
+                        <tr>
+                            <td>${code}</td>
+                            <td><div style="font-weight:600;">${name}</div></td>
+                            <td>${brand} ${model}</td>
+                            <td>${serie}</td>
+                            <td>${dept}</td>
+                            <td><span style="font-size:0.8rem;">${resp}</span></td>
+                            <td><span class="badge ${badgeClass}">${status}</span></td>
+                            <td style="text-align:right;">
+                                <button class="action-btn" title="Editar"><i class="fas fa-edit"></i></button>
+                                <button class="action-btn" onclick="printLabelFromData('${code}', '${name}')" title="Imprimir"><i class="fas fa-print"></i></button>
+                                <button class="action-btn" style="color: #e74c3c;"><i class="fas fa-trash"></i></button>
+                            </td>
+                        </tr>
+                    `}).join('');
+                } else {
+                    tableBody.innerHTML = '<tr><td colspan="8" style="text-align:center; padding:50px;"><i class="fas fa-info-circle"></i> No se encontraron bienes en la nube. Revisa la conexión con Google Sheets.</td></tr>';
+                }
+            } catch (err) {
+                console.error("Error cargando inventario:", err);
+                tableBody.innerHTML = `<tr><td colspan="8" style="text-align:center; padding:50px; color:#e74c3c;"><i class="fas fa-exclamation-triangle"></i> Error: ${err.message}</td></tr>`;
             }
         }
 

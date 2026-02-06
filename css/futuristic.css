@@ -570,3 +570,114 @@ header {
         font-size: 2.5rem;
     }
 }
+
+/* Badge & Status Styles */
+.badge {
+    padding: 5px 12px;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.badge-info {
+    background: rgba(52, 152, 219, 0.1);
+    color: #3498db;
+}
+
+.badge-success {
+    background: rgba(46, 204, 113, 0.1);
+    color: #2ecc71;
+}
+
+.badge-warning {
+    background: rgba(241, 196, 15, 0.1);
+    color: #f1c40f;
+}
+
+.badge-danger {
+    background: rgba(231, 76, 60, 0.1);
+    color: #e74c3c;
+}
+
+.badge-baja {
+    background: rgba(231, 76, 60, 0.2);
+    color: #e74c3c;
+}
+
+.badge-extraviado {
+    background: rgba(155, 89, 182, 0.2);
+    color: #9b59b6;
+}
+
+.badge-comodato {
+    background: rgba(52, 152, 219, 0.2);
+    color: #3498db;
+}
+
+.badge-norecibido {
+    background: rgba(149, 165, 166, 0.2);
+    color: #95a5a6;
+}
+
+.badge-active {
+    background: rgba(46, 204, 113, 0.2);
+    color: #2ecc71;
+}
+
+.badge-inactive {
+    background: rgba(149, 165, 166, 0.2);
+    color: #95a5a6;
+}
+
+/* Form Elements */
+.form-control {
+    width: 100%;
+    padding: 12px 15px;
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid var(--glass-border);
+    border-radius: 8px;
+    color: white;
+    font-family: inherit;
+    transition: var(--transition);
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: var(--accent-blue);
+    box-shadow: 0 0 10px rgba(0, 210, 255, 0.2);
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+}
+
+/* Tab System */
+.config-tab.active {
+    border-bottom: 2px solid var(--accent-blue);
+    color: var(--accent-blue);
+    background: rgba(0, 210, 255, 0.05);
+}
+
+/* Modal Overlay */
+.modal-overlay {
+    backdrop-filter: blur(8px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Responsive Table Fixes */
+.glass {
+    overflow-x: auto;
+}
+
+table tr:hover {
+    background: rgba(255, 255, 255, 0.02);
+}

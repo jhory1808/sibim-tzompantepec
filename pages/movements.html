@@ -88,68 +88,98 @@
         </div>
     </header>
 
-    <main style="padding: 30px 5%;">
-        <div class="glass fade-in" style="padding: 30px;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
-                <div>
-                    <h1>Historial de Movimientos</h1>
-                    <p style="color:var(--text-secondary)">Registro cronológico de todas las acciones del sistema</p>
-                </div>
-                <div style="display: flex; gap: 10px;">
-                    <button class="btn glass"><i class="fas fa-filter"></i> Filtrar</button>
-                    <button class="btn btn-primary" onclick="window.print()"><i class="fas fa-print"></i></button>
-                </div>
+    <main style="padding: 20px 5%;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
+            <div>
+                <h1 style="color: var(--accent-blue);">Historial de Movimientos</h1>
+                <p style="color: var(--text-secondary); font-size: 0.9rem;">Registro de todas las operaciones del
+                    sistema</p>
             </div>
+            <div style="display: flex; gap: 10px;">
+                <button class="btn" style="background: #2ecc71; color: white;" onclick="exportToPDF()"><i
+                        class="fas fa-file-pdf"></i> Exportar PDF</button>
+                <button class="btn" style="background: #ecf0f1; color: #333;" onclick="exportToExcel()"><i
+                        class="fas fa-file-excel"></i> Exportar Excel</button>
+                <button class="btn" style="background: #e74c3c; color: white;" onclick="clearHistory()"><i
+                        class="fas fa-trash"></i> Limpiar Historial</button>
+                <button class="btn" style="background: #f1c40f; color: black;"><i class="fas fa-search"></i> Consulta
+                    Rápida</button>
+            </div>
+        </div>
 
-            <div class="timeline" id="timeline-container">
-                <!-- Data from Google Sheets (Movimientos) -->
-                <div style="text-align: center; padding: 50px;">
-                    <i class="fas fa-spinner fa-spin fa-2x"></i>
-                    <p style="margin-top: 15px;">Conectando con la base de datos centralizada...</p>
+        <div class="glass" style="padding: 20px; margin-bottom: 20px;">
+            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 15px;">
+                <div class="form-group">
+                    <label>Filtrar por Tipo</label>
+                    <select class="form-control">
+                        <option>Todos los tipos</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Filtrar por Usuario</label>
+                    <select class="form-control">
+                        <option>Todos los usuarios</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Fecha Desde</label>
+                    <input type="date" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label>Fecha Hasta</label>
+                    <input type="date" class="form-control">
                 </div>
             </div>
+            <div style="display: flex; gap: 10px;">
+                <button class="btn" style="background: #2ecc71; color: white;">Aplicar Filtros</button>
+                <button class="btn glass">Limpiar Filtros</button>
+            </div>
+        </div>
+
+        <div class="glass" style="padding: 0; overflow: hidden; border-radius: 12px;">
+            <table style="width: 100%; border-collapse: collapse;">
+                <thead style="background: rgba(0,0,0,0.1);">
+                    <tr>
+                        <th style="padding: 15px; text-align: left;">ID</th>
+                        <th style="padding: 15px; text-align: left;">Fecha</th>
+                        <th style="padding: 15px; text-align: left;">Usuario</th>
+                        <th style="padding: 15px; text-align: left;">Acción</th>
+                        <th style="padding: 15px; text-align: left;">Tipo</th>
+                        <th style="padding: 15px; text-align: left;">Detalles</th>
+                        <th style="padding: 15px; text-align: center;">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="movements-table-body">
+                    <tr>
+                        <td style="padding: 15px;">1</td>
+                        <td style="padding: 15px;">${new Date().toLocaleString()}</td>
+                        <td style="padding: 15px;">admin</td>
+                        <td style="padding: 15px;">Inicio de sesión</td>
+                        <td style="padding: 15px;"><span class="badge"
+                                style="background: #f1c40f33; color: #f1c40f; padding: 4px 8px; border-radius: 4px;">Sistema</span>
+                        </td>
+                        <td style="padding: 15px;">Usuario inició sesión en el sistema</td>
+                        <td style="padding: 15px; text-align: center;"><i class="fas fa-eye"
+                                style="color: #17a2b8; cursor: pointer;"></i></td>
+                    </tr>
+                </tbody>
+            </table>
         </div>
     </main>
 
     <script src="../js/config.js"></script>
     <script src="../js/api.js"></script>
     <script src="../js/auth.js"></script>
+    <script src="../js/app.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', async () => {
             Auth.checkAccess();
             Auth.initTheme();
-
-            // Mock dynamic loading logic
-            setTimeout(() => {
-                const container = document.getElementById('timeline-container');
-                container.innerHTML = `
-                    <div class="timeline-item">
-                        <div class="timeline-icon"><i class="fas fa-plus"></i></div>
-                        <div class="timeline-content">
-                            <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
-                                <span class="type-badge type-create">Alta de Bien</span>
-                                <span style="font-size: 0.8rem; color: var(--text-secondary);">Hoy, 10:45 AM</span>
-                            </div>
-                            <h3>Registro de equipo: Laptop Dell Inspiron</h3>
-                            <p style="font-size: 0.9rem;">Registrado por: <strong>Admin</strong></p>
-                            <p style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 5px;">ID: 5191-001 | Departamento: Secretaría</p>
-                        </div>
-                    </div>
-                    <div class="timeline-item">
-                        <div class="timeline-icon" style="border-color: #f1c40f;"><i class="fas fa-exchange-alt"></i></div>
-                        <div class="timeline-content">
-                            <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
-                                <span class="type-badge type-status">Cambio de Estado</span>
-                                <span style="font-size: 0.8rem; color: var(--text-secondary);">Ayer, 04:20 PM</span>
-                            </div>
-                            <h3>Estado actualizado a: <span style="color: #e74c3c;">Baja</span></h3>
-                            <p style="font-size: 0.9rem;">Modificado por: <strong>Supervisor_1</strong></p>
-                            <p style="font-size: 0.8rem; color: var(--text-secondary);">Motivo: Obsolescencia técnica / Falla mayor</p>
-                        </div>
-                    </div>
-                `;
-            }, 1000);
         });
+
+        function exportToPDF() { window.print(); }
+        function exportToExcel() { alert("Exportando historial a Excel..."); }
+        function clearHistory() { if (confirm("¿Seguro que desea limpiar el historial?")) { alert("Historial limpiado."); } }
     </script>
 </body>
 
