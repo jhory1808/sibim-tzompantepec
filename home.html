@@ -4,62 +4,509 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SIBIMTZOMP - Gestión de Activos</title>
+    <title>SIBIM TZOMPANTEPEC - Innovación Patrimonial</title>
     <link rel="stylesheet" href="./css/futuristic.css">
     <link rel="manifest" href="./manifest.json">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
+        :root {
+            --primary-glow: rgba(0, 210, 255, 0.3);
+            --accent-green: #2ecc71;
+        }
+
+        body {
+            background: #020817;
+            overflow-x: hidden;
+        }
+
+        /* Hero Slider Section */
         .hero {
+            position: relative;
             height: 100vh;
             display: flex;
-            flex-direction: column;
-            justify-content: center;
             align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .hero-slider {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+
+        .slide {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            transition: opacity 1.5s ease-in-out;
+            background-size: cover;
+            background-position: center;
+        }
+
+        .slide.active {
+            opacity: 0.6;
+        }
+
+        .slide::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to bottom, rgba(2, 8, 23, 0.8) 0%, transparent 50%, rgba(2, 8, 23, 1) 100%);
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 10;
             text-align: center;
-            background: radial-gradient(circle at center, rgba(0, 210, 255, 0.1) 0%, transparent 70%);
+            max-width: 900px;
+            padding: 0 20px;
+        }
+
+        .hero-logo {
+            width: 280px;
+            margin-bottom: 30px;
+            filter: drop-shadow(0 0 20px var(--accent-blue));
+            animation: float 4s ease-in-out infinite;
+        }
+
+        @keyframes float {
+
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-15px);
+            }
         }
 
         .hero h1 {
-            font-size: 5rem;
-            margin-bottom: 20px;
-            animation: glow 2s ease-in-out infinite alternate;
-        }
-
-        @keyframes glow {
-            from {
-                text-shadow: 0 0 10px #00d2ff, 0 0 20px #00d2ff;
-            }
-
-            to {
-                text-shadow: 0 0 20px #9d50bb, 0 0 30px #9d50bb;
-            }
+            font-size: 4.5rem;
+            font-weight: 900;
+            letter-spacing: 12px;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            background: linear-gradient(to right, #fff, var(--accent-blue));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
 
         .hero p {
-            font-size: 1.5rem;
+            font-size: 1.4rem;
             color: var(--text-secondary);
+            letter-spacing: 4px;
             margin-bottom: 40px;
-            max-width: 600px;
+            text-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
+        }
+
+        .cta-group {
+            display: flex;
+            gap: 25px;
+            justify-content: center;
+        }
+
+        .btn-portal {
+            padding: 18px 45px;
+            font-size: 1.1rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-weight: bold;
+            border-radius: 50px;
+            transition: all 0.4s;
+            position: relative;
+            overflow: hidden;
+            border: none;
+            cursor: pointer;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .btn-primary-glow {
+            background: linear-gradient(45deg, var(--accent-blue), #0072ff);
+            color: white;
+            box-shadow: 0 0 30px rgba(0, 210, 255, 0.4);
+        }
+
+        .btn-primary-glow:hover {
+            transform: translateY(-5px) scale(1.05);
+            box-shadow: 0 0 50px rgba(0, 210, 255, 0.6);
+        }
+
+        /* Reels Section */
+        .reels-section {
+            padding: 100px 5%;
+            background: #020817;
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+
+        .section-header h2 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            color: white;
+        }
+
+        .section-header .line {
+            width: 80px;
+            height: 4px;
+            background: var(--accent-blue);
+            margin: 0 auto;
+            border-radius: 2px;
+        }
+
+        .reels-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+        }
+
+        .reel-card {
+            height: 450px;
+            border-radius: 25px;
+            overflow: hidden;
+            position: relative;
+            cursor: pointer;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .reel-card img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.8s;
+        }
+
+        .reel-card:hover img {
+            transform: scale(1.1);
+        }
+
+        .reel-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            padding: 30px;
+            background: linear-gradient(to top, rgba(0, 0, 0, 0.9), transparent);
+            color: white;
+            opacity: 0.9;
+            transition: opacity 0.3s;
+        }
+
+        .reel-card:hover .reel-overlay {
+            opacity: 1;
+        }
+
+        .reel-tag {
+            background: var(--accent-blue);
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+            display: inline-block;
+        }
+
+        /* Stats Counter */
+        .stats-section {
+            display: flex;
+            justify-content: space-around;
+            padding: 80px 10%;
+            background: rgba(255, 255, 255, 0.02);
+            backdrop-filter: blur(10px);
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 3.5rem;
+            font-weight: 800;
+            color: var(--accent-blue);
+            display: block;
+        }
+
+        .stat-label {
+            color: var(--text-secondary);
+            font-size: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        /* Navbar */
+        .nav-floating {
+            position: fixed;
+            top: 25px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 90%;
+            max-width: 1200px;
+            background: rgba(10, 25, 47, 0.7);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 15px 35px;
+            border-radius: 100px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 1000;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        .nav-logo-text {
+            font-weight: 900;
+            color: white;
+            letter-spacing: 3px;
+            font-size: 1.2rem;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 30px;
+        }
+
+        .nav-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.9rem;
+            transition: color 0.3s;
+        }
+
+        .nav-links a:hover {
+            color: var(--accent-blue);
+        }
+
+        /* Footer */
+        footer {
+            padding: 60px 5%;
+            text-align: center;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .footer-logo {
+            width: 180px;
+            margin-bottom: 25px;
+            opacity: 0.8;
+        }
+
+        .copyright {
+            color: #4b5563;
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2.5rem;
+                letter-spacing: 5px;
+            }
+
+            .hero p {
+                font-size: 1rem;
+            }
+
+            .cta-group {
+                flex-direction: column;
+            }
+
+            .nav-links {
+                display: none;
+            }
+
+            .stats-section {
+                flex-direction: column;
+                gap: 40px;
+            }
         }
     </style>
 </head>
 
 <body>
-    <div class="hero fade-in">
-        <img src="assets/images/logo_municipio.png" alt="Logo Municipio"
-            style="max-width: 350px; margin-bottom: 30px; filter: drop-shadow(0 0 15px rgba(255,255,255,0.1));">
-        <h1 class="logo">SIBIMTZOMP</h1>
-        <p>Gestión Inteligente de Activos Municipales de Vanguardia.</p>
-        <div style="display: flex; gap: 20px;">
-            <a href="login.html" class="btn btn-primary">Acceder al Sistema</a>
-            <a href="#about" class="btn btn-outline">Saber Más</a>
+    <!-- Floating Nav -->
+    <nav class="nav-floating">
+        <div class="nav-logo-text">SIBIM <span style="color: var(--accent-blue);">C2</span></div>
+        <div class="nav-links">
+            <a href="#inicio">Inicio</a>
+            <a href="#reels">Gestión C2</a>
+            <a href="#estadisticas">Patrimonio</a>
+            <a href="pages/scanner.html">Consulta QR</a>
         </div>
-    </div>
+        <a href="login.html" class="btn btn-primary"
+            style="padding: 10px 25px; border-radius: 50px; font-size: 0.8rem;">ENTRAR</a>
+    </nav>
 
+    <!-- Hero Section with Animated Slides -->
+    <section class="hero" id="inicio">
+        <div class="hero-slider">
+            <div class="slide active" style="background-image: url('assets/images/reels/presidencia.png');"></div>
+            <div class="slide" style="background-image: url('assets/images/reels/ambulancias.png');"></div>
+            <div class="slide" style="background-image: url('assets/images/reels/seguridad.png');"></div>
+            <div class="slide" style="background-image: url('assets/images/reels/dif.png');"></div>
+        </div>
+
+        <div class="hero-content">
+            <img src="assets/images/logo_municipio.png" class="hero-logo" alt="Logo Municipio">
+            <h1>SIBIM</h1>
+            <p>Vanguardia en la Protección y Gestión de Activos Municipales</p>
+            <div class="cta-group">
+                <a href="login.html" class="btn-portal btn-primary-glow">
+                    <i class="fas fa-shield-alt"></i> Acceder al Portal
+                </a>
+                <a href="#reels" class="btn-portal"
+                    style="background: rgba(255,255,255,0.05); color: white; border: 1px solid rgba(255,255,255,0.2);">
+                    <i class="fas fa-play-circle"></i> Ver Gestión
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Stats Counter Section -->
+    <section class="stats-section" id="estadisticas">
+        <div class="stat-item">
+            <span class="stat-number" id="count-items">0</span>
+            <span class="stat-label">Bienes Registrados</span>
+        </div>
+        <div class="stat-item">
+            <span class="stat-number" id="count-depts">0</span>
+            <span class="stat-label">Departamentos</span>
+        </div>
+        <div class="stat-item">
+            <span class="stat-number">100%</span>
+            <span class="stat-label">Trazabilidad QR</span>
+        </div>
+    </section>
+
+    <!-- Reels Section -->
+    <section class="reels-section" id="reels">
+        <div class="section-header">
+            <h2>Gestión Municipal 2024 - 2027</h2>
+            <p style="color: var(--text-secondary);">Infraestructura, Equipamiento y Bienestar Ciudadano</p>
+            <div class="line"></div>
+        </div>
+
+        <div class="reels-grid">
+            <div class="reel-card">
+                <img src="assets/images/reels/presidencia.png" alt="Presidencia">
+                <div class="reel-overlay">
+                    <span class="reel-tag">INFRAESTRUCTURA</span>
+                    <h3>Sede Administrativa Municipal</h3>
+                    <p>Corazón operativo de Tzompantepec.</p>
+                </div>
+            </div>
+            <div class="reel-card">
+                <img src="assets/images/reels/ambulancias.png" alt="Salud">
+                <div class="reel-overlay">
+                    <span class="reel-tag">SALUD</span>
+                    <h3>Equipamiento de Emergencias</h3>
+                    <p>Protegiendo la vida con activos de vanguardia.</p>
+                </div>
+            </div>
+            <div class="reel-card">
+                <img src="assets/images/reels/seguridad.png" alt="Seguridad">
+                <div class="reel-overlay">
+                    <span class="reel-tag">SEGURIDAD</span>
+                    <h3>Coordinación Interdepartamental</h3>
+                    <p>Alianza por la seguridad y el control patrimonial.</p>
+                </div>
+            </div>
+            <div class="reel-card">
+                <img src="assets/images/reels/dif.png" alt="Social">
+                <div class="reel-overlay">
+                    <span class="reel-tag">BIENESTAR</span>
+                    <h3>Espacios DIF Municipal</h3>
+                    <p>Instalaciones dignas para el desarrollo social.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Branding Section -->
+    <section style="padding: 80px 5%; text-align: center;">
+        <img src="assets/images/reels/logo_gobierno.png" style="max-width: 300px; margin-bottom: 20px;"
+            alt="Logo Gobierno Humano">
+        <p style="color: var(--text-secondary); max-width: 700px; margin: 0 auto; line-height: 1.8;">
+            El Sistema de Inventario de Bienes Inmuebles y Muebles de Tzompantepec (SIBIM) es una herramienta de
+            transparencia y eficiencia
+            dedicada a salvaguardar los bienes que pertenecen a toda nuestra comunidad.
+        </p>
+    </section>
+
+    <footer>
+        <img src="assets/images/logo_municipio.png" class="footer-logo" alt="Logo Municipio">
+        <p class="copyright">© 2024 - 2027 H. Ayuntamiento de Tzompantepec | Depto. de Sistemas C2</p>
+        <div style="margin-top: 20px; color: var(--text-secondary); font-size: 0.8rem;">
+            Desarrollado con Inteligencia Artificial Superior v1.2.5
+        </div>
+    </footer>
+
+    <script src="js/config.js"></script>
+    <script src="js/api.js"></script>
     <script>
+        // Hero Slider Logic
+        const slides = document.querySelectorAll('.slide');
+        let currentSlide = 0;
+
+        function nextSlide() {
+            slides[currentSlide].classList.remove('active');
+            currentSlide = (currentSlide + 1) % slides.length;
+            slides[currentSlide].classList.add('active');
+        }
+
+        setInterval(nextSlide, 5000);
+
+        // Stats Counter Update
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                const statsData = await API.getStats();
+                if (statsData && statsData.stats) {
+                    animateValue("count-items", 0, statsData.stats.total, 2000);
+                    animateValue("count-depts", 0, statsData.stats.departamentos, 2000);
+                }
+            } catch (error) {
+                console.error("Error loading stats for home:", error);
+            }
+        });
+
+        function animateValue(id, start, end, duration) {
+            if (start === end) return;
+            const obj = document.getElementById(id);
+            const range = end - start;
+            let current = start;
+            const increment = end > start ? 1 : -1;
+            const stepTime = Math.abs(Math.floor(duration / range));
+            const timer = setInterval(function () {
+                current += increment;
+                obj.innerHTML = current;
+                if (current == end) {
+                    clearInterval(timer);
+                }
+            }, stepTime);
+        }
+
+        // Service Worker registration
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/sw.js');
+                navigator.serviceWorker.register('/sw.js').catch(err => {
+                    console.log('SW registration failed: ', err);
+                });
             });
         }
     </script>
