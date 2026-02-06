@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SIBIM - Sistema de Inventario Tzompantepecy</title>
+    <style>
+        /* Estilos del homepage... */
+    </style>
+</head>
+<body>
+    <div class="home-container">
+        <div class="home-card">
+            <div class="home-logo">
+                <i class="fas fa-landmark"></i>
+                <h1>SIBIM</h1>
+            </div>
+            <p class="home-subtitle">Sistema de Inventario Municipal</p>
+            
+            <div class="connection-status" id="connectionStatus" style="display: none;">
+                <div class="status-checking">
+                    <i class="fas fa-spinner fa-spin"></i>
+                    <span>Verificando conexión con Google Sheets...</span>
+                </div>
+            </div>
+            
+            <button class="access-btn" onclick="checkConnectionAndProceed()">
+                <i class="fas fa-sign-in-alt"></i>
+                INICIAR SISTEMA
+            </button>
+            
+            <div class="google-sheets-info" style="margin-top: 1rem; font-size: 0.9rem; color: #666;">
+                <i class="fab fa-google"></i>
+                <span>ID de Google Sheets: 1XUqjJQI3dtZmwm7TYlwcHbbYBd81jszK</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        async function checkConnectionAndProceed() {
+            const btn = document.querySelector('.access-btn');
+            const originalText = btn.innerHTML;
+            
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> CONECTANDO...';
+            btn.disabled = true;
+            
+            try {
+                // 1. Cargar API de Google Sheets
+                await loadGoogleSheetsAPI();
+                
+                // 2. Verificar conexión
+                const result = await GoogleSheetsAPI.testConnection();
+                
+                if (result.success) {
+                    // 3. Redirigir a login
+                    window.location.href = 'login.html';
+                } else {
+                    alert('❌ Error de conexión\n\nNo se puede conectar con Google Sheets.\n\nVerifique:\n1. Conexión a internet\n2. ID de la hoja\n3. Permisos de acceso');
+                    btn.innerHTML = originalText;
+                    btn.disabled = false;
+                }
+                
+            } catch (error) {
+                console.error('Error de conexión:', error);
+                
+                // Preguntar si desea continuar en modo local
+                const useLocal = confirm('⚠️ No se pudo conectar con Google Sheets\n\n¿Desea continuar en modo local? (Datos limitados)');
+                
+                if (useLocal) {
+                    localStorage.setItem('sibim_offline_mode', 'true');
+                    window.location.href = 'login.html';
+                } else {
+                    btn.innerHTML = originalText;
+                    btn.disabled = false;
+                }
+            }
+        }
+        
+        // Función para cargar Google Sheets API
+        function loadGoogleSheetsAPI() {
+            return new Promise((resolve, reject) => {
+                if (window.gapi && window.gapi.client) {
+                    gapi.client.setApiKey('');
+                    resolve();
+                    return;
+                }
+                
+                const script = document.createElement('script');
+                script.src = 'https://apis.google.com/js/api.js';
+                script.onload = () => {
+                    gapi.load('client', () => {
+                        gapi.client.init({}).then(resolve).catch(reject);
+                    });
+                };
+                script.onerror = reject;
+                document.head.appendChild(script);
+            });
+        }
+        
+        // Verificar conexión automáticamente al cargar
+        document.addEventListener('DOMContentLoaded', async function() {
+            try {
+                await loadGoogleSheetsAPI();
+                document.getElementById('connectionStatus').style.display = 'block';
+                
+                // Intentar conexión en segundo plano
+                setTimeout(async () => {
+                    try {
+                        const result = await GoogleSheetsAPI.testConnection();
+                        if (result.success) {
+                            document.getElementById('connectionStatus').innerHTML = 
+                                '<div style="color: #28a745;"><i class="fas fa-check-circle"></i> Conectado a Google Sheets</div>';
+                        }
+                    } catch (e) {
+                        // Silenciar error en carga automática
+                    }
+                }, 1000);
+            } catch (error) {
+                // Silenciar error en carga
+            }
+        });
+    </script>
+</body>
+</html>

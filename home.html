@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SIBIMTZOMP - Gestión de Activos</title>
+    <link rel="stylesheet" href="./css/futuristic.css">
+    <link rel="manifest" href="./manifest.json">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .hero {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            background: radial-gradient(circle at center, rgba(0, 210, 255, 0.1) 0%, transparent 70%);
+        }
+
+        .hero h1 {
+            font-size: 5rem;
+            margin-bottom: 20px;
+            animation: glow 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes glow {
+            from {
+                text-shadow: 0 0 10px #00d2ff, 0 0 20px #00d2ff;
+            }
+
+            to {
+                text-shadow: 0 0 20px #9d50bb, 0 0 30px #9d50bb;
+            }
+        }
+
+        .hero p {
+            font-size: 1.5rem;
+            color: var(--text-secondary);
+            margin-bottom: 40px;
+            max-width: 600px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="hero fade-in">
+        <img src="assets/images/logo_municipio.png" alt="Logo Municipio" style="max-width: 150px; margin-bottom: 20px;">
+        <h1 class="logo">SIBIMTZOMP</h1>
+        <p>Gestión Inteligente de Activos Municipales de Vanguardia.</p>
+        <div style="display: flex; gap: 20px;">
+            <a href="login.html" class="btn btn-primary">Acceder al Sistema</a>
+            <a href="#about" class="btn btn-outline">Saber Más</a>
+        </div>
+    </div>
+
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js');
+            });
+        }
+    </script>
+</body>
+
+</html>

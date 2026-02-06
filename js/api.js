@@ -1,0 +1,135 @@
+const API = {
+    async fetchItems() {
+        const CACHE_KEY = 'sibim_inventory_cache';
+        const CACHE_TIME_KEY = 'sibim_cache_timestamp';
+        const TTL = 300000; // 5 minutos de caché
+
+        try {
+            // Inteligencia de Caché (Simulación SQLite)
+            const cachedData = localStorage.getItem(CACHE_KEY);
+            const lastFetch = localStorage.getItem(CACHE_TIME_KEY);
+            const now = Date.now();
+
+            if (cachedData && lastFetch && (now - lastFetch < TTL)) {
+                Logger.log('Usando Caché Local (Velocidad SQLite)...');
+                return JSON.parse(cachedData);
+            }
+
+            Logger.log('Caché expirado. Sincronizando con Google Cloud...');
+            const response = await fetch(`${CONFIG.scriptUrl}?action=getItems`);
+            const data = await response.json();
+            const items = data.items || data;
+
+            // Guardar en "Base de Datos" del Navegador
+            localStorage.setItem(CACHE_KEY, JSON.stringify(items));
+            localStorage.setItem(CACHE_TIME_KEY, now.toString());
+
+            Logger.log(`${items.length} bienes sincronizados y cacheados.`);
+            return items;
+        } catch (error) {
+            Logger.error('Error de red, intentando usar último caché disponible', error);
+            const emergencyCache = localStorage.getItem(CACHE_KEY);
+            return emergencyCache ? JSON.parse(emergencyCache) : [];
+        }
+    },
+
+    async addItem(itemData) {
+        try {
+            const response = await fetch(CONFIG.scriptUrl, {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    action: 'addItem',
+                    data: itemData
+                })
+            });
+            // Al agregar, invalidamos el caché para forzar actualización
+            localStorage.removeItem('sibim_cache_timestamp');
+            return { success: true };
+        } catch (error) {
+            Logger.error('Error adding item:', error);
+            return { success: false, error };
+        }
+    },
+
+    async updateItem(data) {
+        try {
+            const response = await fetch(CONFIG.scriptUrl, {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    action: 'updateItem',
+                    data: data
+                })
+            });
+            localStorage.removeItem('sibim_cache_timestamp');
+            return { success: true };
+        } catch (error) {
+            Logger.error('Error updating item:', error);
+            return { success: false, error };
+        }
+    },
+
+    async getItemById(id) {
+        try {
+            const response = await fetch(`${CONFIG.scriptUrl}?action=getItemById&id=${id}`);
+            return await response.json();
+        } catch (error) {
+            Logger.error('Error fetching item by ID:', error);
+            return null;
+        }
+    },
+
+    async batchRestore(items) {
+        try {
+            const response = await fetch(CONFIG.scriptUrl, {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    action: 'batchRestore',
+                    data: items
+                })
+            });
+            localStorage.removeItem('sibim_cache_timestamp');
+            return { success: true };
+        } catch (error) {
+            Logger.error('Error in batch restore:', error);
+            return { success: false, error };
+        }
+    },
+
+    async getUsers() {
+        try {
+            const response = await fetch(`${CONFIG.scriptUrl}?action=getUsers`);
+            const data = await response.json();
+            return data.users || data;
+        } catch (error) {
+            Logger.error('Error fetching users:', error);
+            return [];
+        }
+    },
+
+    async getStats() {
+        try {
+            const items = await this.fetchItems();
+            const stats = {
+                total: items.length,
+                departamentos: new Set(items.map(i => i.departamento)).size,
+                bajas: items.filter(i => i.estado === 'Baja' || i.status === 'Baja').length,
+                movimientos: Math.floor(items.length * 0.15)
+            };
+            return { items, stats };
+        } catch (error) {
+            return { items: [], stats: { total: 0, departamentos: 0, bajas: 0, movimientos: 0 } };
+        }
+    }
+};

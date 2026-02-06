@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Usuarios - SIBIMTZOMP</title>
+    <link rel="stylesheet" href="../css/futuristic.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+
+<body>
+    <header>
+        <div class="logo">SIBIMTZOMP</div>
+        <div style="display: flex; align-items: center; gap: 15px;">
+            <a href="../index.html" class="btn btn-outline" style="padding: 10px 15px;">Volver</a>
+        </div>
+    </header>
+
+    <main style="padding: 30px 5%;">
+        <div class="glass fade-in" style="padding: 30px;">
+            <h1 style="margin-bottom: 20px;">Gestión de Usuarios</h1>
+            <p style="color:var(--text-secondary); margin-bottom:20px;">Datos sincronizados desde Google Sheets (Hoja:
+                Usuarios)</p>
+            <table style="width:100%;">
+                <thead>
+                    <tr style="text-align:left; border-bottom:1px solid var(--glass-border);">
+                        <th style="padding:15px;">Usuario</th>
+                        <th style="padding:15px;">Rol</th>
+                        <th style="padding:15px;">Responsable</th>
+                    </tr>
+                </thead>
+                <tbody id="users-table-body">
+                    <!-- Data will be loaded from Google Sheets (mock for now if sheet empty) -->
+                </tbody>
+            </table>
+        </div>
+    </main>
+
+    <script src="../js/config.js"></script>
+    <script src="../js/api.js"></script>
+    <script src="../js/auth.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            Auth.checkAccess();
+            Auth.initTheme();
+            // In a real scenario, we'd add an API.fetchUsers() method
+            // For now, illustrating how it would look
+            const usersBody = document.getElementById('users-table-body');
+            usersBody.innerHTML = '<tr><td colspan="3" style="text-align:center; padding:30px;">Cargando usuarios desde la hoja de Sheets...</td></tr>';
+        });
+    </script>
+</body>
+
+</html>

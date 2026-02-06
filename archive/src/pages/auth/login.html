@@ -1,0 +1,1009 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SIBIM - Iniciar Sesión</title>
+    <style>
+        /* ========== VARIABLES Y ESTILOS GLOBALES ========== */
+        :root {
+            --primary-color: #1a5f7a;
+            --secondary-color: #57cc99;
+            --accent-color: #38a3a5;
+            --light-color: #f8f9fa;
+            --dark-color: #343a40;
+            --gray-color: #6c757d;
+            --danger-color: #dc3545;
+            --warning-color: #ffc107;
+            --info-color: #17a2b8;
+            --border-radius: 12px;
+            --shadow-sm: 0 2px 4px rgba(0,0,0,0.1);
+            --shadow-md: 0 4px 12px rgba(0,0,0,0.1);
+            --shadow-lg: 0 10px 30px rgba(0,0,0,0.2);
+            --transition: all 0.3s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        /* ========== PANTALLA DE LOGIN ========== */
+        .login-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .login-card {
+            background-color: white;
+            border-radius: var(--border-radius);
+            padding: 3rem;
+            width: 100%;
+            max-width: 500px;
+            box-shadow: var(--shadow-lg);
+        }
+
+        .login-header {
+            text-align: center;
+            margin-bottom: 2.5rem;
+        }
+
+        .login-logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .login-logo i {
+            font-size: 2.5rem;
+            color: var(--primary-color);
+        }
+
+        .login-logo h1 {
+            font-size: 2.5rem;
+            color: var(--primary-color);
+            font-weight: 800;
+            letter-spacing: 1px;
+        }
+
+        .login-subtitle {
+            color: var(--gray-color);
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .login-version {
+            color: var(--gray-color);
+            font-size: 0.9rem;
+            opacity: 0.7;
+        }
+
+        .connection-info {
+            margin-top: 1rem;
+            padding: 0.8rem;
+            border-radius: var(--border-radius);
+            font-size: 0.9rem;
+            text-align: center;
+        }
+
+        .connection-success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .connection-warning {
+            background-color: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+
+        .connection-error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .connection-info i {
+            margin-right: 0.5rem;
+        }
+
+        .login-form {
+            margin-bottom: 2rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: var(--dark-color);
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 1rem;
+            border: 2px solid #e2e8f0;
+            border-radius: var(--border-radius);
+            font-size: 1rem;
+            transition: var(--transition);
+            background-color: white;
+            color: var(--dark-color);
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(26, 95, 122, 0.2);
+        }
+
+        .password-container {
+            position: relative;
+        }
+
+        .toggle-password {
+            position: absolute;
+            right: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: var(--gray-color);
+            cursor: pointer;
+            font-size: 1rem;
+            padding: 0.5rem;
+        }
+
+        /* ========== SELECTOR DE ROL ========== */
+        .role-selector {
+            margin-bottom: 1.5rem;
+        }
+
+        .role-options {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 1rem;
+            margin-top: 0.5rem;
+        }
+
+        .role-option {
+            padding: 1rem;
+            border: 2px solid #e2e8f0;
+            border-radius: var(--border-radius);
+            text-align: center;
+            cursor: pointer;
+            transition: var(--transition);
+            background-color: white;
+        }
+
+        .role-option:hover {
+            border-color: var(--primary-color);
+            transform: translateY(-2px);
+        }
+
+        .role-option.selected {
+            border-color: var(--primary-color);
+            background-color: rgba(26, 95, 122, 0.1);
+        }
+
+        .role-icon {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+            color: var(--primary-color);
+        }
+
+        .role-name {
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: var(--dark-color);
+        }
+
+        .role-desc {
+            font-size: 0.8rem;
+            color: var(--gray-color);
+            margin-top: 0.25rem;
+        }
+
+        /* ========== BOTONES ========== */
+        .login-btn {
+            width: 100%;
+            padding: 1rem;
+            background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+            color: white;
+            border: none;
+            border-radius: var(--border-radius);
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+
+        .login-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .login-btn:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+
+        .btn-secondary {
+            padding: 0.8rem 1.5rem;
+            background-color: #e9ecef;
+            color: var(--dark-color);
+            border: none;
+            border-radius: var(--border-radius);
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            margin-top: 1rem;
+            width: 100%;
+        }
+
+        .btn-secondary:hover {
+            background-color: #dee2e6;
+        }
+
+        /* ========== ANIMACIONES ========== */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+
+        /* ========== RESPONSIVE ========== */
+        @media (max-width: 768px) {
+            .login-card {
+                padding: 2rem;
+                margin: 1rem;
+            }
+            
+            .role-options {
+                grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            }
+            
+            .login-logo h1 {
+                font-size: 2rem;
+            }
+            
+            .login-logo i {
+                font-size: 2rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .login-card {
+                padding: 1.5rem;
+            }
+            
+            .role-options {
+                grid-template-columns: 1fr;
+            }
+            
+            .form-control {
+                padding: 0.8rem;
+            }
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-card">
+            <div class="login-header">
+                <div class="login-logo">
+                    <i class="fas fa-landmark"></i>
+                    <h1>SIBIM</h1>
+                </div>
+                <p class="login-subtitle">Sistema de Inventario Municipal</p>
+                <p class="login-version">Versión 3.0 • Período 2024-2027</p>
+                
+                <div id="connectionInfo" class="connection-info connection-warning">
+                    <i class="fas fa-spinner fa-spin"></i>
+                    <span>Inicializando sistema...</span>
+                </div>
+            </div>
+
+            <div class="login-form">
+                <div class="form-group">
+                    <label class="form-label">Usuario</label>
+                    <input type="text" class="form-control" id="username" placeholder="Ingrese su usuario" autocomplete="username">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Contraseña</label>
+                    <div class="password-container">
+                        <input type="password" class="form-control" id="password" placeholder="Ingrese su contraseña" autocomplete="current-password">
+                        <button type="button" class="toggle-password" id="togglePassword">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Seleccionar Rol</label>
+                    <div class="role-options" id="roleOptions">
+                        <!-- Los roles se cargarán dinámicamente -->
+                        <div class="role-option" style="grid-column: 1 / -1; text-align: center; padding: 2rem;">
+                            <div class="role-icon">
+                                <i class="fas fa-spinner fa-spin"></i>
+                            </div>
+                            <div class="role-name">Cargando roles...</div>
+                            <div class="role-desc">Espere un momento</div>
+                        </div>
+                    </div>
+                </div>
+
+                <button class="login-btn" id="loginBtn">
+                    <i class="fas fa-sign-in-alt"></i>
+                    Iniciar Sesión
+                </button>
+                
+                <div style="text-align: center; margin-top: 1rem;">
+                    <button type="button" class="btn-secondary" onclick="window.location.href='index.html'">
+                        <i class="fas fa-arrow-left"></i> Volver al Inicio
+                    </button>
+                </div>
+            </div>
+
+            <div class="login-footer" style="text-align: center; margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid #e2e8f0;">
+                <p style="color: var(--gray-color); font-size: 0.9rem;">
+                    Sistema seguro certificado ISO 27001
+                </p>
+                <div style="display: flex; align-items: center; justify-content: center; gap: 0.5rem; margin-top: 1rem; color: var(--secondary-color); font-weight: 600;">
+                    <i class="fas fa-shield-check"></i>
+                    <span>Base de datos encriptada • Acceso biométrico</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ========== CONFIGURACIÓN ==========
+        const GOOGLE_SHEETS_CONFIG = {
+            SPREADSHEET_ID: '1XUqjJQI3dtZmwm7TYlwcHbbYBd81jszK',
+            SHEET_NAMES: {
+                USERS: 'Usuarios',
+                CONFIG: 'Configuración'
+            },
+            CACHE_DURATION: 5 * 60 * 1000 // 5 minutos
+        };
+
+        // ========== VARIABLES GLOBALES ==========
+        let usersData = [];
+        let availableRoles = [];
+        let isOfflineMode = false;
+        let retryCount = 0;
+        const MAX_RETRIES = 3;
+
+        // ========== INICIALIZACIÓN ==========
+        document.addEventListener('DOMContentLoaded', async function() {
+            // Configurar eventos básicos
+            setupBasicEvents();
+            
+            // Verificar modo de operación
+            checkOperationMode();
+            
+            // Inicializar página de login
+            await initializeLoginPage();
+        });
+
+        // ========== FUNCIONES PRINCIPALES ==========
+        async function initializeLoginPage() {
+            const connectionInfo = document.getElementById('connectionInfo');
+            
+            try {
+                // Verificar si estamos en modo offline
+                isOfflineMode = localStorage.getItem('sibim_offline_mode') === 'true';
+                
+                if (isOfflineMode) {
+                    showConnectionStatus('warning', 'Modo local - Conexión a Google Sheets no disponible');
+                    loadLocalUsers();
+                    setupLoginEvents();
+                    return;
+                }
+                
+                // Modo online - Conectar con Google Sheets
+                showConnectionStatus('loading', 'Conectando con Google Sheets...');
+                
+                // 1. Cargar API de Google Sheets
+                await loadGoogleSheetsAPI();
+                
+                // 2. Cargar usuarios desde Google Sheets
+                await loadUsersFromGoogleSheets();
+                
+                // 3. Extraer y mostrar roles
+                extractAvailableRoles();
+                displayRoleOptions();
+                
+                // 4. Mostrar éxito
+                showConnectionStatus('success', `Conectado a Google Sheets - ${usersData.length} usuarios cargados`);
+                
+                // 5. Configurar eventos
+                setupLoginEvents();
+                
+                // 6. Habilitar botón de login
+                document.getElementById('loginBtn').disabled = false;
+                
+            } catch (error) {
+                console.error('Error inicializando login:', error);
+                retryCount++;
+                
+                if (retryCount < MAX_RETRIES) {
+                    showConnectionStatus('warning', `Reintentando conexión... (${retryCount}/${MAX_RETRIES})`);
+                    setTimeout(initializeLoginPage, 2000);
+                    return;
+                }
+                
+                showConnectionStatus('error', 'Error de conexión. Usando datos locales.');
+                
+                // Fallback a usuarios locales
+                loadLocalUsers();
+                setupLoginEvents();
+                document.getElementById('loginBtn').disabled = false;
+            }
+        }
+
+        // ========== FUNCIONES DE CONEXIÓN GOOGLE SHEETS ==========
+        async function loadGoogleSheetsAPI() {
+            return new Promise((resolve, reject) => {
+                if (window.gapi && window.gapi.client) {
+                    resolve();
+                    return;
+                }
+                
+                const script = document.createElement('script');
+                script.src = 'https://apis.google.com/js/api.js';
+                script.onload = () => {
+                    gapi.load('client', () => {
+                        gapi.client.init({
+                            apiKey: '',
+                            discoveryDocs: ['https://sheets.googleapis.com/$discovery/rest?version=v4'],
+                        }).then(resolve).catch(reject);
+                    });
+                };
+                script.onerror = () => reject(new Error('Error cargando Google Sheets API'));
+                document.head.appendChild(script);
+            });
+        }
+
+        async function loadUsersFromGoogleSheets() {
+            try {
+                // Obtener datos de la pestaña "Usuarios"
+                const response = await gapi.client.sheets.spreadsheets.values.get({
+                    spreadsheetId: GOOGLE_SHEETS_CONFIG.SPREADSHEET_ID,
+                    range: `${GOOGLE_SHEETS_CONFIG.SHEET_NAMES.USERS}!A:O`
+                });
+                
+                const rows = response.result.values || [];
+                usersData = [];
+                
+                if (rows.length > 0) {
+                    const headers = rows[0];
+                    
+                    for (let i = 1; i < rows.length; i++) {
+                        const row = rows[i];
+                        const user = {};
+                        
+                        headers.forEach((header, index) => {
+                            user[header] = row[index] || '';
+                        });
+                        
+                        // Solo incluir usuarios activos
+                        if (user.Estado === 'activo' || user.Estado === '') {
+                            usersData.push({
+                                id: user.ID || i,
+                                username: user.Usuario || '',
+                                password: user.Contraseña || '',
+                                nombre: user.Nombre || '',
+                                apellido: user.Apellido || '',
+                                email: user.Email || '',
+                                telefono: user.Teléfono || '',
+                                rol: user.Rol || '',
+                                departamento: user.Departamento || '',
+                                avatar: user.Avatar || (user.Nombre ? user.Nombre.charAt(0).toUpperCase() : 'U'),
+                                fechaRegistro: user['Fecha Registro'] || '',
+                                estado: user.Estado || 'activo',
+                                permisos: user.Permisos || ''
+                            });
+                        }
+                    }
+                }
+                
+                console.log(`✅ ${usersData.length} usuarios cargados desde Google Sheets`);
+                return usersData;
+                
+            } catch (error) {
+                console.error('Error cargando usuarios:', error);
+                throw new Error('No se pudieron cargar los usuarios desde Google Sheets');
+            }
+        }
+
+        // ========== FUNCIONES LOCALES (FALLBACK) ==========
+        function loadLocalUsers() {
+            usersData = [
+                {
+                    id: 1,
+                    username: "admin",
+                    password: "admin123",
+                    nombre: "Administrador",
+                    apellido: "Sistema",
+                    email: "admin@sibim.mx",
+                    telefono: "555-0101",
+                    rol: "admin",
+                    departamento: "Sistema",
+                    avatar: "A",
+                    estado: "activo",
+                    permisos: "all"
+                },
+                {
+                    id: 2,
+                    username: "usuario",
+                    password: "user123",
+                    nombre: "Usuario",
+                    apellido: "Normal",
+                    email: "usuario@municipio.mx",
+                    telefono: "555-0102",
+                    rol: "user",
+                    departamento: "Secretaría",
+                    avatar: "U",
+                    estado: "activo",
+                    permisos: "inventory,movements,reports,qr"
+                },
+                {
+                    id: 3,
+                    username: "capturista",
+                    password: "capt123",
+                    nombre: "Capturista",
+                    apellido: "Sistema",
+                    email: "capturista@municipio.mx",
+                    telefono: "555-0103",
+                    rol: "capturista",
+                    departamento: "Inventario",
+                    avatar: "C",
+                    estado: "activo",
+                    permisos: "inventory,qr"
+                },
+                {
+                    id: 4,
+                    username: "supervisor",
+                    password: "sup123",
+                    nombre: "Supervisor",
+                    apellido: "Auditoría",
+                    email: "supervisor@municipio.mx",
+                    telefono: "555-0104",
+                    rol: "supervisor",
+                    departamento: "Auditoría",
+                    avatar: "S",
+                    estado: "activo",
+                    permisos: "monitoring,reports,security"
+                },
+                {
+                    id: 5,
+                    username: "reportes",
+                    password: "rep123",
+                    nombre: "Reportes",
+                    apellido: "Sistema",
+                    email: "reportes@municipio.mx",
+                    telefono: "555-0105",
+                    rol: "reportes",
+                    departamento: "Estadísticas",
+                    avatar: "R",
+                    estado: "activo",
+                    permisos: "reports"
+                }
+            ];
+            
+            console.log(`📁 ${usersData.length} usuarios cargados localmente`);
+            extractAvailableRoles();
+            displayRoleOptions();
+        }
+
+        // ========== GESTIÓN DE ROLES ==========
+        function extractAvailableRoles() {
+            const rolesSet = new Set();
+            usersData.forEach(user => {
+                if (user.rol && user.estado === 'activo') {
+                    rolesSet.add(user.rol);
+                }
+            });
+            
+            availableRoles = Array.from(rolesSet);
+            console.log('Roles disponibles:', availableRoles);
+        }
+
+        function displayRoleOptions() {
+            const roleOptions = document.getElementById('roleOptions');
+            roleOptions.innerHTML = '';
+            
+            if (availableRoles.length === 0) {
+                roleOptions.innerHTML = `
+                    <div class="role-option" style="grid-column: 1 / -1; text-align: center; padding: 2rem;">
+                        <div class="role-icon">
+                            <i class="fas fa-exclamation-circle"></i>
+                        </div>
+                        <div class="role-name">No hay roles disponibles</div>
+                        <div class="role-desc">Contacte al administrador</div>
+                    </div>
+                `;
+                return;
+            }
+            
+            const roleConfig = {
+                'admin': { icon: 'fas fa-user-shield', name: 'Administrador', desc: 'Acceso completo al sistema', color: '#dc3545' },
+                'user': { icon: 'fas fa-user', name: 'Usuario Normal', desc: 'Gestión básica de inventario', color: '#28a745' },
+                'capturista': { icon: 'fas fa-edit', name: 'Capturista', desc: 'Registro de artículos', color: '#17a2b8' },
+                'supervisor': { icon: 'fas fa-eye', name: 'Supervisor', desc: 'Monitoreo y auditoría', color: '#ffc107' },
+                'reportes': { icon: 'fas fa-chart-bar', name: 'Reportes', desc: 'Generación de reportes', color: '#6f42c1' }
+            };
+            
+            availableRoles.forEach(role => {
+                const config = roleConfig[role] || {
+                    icon: 'fas fa-user',
+                    name: role.charAt(0).toUpperCase() + role.slice(1),
+                    desc: 'Acceso al sistema',
+                    color: '#6c757d'
+                };
+                
+                const roleOption = document.createElement('div');
+                roleOption.className = 'role-option';
+                roleOption.dataset.role = role;
+                roleOption.innerHTML = `
+                    <div class="role-icon" style="color: ${config.color}">
+                        <i class="${config.icon}"></i>
+                    </div>
+                    <div class="role-name">${config.name}</div>
+                    <div class="role-desc">${config.desc}</div>
+                `;
+                roleOption.addEventListener('click', () => selectRole(role));
+                roleOptions.appendChild(roleOption);
+            });
+            
+            // Seleccionar primer rol por defecto
+            if (availableRoles.length > 0) {
+                setTimeout(() => selectRole(availableRoles[0]), 100);
+            }
+        }
+
+        function selectRole(roleId) {
+            document.querySelectorAll('.role-option').forEach(option => {
+                option.classList.remove('selected');
+            });
+            
+            const selectedOption = document.querySelector(`.role-option[data-role="${roleId}"]`);
+            if (selectedOption) {
+                selectedOption.classList.add('selected');
+                selectedOption.style.borderColor = selectedOption.querySelector('.role-icon').style.color;
+                selectedOption.style.backgroundColor = selectedOption.querySelector('.role-icon').style.color + '15';
+            }
+            
+            sessionStorage.setItem('selectedRole', roleId);
+        }
+
+        // ========== FUNCIÓN DE LOGIN ==========
+        async function login() {
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value;
+            const selectedRoleElement = document.querySelector('.role-option.selected');
+            
+            // Validaciones
+            if (!username) {
+                showLoginError('Por favor ingrese su usuario');
+                document.getElementById('username').focus();
+                return;
+            }
+            
+            if (!password) {
+                showLoginError('Por favor ingrese su contraseña');
+                document.getElementById('password').focus();
+                return;
+            }
+            
+            if (!selectedRoleElement) {
+                showLoginError('Por favor seleccione un rol');
+                return;
+            }
+            
+            const selectedRole = selectedRoleElement.dataset.role;
+            
+            // Deshabilitar botón durante la autenticación
+            const loginBtn = document.getElementById('loginBtn');
+            const originalText = loginBtn.innerHTML;
+            loginBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Verificando...';
+            loginBtn.disabled = true;
+            
+            try {
+                // Buscar usuario
+                const user = usersData.find(u => 
+                    u.username.toLowerCase() === username.toLowerCase() && 
+                    u.password === password && 
+                    u.rol === selectedRole &&
+                    u.estado === 'activo'
+                );
+                
+                if (user) {
+                    // Crear sesión de usuario
+                    const userSession = {
+                        id: user.id,
+                        username: user.username,
+                        nombre: user.nombre,
+                        apellido: user.apellido,
+                        email: user.email,
+                        telefono: user.telefono,
+                        rol: user.rol,
+                        departamento: user.departamento,
+                        avatar: user.avatar || user.nombre.charAt(0).toUpperCase(),
+                        permisos: user.permisos || '',
+                        loginTime: new Date().toISOString(),
+                        ip: await getClientIP(),
+                        offlineMode: isOfflineMode
+                    };
+                    
+                    // Guardar sesión
+                    localStorage.setItem('sibim_currentUser', JSON.stringify(userSession));
+                    
+                    // Registrar movimiento si estamos online
+                    if (!isOfflineMode) {
+                        try {
+                            await logLoginMovement(user);
+                        } catch (error) {
+                            console.warn('No se pudo registrar movimiento:', error);
+                        }
+                    }
+                    
+                    // Mostrar mensaje de éxito
+                    showLoginSuccess(`¡Bienvenido ${user.nombre}!`);
+                    
+                    // Redirigir después de 1 segundo
+                    setTimeout(() => {
+                        window.location.href = 'app.html';
+                    }, 1000);
+                    
+                } else {
+                    showLoginError('Usuario, contraseña o rol incorrectos');
+                    loginBtn.innerHTML = originalText;
+                    loginBtn.disabled = false;
+                    
+                    // Agitar el formulario
+                    document.querySelector('.login-card').classList.add('pulse');
+                    setTimeout(() => {
+                        document.querySelector('.login-card').classList.remove('pulse');
+                    }, 500);
+                }
+                
+            } catch (error) {
+                console.error('Error en login:', error);
+                showLoginError('Error durante la autenticación');
+                loginBtn.innerHTML = originalText;
+                loginBtn.disabled = false;
+            }
+        }
+
+        // ========== FUNCIONES AUXILIARES ==========
+        function setupBasicEvents() {
+            // Toggle password visibility
+            document.getElementById('togglePassword').addEventListener('click', function() {
+                const passwordInput = document.getElementById('password');
+                const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+                passwordInput.setAttribute('type', type);
+                this.innerHTML = type === 'password' ? '<i class="fas fa-eye"></i>' : '<i class="fas fa-eye-slash"></i>';
+            });
+            
+            // Login con Enter
+            document.getElementById('username').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    document.getElementById('password').focus();
+                }
+            });
+            
+            document.getElementById('password').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    login();
+                }
+            });
+            
+            // Autofocus en usuario
+            document.getElementById('username').focus();
+        }
+
+        function setupLoginEvents() {
+            document.getElementById('loginBtn').addEventListener('click', login);
+        }
+
+        function checkOperationMode() {
+            // Verificar si hay parámetro de offline mode
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.has('offline')) {
+                localStorage.setItem('sibim_offline_mode', 'true');
+                isOfflineMode = true;
+            }
+            
+            // Verificar si hay ID de Google Sheets personalizado
+            if (urlParams.has('sheetid')) {
+                GOOGLE_SHEETS_CONFIG.SPREADSHEET_ID = urlParams.get('sheetid');
+                console.log('Usando Google Sheet ID personalizado:', GOOGLE_SHEETS_CONFIG.SPREADSHEET_ID);
+            }
+        }
+
+        function showConnectionStatus(type, message) {
+            const connectionInfo = document.getElementById('connectionInfo');
+            const icon = {
+                loading: 'fa-spinner fa-spin',
+                success: 'fa-check-circle',
+                warning: 'fa-exclamation-triangle',
+                error: 'fa-exclamation-circle'
+            }[type];
+            
+            const className = `connection-${type}`;
+            
+            connectionInfo.className = `connection-info ${className}`;
+            connectionInfo.innerHTML = `<i class="fas ${icon}"></i> <span>${message}</span>`;
+        }
+
+        function showLoginError(message) {
+            // Crear elemento de error
+            let errorElement = document.getElementById('loginError');
+            if (!errorElement) {
+                errorElement = document.createElement('div');
+                errorElement.id = 'loginError';
+                errorElement.style.cssText = `
+                    background-color: #f8d7da;
+                    color: #721c24;
+                    padding: 1rem;
+                    border-radius: var(--border-radius);
+                    margin-top: 1rem;
+                    border: 1px solid #f5c6cb;
+                    display: flex;
+                    align-items: center;
+                    gap: 0.5rem;
+                    animation: fadeIn 0.3s ease;
+                `;
+                document.querySelector('.login-form').appendChild(errorElement);
+            }
+            
+            errorElement.innerHTML = `<i class="fas fa-exclamation-circle"></i> ${message}`;
+            
+            // Auto-remover después de 5 segundos
+            setTimeout(() => {
+                if (errorElement.parentNode) {
+                    errorElement.style.animation = 'fadeIn 0.3s ease reverse';
+                    setTimeout(() => errorElement.remove(), 300);
+                }
+            }, 5000);
+        }
+
+        function showLoginSuccess(message) {
+            // Crear elemento de éxito
+            const successElement = document.createElement('div');
+            successElement.style.cssText = `
+                position: fixed;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                background-color: #d4edda;
+                color: #155724;
+                padding: 2rem;
+                border-radius: var(--border-radius);
+                border: 1px solid #c3e6cb;
+                z-index: 10000;
+                text-align: center;
+                box-shadow: var(--shadow-lg);
+                animation: fadeIn 0.3s ease;
+            `;
+            
+            successElement.innerHTML = `
+                <i class="fas fa-check-circle" style="font-size: 3rem; margin-bottom: 1rem; color: #28a745;"></i>
+                <h3 style="margin-bottom: 0.5rem;">${message}</h3>
+                <p>Redirigiendo al sistema...</p>
+                <div style="margin-top: 1rem;">
+                    <div class="spinner-border text-success" role="status" style="width: 2rem; height: 2rem;">
+                        <span class="sr-only">Cargando...</span>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(successElement);
+        }
+
+        async function getClientIP() {
+            try {
+                const response = await fetch('https://api.ipify.org?format=json');
+                const data = await response.json();
+                return data.ip;
+            } catch (error) {
+                return '192.168.1.' + Math.floor(Math.random() * 255);
+            }
+        }
+
+        async function logLoginMovement(user) {
+            try {
+                const movementData = [
+                    Date.now().toString(),
+                    new Date().toISOString().split('T')[0],
+                    new Date().toLocaleTimeString('es-MX'),
+                    user.username,
+                    'Inicio de sesión',
+                    'Autenticación',
+                    `Usuario ${user.nombre} ${user.apellido} inició sesión`,
+                    '',
+                    '',
+                    '',
+                    '',
+                    '',
+                    '',
+                    '',
+                    '',
+                    await getClientIP(),
+                    navigator.userAgent.substring(0, 50),
+                    'SESSION_' + Date.now()
+                ];
+                
+                // Agregar fila a la pestaña de Movimientos
+                await gapi.client.sheets.spreadsheets.values.append({
+                    spreadsheetId: GOOGLE_SHEETS_CONFIG.SPREADSHEET_ID,
+                    range: 'Movimientos!A:R',
+                    valueInputOption: 'USER_ENTERED',
+                    resource: {
+                        values: [movementData]
+                    }
+                });
+                
+                console.log('✅ Movimiento de login registrado en Google Sheets');
+                
+            } catch (error) {
+                console.error('Error registrando movimiento:', error);
+                throw error;
+            }
+        }
+
+        // ========== EXPORTAR FUNCIONES GLOBALES ==========
+        window.login = login;
+        window.selectRole = selectRole;
+    </script>
+</body>
+</html>

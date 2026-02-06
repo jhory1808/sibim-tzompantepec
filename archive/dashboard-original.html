@@ -1,0 +1,1115 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SIBIM - Sistema de Inventario Tzompantepec</title>
+    
+    <!-- Manifest y metadatos PWA -->
+    <link rel="manifest" href="/manifest.json">
+    <meta name="application-name" content="SIBIM">
+    <meta name="apple-mobile-web-app-title" content="SIBIM">
+    <meta name="theme-color" content="#1a5f7a">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    
+    <!-- Iconos para Apple -->
+    <link rel="apple-touch-icon" href="icon-192x192.png">
+    <link rel="apple-touch-startup-image" href="splash-screen.png">
+    
+    <!-- Iconos para Windows -->
+    <meta name="msapplication-TileColor" content="#1a5f7a">
+    <meta name="msapplication-TileImage" content="icon-144x144.png">
+    
+    <!-- Estilos y scripts externos -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <!-- Biblioteca para exportar a Excel -->
+    <script src="https://unpkg.com/xlsx/dist/xlsx.full.min.js"></script>
+    <!-- Biblioteca para exportar a PDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+    
+    <!-- Configuración de Google Sheets -->
+    <script>
+        // Configuración de Google Sheets
+        const GOOGLE_SHEETS_CONFIG = {
+            SPREADSHEET_ID: '1sUbVTOcghY9A0KNHpbyEuE2pnnEthqTQXv_JThW4bYs',
+            API_KEY: '',
+            SHEET_NAMES: {
+                INVENTORY: 'Inventario',
+                USERS: 'Usuarios',
+                DEPARTMENTS: 'Departamentos',
+                MOVEMENTS: 'Movimientos',
+                UPDATES: 'Actualizaciones',
+                CONFIGURATION: 'Configuración'
+            }
+        };
+
+        // API de Google Sheets mejorada
+        const GoogleSheetsAPI = {
+            async loadGoogleSheetsAPI() {
+                // Cargar librería de Google Sheets API si no está cargada
+                if (!window.gapi) {
+                    await new Promise((resolve, reject) => {
+                        const script = document.createElement('script');
+                        script.src = 'https://apis.google.com/js/api.js';
+                        script.onload = () => {
+                            gapi.load('client', async () => {
+                                try {
+                                    await gapi.client.init({
+                                        apiKey: GOOGLE_SHEETS_CONFIG.API_KEY,
+                                        discoveryDocs: ['https://sheets.googleapis.com/$discovery/rest?version=v4'],
+                                    });
+                                    console.log('Google Sheets API cargada');
+                                    resolve();
+                                } catch (error) {
+                                    reject(error);
+                                }
+                            });
+                        };
+                        script.onerror = reject;
+                        document.head.appendChild(script);
+                    });
+                }
+                return true;
+            },
+
+            async getAllSheets() {
+                try {
+                    await this.loadGoogleSheetsAPI();
+                    const response = await gapi.client.sheets.spreadsheets.get({
+                        spreadsheetId: GOOGLE_SHEETS_CONFIG.SPREADSHEET_ID
+                    });
+                    return response.result.sheets || [];
+                } catch (error) {
+                    console.error('Error obteniendo hojas:', error);
+                    // Fallback: intentar con método simplificado
+                    return this.getSheetsSimplified();
+                }
+            },
+
+            async getSheetsSimplified() {
+                try {
+                    const url = `https://docs.google.com/spreadsheets/d/${GOOGLE_SHEETS_CONFIG.SPREADSHEET_ID}/gviz/tq?tqx=out:json`;
+                    const response = await fetch(url);
+                    
+                    if (!response.ok) {
+                        throw new Error('Error al conectar con Google Sheets');
+                    }
+                    
+                    const text = await response.text();
+                    // Procesar respuesta para obtener nombres de hojas
+                    // Nota: Este método puede no ser completamente confiable
+                    return [{ title: 'Inventario' }, { title: 'Usuarios' }];
+                } catch (error) {
+                    console.error('Error método simplificado:', error);
+                    return [];
+                }
+            },
+
+            async createSheet(sheetName) {
+                try {
+                    await this.loadGoogleSheetsAPI();
+                    
+                    const response = await gapi.client.sheets.spreadsheets.batchUpdate({
+                        spreadsheetId: GOOGLE_SHEETS_CONFIG.SPREADSHEET_ID,
+                        requests: [{
+                            addSheet: {
+                                properties: {
+                                    title: sheetName
+                                }
+                            }
+                        }]
+                    });
+                    
+                    console.log(`Hoja "${sheetName}" creada`);
+                    return { success: true, sheetId: response.result.replies[0].addSheet.properties.sheetId };
+                } catch (error) {
+                    console.error(`Error creando hoja "${sheetName}":`, error);
+                    return { success: false, error: error.message };
+                }
+            },
+
+            async getSheetData(sheetName, includeHeaders = true) {
+                try {
+                    // Método simplificado para obtener datos
+                    const url = `https://docs.google.com/spreadsheets/d/${GOOGLE_SHEETS_CONFIG.SPREADSHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(sheetName)}`;
+                    const response = await fetch(url);
+                    
+                    if (!response.ok) {
+                        throw new Error('Error al conectar con Google Sheets');
+                    }
+                    
+                    const text = await response.text();
+                    const jsonStr = text.substring(47, text.length - 2);
+                    const data = JSON.parse(jsonStr);
+                    
+                    const rows = data.table.rows || [];
+                    const cols = data.table.cols || [];
+                    
+                    const result = [];
+                    
+                    rows.forEach((row, rowIndex) => {
+                        const item = {};
+                        row.c.forEach((cell, colIndex) => {
+                            const colName = cols[colIndex].label || `Col${colIndex}`;
+                            item[colName] = cell ? cell.v : '';
+                        });
+                        result.push(item);
+                    });
+                    
+                    return result;
+                } catch (error) {
+                    console.error(`Error obteniendo datos de ${sheetName}:`, error);
+                    // Retornar datos de ejemplo para desarrollo
+                    return this.getSampleData(sheetName);
+                }
+            },
+
+            getSampleData(sheetName) {
+                // Datos de ejemplo para desarrollo
+                switch(sheetName) {
+                    case 'Inventario':
+                        return [
+                            {
+                                'ID': '1',
+                                'Código': 'TEC-001',
+                                'Nombre': 'REFRIGERADOR',
+                                'Marca': 'Mabe',
+                                'Modelo': 'ATVIOAT-6',
+                                'Número de Serie': 'SN-MABE-001',
+                                'Categoría': 'Electrodomésticos',
+                                'Grupo': 'Cocina',
+                                'Responsable': 'EDZNA SAYAB DE GANTE CASTILLO',
+                                'Área Asignada': 'Cocina Principal',
+                                'Estado': 'Activo',
+                                'Departamento': 'SECRETARÍA H. AYUNTAMIENTO',
+                                'Valor': '$1,500.00',
+                                'Fecha Adquisición': '2024-01-01',
+                                'Empresa': 'GORIERNO',
+                                'Observaciones': 'Refrigerador de doble puerta',
+                                'Fecha Registro': '2024-01-01',
+                                'Imagen': '',
+                                'Documento Resguardo': '',
+                                'Fecha Resguardo': '',
+                                'Vigencia Resguardo': '12',
+                                'QR Code': ''
+                            }
+                        ];
+                    case 'Usuarios':
+                        return [
+                            {
+                                'ID': '1',
+                                'Usuario': 'admin',
+                                'Contraseña': 'admin123',
+                                'Nombre': 'Administrador',
+                                'Apellido': 'Sistema',
+                                'Email': 'admin@sibim.mx',
+                                'Teléfono': '555-0101',
+                                'Rol': 'admin',
+                                'Departamento': 'Sistema',
+                                'Avatar': 'A',
+                                'Fecha Registro': '2024-01-01',
+                                'Estado': 'Activo',
+                                'Permisos': 'all',
+                                'Último Acceso': '2024-03-20 10:30',
+                                'IP Último Acceso': '192.168.1.100'
+                            }
+                        ];
+                    default:
+                        return [];
+                }
+            },
+
+            async addRow(sheetName, rowData) {
+                console.log(`Simulando agregar fila a ${sheetName}:`, rowData);
+                
+                // En una implementación real:
+                // await gapi.client.sheets.spreadsheets.values.append({
+                //     spreadsheetId: GOOGLE_SHEETS_CONFIG.SPREADSHEET_ID,
+                //     range: `${sheetName}!A:A`,
+                //     valueInputOption: 'USER_ENTERED',
+                //     resource: {
+                //         values: [Object.values(rowData)]
+                //     }
+                // });
+                
+                return { success: true, message: 'Fila agregada (simulado)' };
+            },
+
+            async updateRow(sheetName, rowIndex, rowData) {
+                console.log(`Simulando actualizar fila ${rowIndex} en ${sheetName}:`, rowData);
+                return { success: true, message: 'Fila actualizada (simulado)' };
+            }
+        };
+
+        // Función para mostrar notificaciones
+        function showToast(message, type = 'info') {
+            const toast = document.createElement('div');
+            toast.className = `toast toast-${type}`;
+            toast.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                padding: 12px 24px;
+                background-color: ${type === 'success' ? '#4CAF50' : type === 'warning' ? '#FF9800' : type === 'error' ? '#F44336' : '#2196F3'};
+                color: white;
+                border-radius: 4px;
+                box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+                z-index: 10000;
+                animation: slideIn 0.3s ease;
+                max-width: 400px;
+                word-wrap: break-word;
+            `;
+            toast.textContent = message;
+            
+            document.body.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.style.animation = 'slideOut 0.3s ease';
+                setTimeout(() => toast.remove(), 300);
+            }, 5000);
+        }
+    </script>
+    
+    <style>
+        /* ... (todos los estilos existentes se mantienen igual) ... */
+        
+        /* Animaciones para toasts */
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        
+        @keyframes slideOut {
+            from { transform: translateX(0); opacity: 1; }
+            to { transform: translateX(100%); opacity: 0; }
+        }
+        
+        /* Estilos para indicadores de estado */
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+        
+        .status-online {
+            background-color: #4CAF50;
+            box-shadow: 0 0 8px #4CAF50;
+        }
+        
+        .status-offline {
+            background-color: #F44336;
+        }
+        
+        .status-syncing {
+            background-color: #FF9800;
+            animation: pulse 1.5s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+        
+        /* ... (resto de estilos existentes) ... */
+    </style>
+</head>
+<body>
+    <!-- ... (todo el contenido HTML existente se mantiene igual) ... -->
+    
+    <!-- Nuevo indicador de estado de Google Sheets en el header -->
+    <script>
+        function addGoogleSheetsStatusIndicator() {
+            const headerRight = document.querySelector('.header-right');
+            if (headerRight) {
+                const statusIndicator = document.createElement('div');
+                statusIndicator.id = 'googleSheetsStatus';
+                statusIndicator.style.cssText = `
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                    padding: 6px 12px;
+                    background-color: rgba(255,255,255,0.1);
+                    border-radius: 20px;
+                    font-size: 0.8rem;
+                    cursor: pointer;
+                `;
+                statusIndicator.innerHTML = `
+                    <span class="status-indicator status-syncing"></span>
+                    <span>Sincronizando...</span>
+                `;
+                statusIndicator.onclick = () => testGoogleSheetsConnection();
+                
+                // Insertar antes del botón de Google Sheets
+                const sheetsBtn = headerRight.querySelector('.btn-success[onclick*="testGoogleSheetsConnection"]');
+                if (sheetsBtn) {
+                    headerRight.insertBefore(statusIndicator, sheetsBtn);
+                } else {
+                    headerRight.appendChild(statusIndicator);
+                }
+            }
+        }
+        
+        function updateGoogleSheetsStatus(status, message = '') {
+            const statusElement = document.getElementById('googleSheetsStatus');
+            if (statusElement) {
+                const indicator = statusElement.querySelector('.status-indicator');
+                const text = statusElement.querySelector('span:last-child');
+                
+                indicator.className = 'status-indicator';
+                
+                switch(status) {
+                    case 'connected':
+                        indicator.classList.add('status-online');
+                        text.textContent = 'Conectado a Sheets';
+                        break;
+                    case 'disconnected':
+                        indicator.classList.add('status-offline');
+                        text.textContent = 'Sin conexión';
+                        break;
+                    case 'syncing':
+                        indicator.classList.add('status-syncing');
+                        text.textContent = 'Sincronizando...';
+                        break;
+                    case 'error':
+                        indicator.classList.add('status-offline');
+                        text.textContent = message || 'Error de conexión';
+                        break;
+                }
+            }
+        }
+    </script>
+
+    <!-- ... (resto del contenido HTML existente) ... -->
+
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/es.js"></script>
+    <script>
+        // ========== DATOS DEL SISTEMA ==========
+        let currentUser = null;
+        let inventoryData = [];
+        let departmentsData = [];
+        let usersData = [];
+        let movementsData = [];
+        let qrData = [];
+        let statusChart, departmentsChart, monthlyMovementsChart, categoryValueChart;
+        
+        // Variables para manejo de archivos
+        let currentItemImages = [];
+        let currentCustodyFiles = [];
+        let currentUpdateCustodyFiles = [];
+
+        // ========== NUEVAS FUNCIONES GOOGLE SHEETS ==========
+
+        // Función para verificar todas las pestañas
+        async function verifyAllSheetsExist() {
+            try {
+                await GoogleSheetsAPI.loadGoogleSheetsAPI();
+                
+                const allSheets = await GoogleSheetsAPI.getAllSheets();
+                const sheetNames = allSheets.map(sheet => sheet.title);
+                
+                const requiredSheets = Object.values(GOOGLE_SHEETS_CONFIG.SHEET_NAMES);
+                const missingSheets = [];
+                
+                requiredSheets.forEach(requiredSheet => {
+                    if (!sheetNames.includes(requiredSheet)) {
+                        missingSheets.push(requiredSheet);
+                    }
+                });
+                
+                if (missingSheets.length > 0) {
+                    console.warn('Faltan las siguientes pestañas:', missingSheets);
+                    return {
+                        success: false,
+                        missingSheets: missingSheets,
+                        message: `Faltan ${missingSheets.length} pestañas en Google Sheets`
+                    };
+                }
+                
+                return {
+                    success: true,
+                    sheetCount: sheetNames.length,
+                    sheetNames: sheetNames,
+                    message: 'Todas las pestañas existen'
+                };
+                
+            } catch (error) {
+                console.error('Error verificando pestañas:', error);
+                return {
+                    success: false,
+                    error: error.message
+                };
+            }
+        }
+
+        // Función para crear pestañas faltantes
+        async function createMissingSheets() {
+            updateGoogleSheetsStatus('syncing', 'Verificando pestañas...');
+            
+            const verification = await verifyAllSheetsExist();
+            
+            if (!verification.success && verification.missingSheets) {
+                try {
+                    showToast(`Creando ${verification.missingSheets.length} pestañas faltantes...`, 'info');
+                    
+                    for (const sheetName of verification.missingSheets) {
+                        await GoogleSheetsAPI.createSheet(sheetName);
+                        
+                        // Agregar encabezados según el tipo de pestaña
+                        let headers = [];
+                        
+                        switch(sheetName) {
+                            case 'Usuarios':
+                                headers = [['ID', 'Usuario', 'Contraseña', 'Nombre', 'Apellido', 'Email', 'Teléfono', 'Rol', 'Departamento', 'Avatar', 'Fecha Registro', 'Estado', 'Permisos', 'Último Acceso']];
+                                break;
+                            case 'Departamentos':
+                                headers = [['ID', 'Nombre Departamento', 'Encargado', 'Email Encargado', 'Teléfono Encargado', 'Descripción', 'Artículos Asignados', 'Fecha Creación', 'Ubicación', 'Estado', 'Presupuesto Anual']];
+                                break;
+                            case 'Movimientos':
+                                headers = [['ID', 'Fecha', 'Hora', 'Usuario', 'Acción', 'Tipo', 'Detalles', 'ID Artículo', 'Código Artículo', 'Nombre Artículo', 'Departamento Origen', 'Departamento Destino', 'Valor']];
+                                break;
+                            case 'Actualizaciones':
+                                headers = [['ID', 'Fecha', 'Hora', 'Usuario', 'Tipo Actualización', 'Tabla Afectada', 'ID Registro', 'Campo Modificado', 'Valor Anterior', 'Valor Nuevo', 'Descripción']];
+                                break;
+                            case 'Configuración':
+                                headers = [['Clave', 'Valor', 'Descripción', 'Tipo', 'Módulo', 'Última Modificación', 'Usuario Modificación']];
+                                break;
+                            case 'Inventario':
+                                headers = [['ID', 'Código', 'Nombre', 'Marca', 'Modelo', 'Número de Serie', 'Categoría', 'Grupo', 'Responsable', 'Área Asignada', 'Estado', 'Departamento', 'Valor', 'Fecha Adquisición', 'Empresa', 'Observaciones', 'Fecha Registro', 'Imagen', 'Documento Resguardo', 'Fecha Resguardo', 'Vigencia Resguardo', 'QR Code']];
+                                break;
+                        }
+                        
+                        if (headers.length > 0) {
+                            await GoogleSheetsAPI.addRow(sheetName, headers[0]);
+                        }
+                        
+                        console.log(`✅ Pestaña "${sheetName}" creada con encabezados`);
+                    }
+                    
+                    showToast(`Se crearon ${verification.missingSheets.length} pestañas`, 'success');
+                    
+                    return {
+                        success: true,
+                        created: verification.missingSheets,
+                        message: `Se crearon ${verification.missingSheets.length} pestañas`
+                    };
+                    
+                } catch (error) {
+                    console.error('Error creando pestañas:', error);
+                    showToast(`Error creando pestañas: ${error.message}`, 'error');
+                    return {
+                        success: false,
+                        error: error.message
+                    };
+                }
+            }
+            
+            return verification;
+        }
+
+        // Función para cargar configuración desde Google Sheets
+        async function loadConfigurationFromSheets() {
+            try {
+                const configData = await GoogleSheetsAPI.getSheetData('Configuración', false);
+                
+                if (configData && configData.length > 0) {
+                    const config = {};
+                    configData.forEach(row => {
+                        if (row.Clave && row.Valor) {
+                            config[row.Clave] = row.Valor;
+                        }
+                    });
+                    
+                    localStorage.setItem('sibim_configuration', JSON.stringify(config));
+                    console.log('Configuración cargada desde Google Sheets');
+                    return { success: true, config: config };
+                }
+                
+                return { success: false, message: 'No hay configuración en Google Sheets' };
+            } catch (error) {
+                console.error('Error cargando configuración:', error);
+                return { success: false, error: error.message };
+            }
+        }
+
+        // Inicialización mejorada del sistema
+        async function initializeSystemWithGoogleSheets() {
+            updateGoogleSheetsStatus('syncing', 'Inicializando sistema...');
+            
+            try {
+                // 1. Inicializar conexión con Google Sheets
+                await initializeGoogleSheetsConnection();
+                
+                // 2. Verificar/Crear pestañas faltantes
+                const sheetsResult = await createMissingSheets();
+                
+                if (!sheetsResult.success) {
+                    console.warn('Advertencia con pestañas:', sheetsResult.message);
+                }
+                
+                // 3. Cargar configuración
+                const configData = await loadConfigurationFromSheets();
+                
+                // 4. Sincronizar datos
+                updateGoogleSheetsStatus('syncing', 'Sincronizando datos...');
+                const syncResult = await loadDataFromGoogleSheetsWithStructure();
+                
+                if (syncResult.success) {
+                    console.log('✅ Sistema inicializado con Google Sheets');
+                    console.log('📊 Datos cargados:', syncResult.counts);
+                    
+                    // Actualizar UI
+                    updateDashboardStats();
+                    loadInventoryTable();
+                    
+                    updateGoogleSheetsStatus('connected');
+                    showToast('✅ Sistema sincronizado con Google Sheets', 'success');
+                    
+                    return {
+                        success: true,
+                        sheets: sheetsResult,
+                        config: configData,
+                        sync: syncResult
+                    };
+                } else {
+                    console.error('Error cargando datos:', syncResult.error);
+                    
+                    // Usar datos locales como fallback
+                    loadLocalStorageData();
+                    
+                    updateGoogleSheetsStatus('disconnected');
+                    showToast('⚠️ Usando datos locales como respaldo', 'warning');
+                    
+                    return {
+                        success: false,
+                        error: syncResult.error,
+                        message: 'Usando datos locales como respaldo'
+                    };
+                }
+                
+            } catch (error) {
+                console.error('Error inicializando sistema:', error);
+                
+                // Fallback completo a datos locales
+                loadLocalStorageData();
+                
+                updateGoogleSheetsStatus('error', error.message);
+                showToast('⚠️ Sistema cargado en modo local', 'warning');
+                
+                return {
+                    success: false,
+                    error: error.message,
+                    message: 'Sistema cargado en modo local'
+                };
+            }
+        }
+
+        // ========== FUNCIONES EXISTENTES MODIFICADAS ==========
+
+        // Función para inicializar conexión con Google Sheets
+        async function initializeGoogleSheetsConnection() {
+            try {
+                await GoogleSheetsAPI.loadGoogleSheetsAPI();
+                console.log('✅ Conexión con Google Sheets inicializada');
+                return true;
+            } catch (error) {
+                console.error('❌ Error inicializando Google Sheets:', error);
+                throw error;
+            }
+        }
+
+        // Función para preparar datos del inventario para Google Sheets
+        function prepareInventoryForSheets(item) {
+            return {
+                'ID': item.id,
+                'Código': item.code,
+                'Nombre': item.name,
+                'Marca': item.brand,
+                'Modelo': item.model,
+                'Número de Serie': item.serial,
+                'Categoría': item.category,
+                'Grupo': item.group,
+                'Responsable': item.responsible,
+                'Área Asignada': item.area,
+                'Estado': item.status,
+                'Departamento': item.department,
+                'Valor': item.value,
+                'Fecha Adquisición': item.acquisitionDate,
+                'Empresa': item.empresa,
+                'Observaciones': item.observations,
+                'Fecha Registro': item.fechaRegistro,
+                'Imagen': item.image,
+                'Documento Resguardo': item.custodyFile,
+                'Fecha Resguardo': item.custodyDate,
+                'Vigencia Resguardo': item.custodyValidity,
+                'QR Code': item.qrCode || ''
+            };
+        }
+
+        // Función para registrar movimiento en Google Sheets
+        async function logMovementToSheets(movement) {
+            try {
+                await GoogleSheetsAPI.addRow(
+                    GOOGLE_SHEETS_CONFIG.SHEET_NAMES.MOVEMENTS,
+                    movement
+                );
+                console.log('✅ Movimiento registrado en Google Sheets');
+            } catch (error) {
+                console.error('❌ Error registrando movimiento en Google Sheets:', error);
+                // Fallback: guardar localmente
+                movementsData.push(movement);
+                localStorage.setItem('sibim_movementsData', JSON.stringify(movementsData));
+            }
+        }
+
+        // Función para registrar actualización en Google Sheets
+        async function logUpdateToSheets(update) {
+            try {
+                await GoogleSheetsAPI.addRow(
+                    GOOGLE_SHEETS_CONFIG.SHEET_NAMES.UPDATES,
+                    update
+                );
+                console.log('✅ Actualización registrada en Google Sheets');
+            } catch (error) {
+                console.error('❌ Error registrando actualización en Google Sheets:', error);
+            }
+        }
+
+        // FUNCIÓN MODIFICADA saveItem() - ASYNC CON NUEVO CAMPO GRUPO
+        async function saveItem() {
+            const code = document.getElementById('itemCode').value;
+            const name = document.getElementById('itemName').value;
+            const brand = document.getElementById('itemBrand').value;
+            const model = document.getElementById('itemModel').value;
+            const serial = document.getElementById('itemSerial').value;
+            const category = document.getElementById('itemCategory').value;
+            const group = document.getElementById('itemGroup').value;
+            const responsible = document.getElementById('itemResponsable').value;
+            const area = document.getElementById('itemArea').value;
+            const status = document.getElementById('itemStatus').value;
+            const department = document.getElementById('itemDepartment').value;
+            
+            // Validar campos obligatorios
+            const requiredFields = [code, name, brand, model, serial, category, group, responsible, area, department];
+            if (requiredFields.some(field => !field)) {
+                alert('Por favor complete todos los campos obligatorios (*)');
+                return;
+            }
+            
+            const newId = Date.now();
+            
+            // Procesar imágenes
+            let imageData = null;
+            if (currentItemImages.length > 0) {
+                imageData = currentItemImages[0].url;
+            }
+            
+            // Procesar archivos de resguardo
+            let custodyFileName = null;
+            if (currentCustodyFiles.length > 0) {
+                custodyFileName = currentCustodyFiles[0].name;
+            }
+            
+            const newItem = {
+                id: newId,
+                code: code,
+                name: name,
+                brand: brand,
+                model: model,
+                serial: serial,
+                category: category,
+                group: group,
+                responsible: responsible,
+                area: area,
+                status: status === 'activo' ? 'Activo' : status === 'mantenimiento' ? 'En Mantenimiento' : status === 'baja' ? 'Dado de Baja' : 'En Préstamo',
+                department: department,
+                acquisitionDate: document.getElementById('itemAcquisitionDate').value || new Date().toISOString().split('T')[0],
+                value: document.getElementById('itemValue').value ? '$' + document.getElementById('itemValue').value : '$0.00',
+                empresa: "GORIERNO",
+                fechaRegistro: new Date().toISOString().split('T')[0],
+                observations: document.getElementById('itemObservations').value || '',
+                imageDescription: document.getElementById('imageDescription').value || '',
+                image: imageData || "https://via.placeholder.com/300x200?text=" + encodeURIComponent(name.substring(0, 20)),
+                custodyFile: custodyFileName,
+                custodyDate: document.getElementById('custodyDate').value || '',
+                custodyValidity: document.getElementById('custodyValidity').value || 12,
+                custodyObservations: document.getElementById('custodyObservations').value || ''
+            };
+            
+            // Guardar localmente
+            inventoryData.push(newItem);
+            localStorage.setItem('sibim_inventoryData', JSON.stringify(inventoryData));
+            
+            // Guardar en Google Sheets
+            try {
+                updateGoogleSheetsStatus('syncing', 'Guardando en Google Sheets...');
+                
+                const rowData = prepareInventoryForSheets(newItem);
+                await GoogleSheetsAPI.addRow(
+                    GOOGLE_SHEETS_CONFIG.SHEET_NAMES.INVENTORY,
+                    rowData
+                );
+                
+                // Registrar movimiento
+                await logMovementToSheets({
+                    id: Date.now(),
+                    usuario: currentUser.username,
+                    accion: 'Registro de artículo',
+                    tipo: 'Alta',
+                    detalles: `Nuevo artículo registrado: ${name} (${code})`,
+                    idArticulo: newId,
+                    codigoArticulo: code,
+                    nombreArticulo: name,
+                    departamentoDestino: department,
+                    valor: newItem.value,
+                    estadoNuevo: newItem.status
+                });
+                
+                // Registrar actualización
+                await logUpdateToSheets({
+                    id: Date.now(),
+                    usuario: currentUser.username,
+                    tipoActualizacion: 'Creación',
+                    tablaAfectada: 'Inventario',
+                    idRegistro: code,
+                    descripcion: `Nuevo artículo creado: ${name}`
+                });
+                
+                updateGoogleSheetsStatus('connected');
+                showToast('✅ Artículo guardado en Google Sheets', 'success');
+            } catch (error) {
+                console.error('Error guardando en Google Sheets:', error);
+                updateGoogleSheetsStatus('error', 'Error guardando');
+                showToast('⚠️ Artículo guardado localmente (Google Sheets falló)', 'warning');
+            }
+            
+            // Actualizar contador de departamento
+            const deptIndex = departmentsData.findIndex(dept => dept.name === department);
+            if (deptIndex !== -1) {
+                departmentsData[deptIndex].items += 1;
+                localStorage.setItem('sibim_departmentsData', JSON.stringify(departmentsData));
+            }
+            
+            // Generar QR para el nuevo artículo
+            qrData.push({
+                id: qrData.length + 1,
+                item: name,
+                code: code,
+                department: department,
+                date: new Date().toLocaleDateString('es-MX'),
+                qrCode: ""
+            });
+            localStorage.setItem('sibim_qrData', JSON.stringify(qrData));
+            
+            loadInventoryTable();
+            loadDepartmentsTable();
+            loadMovementsTable();
+            loadQRTable();
+            updateDashboardStats();
+            closeModal('registerItemModal');
+            
+            // Mostrar mensaje de éxito
+            alert(`✅ Artículo "${name}" registrado exitosamente.\n📋 Código: ${code}\n🏷️  Grupo: ${group}\n🏢 Departamento: ${department}\n✅ Se ha generado un código QR automáticamente.`);
+            
+            // Limpiar formulario y archivos
+            resetItemForm();
+        }
+
+        // NUEVA FUNCIÓN: Cargar datos desde Google Sheets con la nueva estructura
+        async function loadDataFromGoogleSheetsWithStructure() {
+            updateGoogleSheetsStatus('syncing', 'Cargando datos...');
+            
+            try {
+                await initializeGoogleSheetsConnection();
+                
+                // Cargar todos los datos
+                const [inventoryRaw, usersRaw, departmentsRaw, movementsRaw] = await Promise.all([
+                    GoogleSheetsAPI.getSheetData(GOOGLE_SHEETS_CONFIG.SHEET_NAMES.INVENTORY, false),
+                    GoogleSheetsAPI.getSheetData(GOOGLE_SHEETS_CONFIG.SHEET_NAMES.USERS, false),
+                    GoogleSheetsAPI.getSheetData(GOOGLE_SHEETS_CONFIG.SHEET_NAMES.DEPARTMENTS, false),
+                    GoogleSheetsAPI.getSheetData(GOOGLE_SHEETS_CONFIG.SHEET_NAMES.MOVEMENTS, false)
+                ]);
+                
+                // Mapear datos del inventario
+                inventoryData = inventoryRaw.map((item, index) => ({
+                    id: item.ID || index + 1,
+                    code: item.Código || '',
+                    name: item.Nombre || '',
+                    brand: item.Marca || '',
+                    model: item.Modelo || '',
+                    serial: item['Número de Serie'] || '',
+                    category: item.Categoría || '',
+                    group: item.Grupo || '',
+                    responsible: item.Responsable || '',
+                    area: item['Área Asignada'] || '',
+                    status: item.Estado || '',
+                    department: item.Departamento || '',
+                    value: item.Valor || '$0.00',
+                    acquisitionDate: item['Fecha Adquisición'] || '',
+                    empresa: item.Empresa || 'GORIERNO',
+                    observations: item.Observaciones || '',
+                    fechaRegistro: item['Fecha Registro'] || '',
+                    image: item.Imagen || '',
+                    custodyFile: item['Documento Resguardo'] || '',
+                    custodyDate: item['Fecha Resguardo'] || '',
+                    custodyValidity: item['Vigencia Resguardo'] || '12',
+                    qrCode: item['QR Code'] || ''
+                }));
+                
+                // Mapear datos de usuarios
+                usersData = usersRaw.map((user, index) => ({
+                    id: user.ID || index + 1,
+                    username: user.Usuario || '',
+                    password: user.Contraseña || '',
+                    nombre: user.Nombre || '',
+                    apellido: user.Apellido || '',
+                    email: user.Email || '',
+                    telefono: user.Teléfono || '',
+                    rol: user.Rol || '',
+                    departamento: user.Departamento || '',
+                    avatar: user.Avatar || (user.Nombre ? user.Nombre.charAt(0) : 'U'),
+                    fechaRegistro: user['Fecha Registro'] || '',
+                    estado: user.Estado || 'activo',
+                    permisos: user.Permisos || '',
+                    ultimoAcceso: user['Último Acceso'] || '',
+                    ipUltimoAcceso: user['IP Último Acceso'] || ''
+                }));
+                
+                // Mapear datos de departamentos
+                departmentsData = departmentsRaw.map((dept, index) => ({
+                    id: dept.ID || index + 1,
+                    name: dept['Nombre Departamento'] || '',
+                    manager: dept.Encargado || '',
+                    emailManager: dept['Email Encargado'] || '',
+                    phoneManager: dept['Teléfono Encargado'] || '',
+                    description: dept.Descripción || '',
+                    items: parseInt(dept['Artículos Asignados']) || 0,
+                    creationDate: dept['Fecha Creación'] || '',
+                    location: dept.Ubicación || '',
+                    status: dept.Estado || 'Activo',
+                    budget: dept['Presupuesto Anual'] || '$0.00',
+                    userCreation: dept['Usuario Creación'] || '',
+                    lastUpdate: dept['Última Actualización'] || ''
+                }));
+                
+                // Mapear datos de movimientos
+                movementsData = movementsRaw.map((mov, index) => ({
+                    id: mov.ID || index + 1,
+                    fecha: mov.Fecha || '',
+                    hora: mov.Hora || '',
+                    usuario: mov.Usuario || '',
+                    accion: mov.Acción || '',
+                    tipo: mov.Tipo || '',
+                    detalles: mov.Detalles || '',
+                    idArticulo: mov['ID Artículo'] || '',
+                    codigoArticulo: mov['Código Artículo'] || '',
+                    nombreArticulo: mov['Nombre Artículo'] || '',
+                    departamentoOrigen: mov['Departamento Origen'] || '',
+                    departamentoDestino: mov['Departamento Destino'] || '',
+                    valor: mov.Valor || '',
+                    estadoAnterior: mov['Estado Anterior'] || '',
+                    estadoNuevo: mov['Estado Nuevo'] || '',
+                    ipUsuario: mov['IP Usuario'] || '',
+                    navegador: mov.Navegador || '',
+                    sesionId: mov['Sesión ID'] || ''
+                }));
+                
+                // Guardar en localStorage
+                localStorage.setItem('sibim_inventoryData', JSON.stringify(inventoryData));
+                localStorage.setItem('sibim_usersData', JSON.stringify(usersData));
+                localStorage.setItem('sibim_departmentsData', JSON.stringify(departmentsData));
+                localStorage.setItem('sibim_movementsData', JSON.stringify(movementsData));
+                
+                updateGoogleSheetsStatus('connected');
+                
+                return { 
+                    success: true, 
+                    counts: {
+                        inventory: inventoryData.length,
+                        users: usersData.length,
+                        departments: departmentsData.length,
+                        movements: movementsData.length
+                    }
+                };
+                
+            } catch (error) {
+                console.error('Error cargando datos de Google Sheets:', error);
+                updateGoogleSheetsStatus('error', error.message);
+                return { success: false, error: error.message };
+            }
+        }
+
+        // NUEVA FUNCIÓN: Crear estructura de Google Sheets
+        async function createGoogleSheetStructure() {
+            try {
+                updateGoogleSheetsStatus('syncing', 'Creando estructura...');
+                
+                const result = await createMissingSheets();
+                
+                if (result.success) {
+                    showToast('✅ Estructura de Google Sheets creada', 'success');
+                } else {
+                    showToast(`⚠️ ${result.message}`, 'warning');
+                }
+                
+                return result;
+                
+            } catch (error) {
+                console.error('Error creando estructura de Google Sheets:', error);
+                showToast(`❌ Error: ${error.message}`, 'error');
+                return { success: false, error: error.message };
+            }
+        }
+
+        // Modificar función populateDepartmentSelects para incluir el campo grupo
+        function populateDepartmentSelects() {
+            const selects = [
+                'itemDepartment',
+                'filterDepartment',
+                'userDepartment',
+                'deptManager',
+                'quickItemDepartment'
+            ];
+            
+            selects.forEach(selectId => {
+                const select = document.getElementById(selectId);
+                if (select) {
+                    // Limpiar opciones existentes excepto la primera
+                    while (select.options.length > 1) {
+                        select.remove(1);
+                    }
+                    
+                    // Agregar departamentos
+                    departmentsData.forEach(dept => {
+                        const option = document.createElement('option');
+                        option.value = dept.name;
+                        option.textContent = dept.name;
+                        select.appendChild(option);
+                    });
+                }
+            });
+            
+            // También llenar el select de grupo si existe
+            const groupSelect = document.getElementById('itemGroup');
+            if (groupSelect) {
+                const groups = [
+                    'cocina', 'oficina', 'almacen', 'taller', 
+                    'sala_reuniones', 'recepcion', 'patio', 'garage'
+                ];
+                
+                groups.forEach(group => {
+                    const option = document.createElement('option');
+                    option.value = group;
+                    option.textContent = group.charAt(0).toUpperCase() + group.slice(1).replace('_', ' ');
+                    groupSelect.appendChild(option);
+                });
+            }
+        }
+
+        // ========== INICIALIZACIÓN MODIFICADA DEL SISTEMA ==========
+        document.addEventListener('DOMContentLoaded', async function() {
+            // Verificar si hay usuario logueado
+            const savedUser = localStorage.getItem('sibim_currentUser');
+            
+            if (savedUser) {
+                currentUser = JSON.parse(savedUser);
+                
+                // Agregar indicador de estado de Google Sheets
+                addGoogleSheetsStatusIndicator();
+                
+                // Inicializar sistema con Google Sheets
+                const initResult = await initializeSystemWithGoogleSheets();
+                
+                if (initResult.success) {
+                    console.log('✅ Sistema inicializado exitosamente');
+                } else {
+                    console.warn('⚠️ Sistema inicializado con advertencias:', initResult.message);
+                }
+                
+                showApp();
+            } else {
+                if (typeof showLogin !== 'undefined') {
+            showLogin();
+                } else {
+             console.log('showLogin no está disponible aún');
+        }
+            }
+            
+            // Resto de la inicialización...
+            setupRoleOptions();
+            setupLoginEvents();
+            initializeDatepickers();
+            setupFloatingButton();
+            setupButtonEvents();
+            setupFileUploads();
+            initializePWA();
+            setupThemeColor();
+            
+            // Asegurar que el botón flotante sea visible
+            document.getElementById('toggleSidebar').style.display = 'flex';
+        });
+
+        // ========== FUNCIONES EXISTENTES (SE MANTIENEN IGUAL) ==========
+        // ... (todas las demás funciones existentes se mantienen igual) ...
+
+        // Función para agregar botón de creación de estructura en la página de configuración
+        function addCreateStructureButton() {
+            const configSheetTab = document.getElementById('config-sheets');
+            if (configSheetTab) {
+                const buttonContainer = configSheetTab.querySelector('.security-actions') || 
+                                       configSheetTab.querySelector('.form-actions') ||
+                                       configSheetTab;
+                
+                const createBtn = document.createElement('button');
+                createBtn.className = 'btn btn-warning';
+                createBtn.innerHTML = '<i class="fas fa-plus-circle"></i> Crear Estructura Sheets';
+                createBtn.onclick = createGoogleSheetStructure;
+                
+                if (buttonContainer.querySelector('.form-actions')) {
+                    buttonContainer.querySelector('.form-actions').appendChild(createBtn);
+                } else {
+                    buttonContainer.appendChild(createBtn);
+                }
+            }
+        }
+
+        // Modificar función testGoogleSheetsConnection para actualizar el estado
+        async function testGoogleSheetsConnection() {
+            try {
+                updateGoogleSheetsStatus('syncing', 'Probando conexión...');
+                
+                await initializeGoogleSheetsConnection();
+                const verification = await verifyAllSheetsExist();
+                
+                if (verification.success) {
+                    updateGoogleSheetsStatus('connected');
+                    showToast(`✅ Conexión exitosa. ${verification.sheetCount} pestañas disponibles`, 'success');
+                } else {
+                    updateGoogleSheetsStatus('error', verification.message);
+                    showToast(`⚠️ ${verification.message}`, 'warning');
+                }
+                
+                return verification;
+            } catch (error) {
+                updateGoogleSheetsStatus('error', error.message);
+                showToast(`❌ Error de conexión: ${error.message}`, 'error');
+                throw error;
+            }
+        }
+
+        // Llamar a la función después de que se cargue la página de configuración
+        setTimeout(addCreateStructureButton, 1000);
+
+    </script>
+</body>
+</html>

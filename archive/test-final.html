@@ -1,0 +1,45 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <title>Prueba Final SIBIM</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        function testLibraries() {
+            console.log('=== PRUEBA DE LIBRERÍAS ===');
+            
+            // Chart.js
+            if (typeof Chart !== 'undefined') {
+                console.log('✅ Chart.js: OK');
+                
+                // Crear gráfico de prueba
+                const canvas = document.createElement('canvas');
+                document.body.appendChild(canvas);
+                new Chart(canvas.getContext('2d'), {
+                    type: 'pie',
+                    data: {
+                        labels: ['Funciona', 'No funciona'],
+                        datasets: [{
+                            data: [100, 0],
+                            backgroundColor: ['green', 'red']
+                        }]
+                    }
+                });
+                
+                return true;
+            } else {
+                console.log('❌ Chart.js: FALLO');
+                return false;
+            }
+        }
+        
+        window.onload = testLibraries;
+    </script>
+</head>
+<body>
+    <h1>🧪 Prueba de Librerías</h1>
+    <p>Revisa la consola (F12 → Console)</p>
+    <p>Si ves "✅ Chart.js: OK", todo funciona.</p>
+    <button onclick="location.reload()">Reintentar</button>
+    <a href="dashboard.html">Ir al Dashboard</a>
+</body>
+</html>

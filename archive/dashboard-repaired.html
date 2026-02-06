@@ -1,0 +1,3250 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SIBIM - Dashboard Administrativo</title>
+    
+    <!-- ========== CDNs ABSOLUTAMENTE NECESARIOS ========== -->
+    <!-- Bootstrap 5 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous">
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js" crossorigin="anonymous"></script>
+    
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js" crossorigin="anonymous"></script>
+    
+    <!-- Flatpickr (fechas) -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr" crossorigin="anonymous"></script>
+    
+    <!-- Librerías para exportación -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" crossorigin="anonymous"></script>
+    
+    <!-- Manifest PWA -->
+    <link rel="manifest" href="/config/manifest.json">
+    
+    <!-- Favicon -->
+    <link rel="icon" href="/assets/icons/favicon.ico" type="image/x-icon">
+    <link rel="apple-touch-icon" href="/assets/icons/icon-192x192.png">
+    
+    <!-- Estilos locales -->
+    <link rel="stylesheet" href="/src/css/style.css">
+    
+    <style>
+        /* Estilos de emergencia */
+        .chart-error {
+            padding: 20px;
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+        .loading {
+            text-align: center;
+            padding: 40px;
+        }
+    </style>
+</head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SIBIM - Sistema de Inventario Municipal</title>
+    
+    <!-- Manifest y metadatos PWA -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="application-name" content="SIBIM">
+    <meta name="apple-mobile-web-app-title" content="SIBIM">
+    <meta name="theme-color" content="#1a5f7a">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    
+    <!-- Iconos -->
+    <link rel="icon" href="/assets/icons/icon-192x192.png" type="image/png">
+    <link rel="apple-touch-icon" href="/assets/icons/icon-192x192.png">
+    
+    <!-- Estilos y scripts externos -->
+    <link rel="stylesheet" href="/src/https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/src/https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <script src="/src/https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="/src/https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+    <script src="/src/https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="/src/https://unpkg.com/xlsx/dist/xlsx.full.min.js"></script>
+    <script src="/src/https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="/src/https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+    
+    <style>
+        /* ========== VARIABLES Y ESTILOS GLOBALES ========== */
+        :root {
+            --primary-color: #1a5f7a;
+            --secondary-color: #57cc99;
+            --accent-color: #38a3a5;
+            --light-color: #f8f9fa;
+            --dark-color: #343a40;
+            --gray-color: #6c757d;
+            --danger-color: #dc3545;
+            --warning-color: #ffc107;
+            --info-color: #17a2b8;
+            --sidebar-width: 280px;
+            --header-height: 70px;
+            --border-radius: 12px;
+            --shadow-sm: 0 2px 4px rgba(0,0,0,0.1);
+            --shadow-md: 0 4px 12px rgba(0,0,0,0.1);
+            --shadow-lg: 0 10px 30px rgba(0,0,0,0.2);
+            --transition: all 0.3s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #f5f7fa;
+            color: var(--dark-color);
+            overflow-x: hidden;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        /* ========== ESTILOS PARA CONTROL DE ROLES ========== */
+
+        /* Elementos restringidos */
+        .restricted {
+            opacity: 0.5;
+            pointer-events: none;
+            cursor: not-allowed;
+            position: relative;
+        }
+
+        .restricted::after {
+            content: "ðŸ”’";
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            font-size: 0.8rem;
+        }
+
+        /* Badges para roles */
+        .role-badge {
+            display: inline-block;
+            padding: 0.25rem 0.5rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .role-badge-admin {
+            background-color: rgba(220, 53, 69, 0.1);
+            color: #dc3545;
+            border: 1px solid #dc3545;
+        }
+
+        .role-badge-user {
+            background-color: rgba(40, 167, 69, 0.1);
+            color: #28a745;
+            border: 1px solid #28a745;
+        }
+
+        .role-badge-capturista {
+            background-color: rgba(23, 162, 184, 0.1);
+            color: #17a2b8;
+            border: 1px solid #17a2b8;
+        }
+
+        .role-badge-supervisor {
+            background-color: rgba(255, 193, 7, 0.1);
+            color: #ffc107;
+            border: 1px solid #ffc107;
+        }
+
+        .role-badge-reportes {
+            background-color: rgba(111, 66, 193, 0.1);
+            color: #6f42c1;
+            border: 1px solid #6f42c1;
+        }
+
+        /* Indicador de rol en header */
+        .user-role-indicator {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+            color: white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        /* Toast personalizados */
+        .toast-role {
+            border-left: 5px solid;
+        }
+
+        .toast-role-admin {
+            border-left-color: #dc3545;
+        }
+
+        .toast-role-user {
+            border-left-color: #28a745;
+        }
+
+        .toast-role-capturista {
+            border-left-color: #17a2b8;
+        }
+
+        .toast-role-supervisor {
+            border-left-color: #ffc107;
+        }
+
+        .toast-role-reportes {
+            border-left-color: #6f42c1;
+        }
+
+        /* Panel de informaciÃ³n de rol */
+        .role-info-panel {
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            border-radius: var(--border-radius);
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+            border-left: 5px solid var(--primary-color);
+        }
+
+        .role-info-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .role-info-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: white;
+        }
+
+        .role-info-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        .role-info-desc {
+            color: var(--gray-color);
+            font-size: 0.9rem;
+        }
+
+        .role-permissions-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+
+        .role-permission-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem;
+            background-color: white;
+            border-radius: 5px;
+            border: 1px solid #dee2e6;
+        }
+
+        .role-permission-item i {
+            color: var(--secondary-color);
+        }
+
+        /* Modo de solo lectura */
+        .readonly-mode .form-control:not([readonly]) {
+            background-color: #f8f9fa;
+            border-color: #dee2e6;
+            cursor: not-allowed;
+        }
+
+        .readonly-mode button:not([data-action="read"]) {
+            display: none;
+        }
+
+        /* Ocultar elementos por rol */
+        [data-role="admin-only"] {
+            display: none;
+        }
+
+        body.role-admin [data-role="admin-only"] {
+            display: block;
+        }
+
+        [data-role="user-hidden"] {
+            display: block;
+        }
+
+        body.role-user [data-role="user-hidden"] {
+            display: none;
+        }
+
+        /* AnimaciÃ³n de cambio de rol */
+        @keyframes roleTransition {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .role-transition {
+            animation: roleTransition 0.3s ease;
+        }
+
+        /* ========== APLICACIÃ“N PRINCIPAL ========== */
+        .container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* HEADER */
+        .header {
+            height: var(--header-height);
+            background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 2rem;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+            box-shadow: var(--shadow-md);
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+        }
+
+        .logo i {
+            font-size: 2rem;
+        }
+
+        .logo h1 {
+            font-size: 1.8rem;
+            font-weight: 800;
+            letter-spacing: 1px;
+            line-height: 1.1;
+        }
+
+        .logo span {
+            font-size: 0.7rem;
+            opacity: 0.9;
+            font-weight: 400;
+        }
+
+        .period {
+            background-color: rgba(255, 255, 255, 0.2);
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            margin-left: 1rem;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: var(--border-radius);
+            transition: var(--transition);
+            position: relative;
+        }
+
+        .user-info:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.2rem;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .user-details {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .user-name {
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .user-role {
+            font-size: 0.8rem;
+            opacity: 0.9;
+        }
+
+        .user-dropdown {
+            position: absolute;
+            top: calc(100% + 0.5rem);
+            right: 0;
+            background-color: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-lg);
+            min-width: 200px;
+            z-index: 1001;
+            display: none;
+            overflow: hidden;
+        }
+
+        .user-info:hover .user-dropdown,
+        .user-dropdown:hover {
+            display: block;
+        }
+
+        .user-dropdown-item {
+            padding: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            color: var(--dark-color);
+            text-decoration: none;
+            transition: var(--transition);
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .user-dropdown-item:last-child {
+            border-bottom: none;
+        }
+
+        .user-dropdown-item:hover {
+            background-color: rgba(26, 95, 122, 0.1);
+        }
+
+        .user-dropdown-item i {
+            width: 20px;
+            text-align: center;
+            color: var(--primary-color);
+        }
+
+        /* SIDEBAR */
+        .sidebar {
+            width: var(--sidebar-width);
+            background-color: white;
+            position: fixed;
+            top: var(--header-height);
+            left: 0;
+            height: calc(100vh - var(--header-height));
+            overflow-y: auto;
+            transition: var(--transition);
+            box-shadow: var(--shadow-md);
+            z-index: 90;
+        }
+
+        .sidebar.collapsed {
+            transform: translateX(-100%);
+        }
+
+        .sidebar.active {
+            transform: translateX(0);
+        }
+
+        .sidebar-menu {
+            padding: 1.5rem 0;
+        }
+
+        .menu-section {
+            padding: 0 0.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .menu-section-title {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--gray-color);
+            padding: 0 1.5rem;
+            margin-bottom: 0.75rem;
+            font-weight: 600;
+        }
+
+        .menu-item {
+            padding: 1rem 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            color: var(--dark-color);
+            text-decoration: none;
+            transition: var(--transition);
+            border-left: 4px solid transparent;
+            cursor: pointer;
+            margin: 0.25rem 0.5rem;
+            border-radius: var(--border-radius);
+        }
+
+        .menu-item:hover {
+            background-color: rgba(86, 204, 153, 0.1);
+            color: var(--primary-color);
+            border-left-color: var(--secondary-color);
+        }
+
+        .menu-item.active {
+            background-color: rgba(86, 204, 153, 0.15);
+            color: var(--primary-color);
+            border-left-color: var(--secondary-color);
+            font-weight: 600;
+        }
+
+        .menu-item i {
+            width: 24px;
+            text-align: center;
+            font-size: 1.2rem;
+        }
+
+        .menu-label {
+            font-size: 0.95rem;
+            font-weight: 500;
+        }
+
+        .menu-badge {
+            margin-left: auto;
+            background-color: var(--primary-color);
+            color: white;
+            font-size: 0.7rem;
+            padding: 0.2rem 0.5rem;
+            border-radius: 10px;
+        }
+
+        .sidebar-footer {
+            padding: 1.5rem;
+            margin-top: auto;
+            border-top: 1px solid #eee;
+            font-size: 0.8rem;
+            color: var(--gray-color);
+        }
+
+        .security-badge {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-top: 0.8rem;
+            color: var(--secondary-color);
+            font-weight: 600;
+        }
+
+        /* MAIN CONTENT */
+        .main-content {
+            flex: 1;
+            margin-top: var(--header-height);
+            margin-left: var(--sidebar-width);
+            padding: 2rem;
+            transition: var(--transition);
+            display: none;
+        }
+
+        .main-content.active {
+            display: block;
+        }
+
+        .main-content.expanded {
+            margin-left: 0;
+        }
+
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid #eee;
+        }
+
+        .page-title {
+            font-size: 1.8rem;
+            color: var(--primary-color);
+        }
+
+        .page-subtitle {
+            color: var(--gray-color);
+            font-size: 1rem;
+            margin-top: 0.5rem;
+        }
+
+        .page-actions {
+            display: flex;
+            gap: 1rem;
+        }
+
+        /* BUTTONS */
+        .btn {
+            padding: 0.6rem 1.2rem;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .btn-primary {
+            background-color: var(--secondary-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #45b884;
+        }
+
+        .btn-secondary {
+            background-color: #e9ecef;
+            color: var(--dark-color);
+        }
+
+        .btn-secondary:hover {
+            background-color: #dee2e6;
+        }
+
+        .btn-danger {
+            background-color: var(--danger-color);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background-color: #c82333;
+        }
+
+        .btn-info {
+            background-color: var(--info-color);
+            color: white;
+        }
+
+        .btn-info:hover {
+            background-color: #138496;
+        }
+
+        .btn-warning {
+            background-color: var(--warning-color);
+            color: var(--dark-color);
+        }
+
+        .btn-warning:hover {
+            background-color: #e0a800;
+        }
+
+        .btn-success {
+            background-color: #28a745;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background-color: #218838;
+        }
+
+        /* DASHBOARD STYLES */
+        .welcome-section {
+            background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+            color: white;
+            padding: 2rem;
+            border-radius: var(--border-radius);
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow-md);
+        }
+
+        .welcome-section h2 {
+            font-size: 1.8rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .welcome-section p {
+            opacity: 0.9;
+            margin-bottom: 1.5rem;
+        }
+
+        .user-welcome {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-top: 1.5rem;
+            padding: 1rem;
+            background-color: rgba(255, 255, 255, 0.15);
+            border-radius: var(--border-radius);
+        }
+
+        .user-welcome-avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: white;
+        }
+
+        .user-welcome-info h4 {
+            font-size: 1.2rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .user-welcome-info p {
+            margin-bottom: 0;
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background-color: white;
+            border-radius: var(--border-radius);
+            padding: 1.5rem;
+            box-shadow: var(--shadow-md);
+            transition: var(--transition);
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .stat-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+            color: white;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            color: var(--primary-color);
+        }
+
+        .stat-label {
+            color: var(--gray-color);
+            font-size: 0.9rem;
+        }
+
+        .stat-trend {
+            font-size: 0.8rem;
+            margin-top: 0.5rem;
+        }
+
+        .stat-trend.positive {
+            color: #28a745;
+        }
+
+        .stat-trend.negative {
+            color: #dc3545;
+        }
+
+        /* CHARTS CONTAINER */
+        .charts-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        @media (max-width: 1100px) {
+            .charts-container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .chart-card {
+            background-color: white;
+            border-radius: var(--border-radius);
+            padding: 1.5rem;
+            box-shadow: var(--shadow-md);
+        }
+
+        .chart-title {
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+            color: var(--primary-color);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 300px;
+            width: 100%;
+        }
+
+        /* MODULES GRID */
+        .modules-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .module-card {
+            background-color: white;
+            border-radius: var(--border-radius);
+            padding: 1.5rem;
+            box-shadow: var(--shadow-md);
+            transition: var(--transition);
+            cursor: pointer;
+        }
+
+        .module-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .module-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .module-icon {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            color: white;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .module-title {
+            font-size: 1.3rem;
+            color: var(--primary-color);
+        }
+
+        .module-desc {
+            color: var(--gray-color);
+            line-height: 1.5;
+            margin-bottom: 1.5rem;
+        }
+
+        /* SEARCH AND FILTERS */
+        .search-container {
+            background-color: white;
+            padding: 1.5rem;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-md);
+            margin-bottom: 2rem;
+        }
+
+        .search-box {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .search-input {
+            flex: 1;
+            padding: 0.8rem 1rem;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 1rem;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--secondary-color);
+            box-shadow: 0 0 0 3px rgba(86, 204, 153, 0.2);
+        }
+
+        .filters-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .filter-label {
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: var(--dark-color);
+        }
+
+        .filter-select, .filter-input {
+            padding: 0.6rem;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 0.9rem;
+        }
+
+        /* TABLES */
+        .table-container {
+            background-color: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-md);
+            overflow: hidden;
+            margin-bottom: 2rem;
+        }
+
+        .table-responsive {
+            overflow-x: auto;
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .data-table th {
+            background-color: #f8f9fa;
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600;
+            color: var(--dark-color);
+            border-bottom: 2px solid #dee2e6;
+        }
+
+        .data-table td {
+            padding: 1rem;
+            border-bottom: 1px solid #eee;
+        }
+
+        .data-table tr:hover {
+            background-color: #f8f9fa;
+        }
+
+        .table-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .action-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .action-edit {
+            background-color: rgba(86, 204, 153, 0.1);
+            color: var(--secondary-color);
+        }
+
+        .action-edit:hover {
+            background-color: rgba(86, 204, 153, 0.3);
+        }
+
+        .action-delete {
+            background-color: rgba(220, 53, 69, 0.1);
+            color: var(--danger-color);
+        }
+
+        .action-delete:hover {
+            background-color: rgba(220, 53, 69, 0.3);
+        }
+
+        .action-view {
+            background-color: rgba(23, 162, 184, 0.1);
+            color: var(--info-color);
+        }
+
+        .action-view:hover {
+            background-color: rgba(23, 162, 184, 0.3);
+        }
+
+        .action-qr {
+            background-color: rgba(111, 66, 193, 0.1);
+            color: #6f42c1;
+        }
+
+        .action-qr:hover {
+            background-color: rgba(111, 66, 193, 0.3);
+        }
+
+        /* MODALS */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background-color: white;
+            border-radius: var(--border-radius);
+            width: 100%;
+            max-width: 800px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: var(--shadow-lg);
+        }
+
+        .modal-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-title {
+            font-size: 1.5rem;
+            color: var(--primary-color);
+        }
+
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--gray-color);
+        }
+
+        .modal-body {
+            padding: 1.5rem;
+        }
+
+        /* FORM STYLES */
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: var(--dark-color);
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.8rem;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 1rem;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--secondary-color);
+            box-shadow: 0 0 0 3px rgba(86, 204, 153, 0.2);
+        }
+
+        .form-textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        /* TABS */
+        .tabs {
+            display: flex;
+            border-bottom: 1px solid #ddd;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .tab {
+            padding: 0.8rem 1.5rem;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            color: var(--gray-color);
+            border-bottom: 3px solid transparent;
+            transition: var(--transition);
+            white-space: nowrap;
+        }
+
+        .tab.active {
+            color: var(--primary-color);
+            border-bottom-color: var(--secondary-color);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* QR CODE SECTION */
+        .qr-section {
+            text-align: center;
+            margin-top: 2rem;
+            padding: 1.5rem;
+            background-color: #f8f9fa;
+            border-radius: var(--border-radius);
+        }
+
+        .qr-generator {
+            background-color: white;
+            border-radius: var(--border-radius);
+            padding: 1.5rem;
+            box-shadow: var(--shadow-md);
+            margin-bottom: 2rem;
+        }
+
+        .qr-input-group {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .qr-input {
+            flex: 1;
+            padding: 0.8rem;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 1rem;
+        }
+
+        .qr-result {
+            text-align: center;
+            padding: 1.5rem;
+            background-color: #f8f9fa;
+            border-radius: var(--border-radius);
+            margin-top: 1.5rem;
+        }
+
+        .qr-code-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+            margin: 1.5rem 0;
+        }
+
+        .qr-code {
+            width: 200px;
+            height: 200px;
+            background-color: white;
+            border: 1px solid #ddd;
+            border-radius: var(--border-radius);
+            padding: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .qr-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin-top: 1rem;
+        }
+
+        /* FLOATING BUTTON */
+        .floating-button {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background-color: var(--primary-color);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            box-shadow: var(--shadow-lg);
+            cursor: pointer;
+            z-index: 1000;
+            transition: var(--transition);
+            border: none;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(26, 95, 122, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(26, 95, 122, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(26, 95, 122, 0); }
+        }
+
+        .floating-button:hover {
+            background-color: var(--accent-color);
+            transform: scale(1.1);
+        }
+
+        /* BADGES */
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.5rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .badge-success {
+            background-color: rgba(40, 167, 69, 0.1);
+            color: #28a745;
+        }
+
+        .badge-warning {
+            background-color: rgba(255, 193, 7, 0.1);
+            color: #ffc107;
+        }
+
+        .badge-danger {
+            background-color: rgba(220, 53, 69, 0.1);
+            color: #dc3545;
+        }
+
+        .badge-info {
+            background-color: rgba(23, 162, 184, 0.1);
+            color: #17a2b8;
+        }
+
+        .badge-primary {
+            background-color: rgba(26, 95, 122, 0.1);
+            color: var(--primary-color);
+        }
+
+        /* PERMISSION DENIED */
+        .permission-denied {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: var(--gray-color);
+        }
+
+        .permission-denied i {
+            font-size: 4rem;
+            color: var(--danger-color);
+            margin-bottom: 1rem;
+        }
+
+        .permission-denied h3 {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+            color: var(--primary-color);
+        }
+
+        .permission-denied p {
+            margin-bottom: 2rem;
+        }
+
+        /* FILE UPLOAD STYLES */
+        .file-upload-area {
+            border: 2px dashed #ddd;
+            border-radius: var(--border-radius);
+            padding: 2rem;
+            text-align: center;
+            cursor: pointer;
+            transition: var(--transition);
+            margin-bottom: 1rem;
+        }
+
+        .file-upload-area:hover {
+            border-color: var(--primary-color);
+            background-color: rgba(26, 95, 122, 0.05);
+        }
+
+        .file-upload-area i {
+            font-size: 3rem;
+            color: #ccc;
+            margin-bottom: 1rem;
+        }
+
+        .file-upload-area.dragover {
+            border-color: var(--secondary-color);
+            background-color: rgba(86, 204, 153, 0.05);
+        }
+
+        .file-upload-info {
+            color: var(--gray-color);
+            font-size: 0.9rem;
+        }
+
+        /* RESPONSIVE DESIGN */
+        @media (max-width: 768px) {
+            .header {
+                padding: 0 1rem;
+            }
+            
+            .logo h1 {
+                font-size: 1.3rem;
+            }
+            
+            .main-content {
+                margin-left: 0;
+                padding: 1rem;
+            }
+            
+            .sidebar {
+                width: 100%;
+                transform: translateX(-100%);
+            }
+            
+            .sidebar.active {
+                transform: translateX(0);
+            }
+            
+            .charts-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .modules-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .floating-button {
+                bottom: 1rem;
+                right: 1rem;
+                width: 50px;
+                height: 50px;
+                font-size: 1.2rem;
+            }
+        }
+
+        /* LOADING SPINNER */
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            border-radius: 50%;
+            border-top-color: var(--primary-color);
+            animation: spin 1s ease-in-out infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* UTILITY CLASSES */
+        .text-center { text-align: center; }
+        .text-right { text-align: right; }
+        .text-muted { color: var(--gray-color); }
+        .mb-1 { margin-bottom: 0.5rem; }
+        .mb-2 { margin-bottom: 1rem; }
+        .mb-3 { margin-bottom: 1.5rem; }
+        .mb-4 { margin-bottom: 2rem; }
+        .mt-1 { margin-top: 0.5rem; }
+        .mt-2 { margin-top: 1rem; }
+        .mt-3 { margin-top: 1.5rem; }
+        .mt-4 { margin-top: 2rem; }
+        .d-flex { display: flex; }
+        .align-items-center { align-items: center; }
+        .justify-content-between { justify-content: space-between; }
+        .gap-1 { gap: 0.5rem; }
+        .gap-2 { gap: 1rem; }
+        .gap-3 { gap: 1.5rem; }
+        .w-100 { width: 100%; }
+        .flex-wrap { flex-wrap: wrap; }
+    </style>
+</head>
+<body>
+    <!-- HEADER -->
+    <div class="header">
+        <div class="header-left">
+            <button class="btn btn-secondary" id="toggleSidebar">
+                <i class="fas fa-bars"></i>
+            </button>
+            <div class="logo">
+                <i class="fas fa-boxes"></i>
+                <div>
+                    <h1>SIBIM <span>Sistema de Inventario Municipal</span></h1>
+                    <div class="period">Ejercicio Fiscal 2024</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="header-right">
+            <div class="user-info" id="userMenu">
+                <div class="user-avatar" id="userAvatar" style="background-color: #38a3a5;">MA</div>
+                <div class="user-details">
+                    <div class="user-name" id="userName">MarÃ­a Admin</div>
+                    <div class="user-role" id="userRole">Administrador</div>
+                </div>
+                <i class="fas fa-chevron-down"></i>
+                <div class="user-dropdown">
+                    <div class="user-dropdown-item" id="profileBtn">
+                        <i class="fas fa-user"></i>
+                        <span>Mi Perfil</span>
+                    </div>
+                    <div class="user-dropdown-item" id="changeRoleBtn">
+                        <i class="fas fa-user-tag"></i>
+                        <span>Cambiar Rol</span>
+                    </div>
+                    <div class="user-dropdown-item" id="settingsBtn">
+                        <i class="fas fa-cog"></i>
+                        <span>ConfiguraciÃ³n</span>
+                    </div>
+                    <div class="user-dropdown-item" id="helpBtn">
+                        <i class="fas fa-question-circle"></i>
+                        <span>Ayuda</span>
+                    </div>
+                    <div class="user-dropdown-item" id="logoutBtn">
+                        <i class="fas fa-sign-out-alt"></i>
+                        <span>Cerrar SesiÃ³n</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SIDEBAR -->
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-menu">
+            <!-- Dashboard Section -->
+            <div class="menu-section">
+                <div class="menu-section-title">Principal</div>
+                <div class="menu-item active" data-page="dashboard">
+                    <i class="fas fa-tachometer-alt"></i>
+                    <span class="menu-label">Dashboard</span>
+                </div>
+            </div>
+
+            <!-- Inventory Section -->
+            <div class="menu-section">
+                <div class="menu-section-title">GestiÃ³n de Inventario</div>
+                <div class="menu-item" data-page="inventory">
+                    <i class="fas fa-boxes"></i>
+                    <span class="menu-label">Inventario</span>
+                    <span class="menu-badge">1,254</span>
+                </div>
+                <div class="menu-item" data-page="categories">
+                    <i class="fas fa-tags"></i>
+                    <span class="menu-label">CategorÃ­as</span>
+                </div>
+                <div class="menu-item" data-page="suppliers">
+                    <i class="fas fa-truck"></i>
+                    <span class="menu-label">Proveedores</span>
+                </div>
+                <div class="menu-item" data-page="warehouses">
+                    <i class="fas fa-warehouse"></i>
+                    <span class="menu-label">Almacenes</span>
+                </div>
+            </div>
+
+            <!-- Transactions Section -->
+            <div class="menu-section">
+                <div class="menu-section-title">Transacciones</div>
+                <div class="menu-item" data-page="movements">
+                    <i class="fas fa-exchange-alt"></i>
+                    <span class="menu-label">Movimientos</span>
+                    <span class="menu-badge">45</span>
+                </div>
+                <div class="menu-item" data-page="orders">
+                    <i class="fas fa-clipboard-list"></i>
+                    <span class="menu-label">Ã“rdenes</span>
+                </div>
+                <div class="menu-item" data-page="maintenance">
+                    <i class="fas fa-tools"></i>
+                    <span class="menu-label">Mantenimientos</span>
+                </div>
+            </div>
+
+            <!-- Reports Section -->
+            <div class="menu-section">
+                <div class="menu-section-title">Reportes</div>
+                <div class="menu-item" data-page="reports">
+                    <i class="fas fa-chart-bar"></i>
+                    <span class="menu-label">Reportes</span>
+                </div>
+                <div class="menu-item" data-page="analytics">
+                    <i class="fas fa-chart-line"></i>
+                    <span class="menu-label">AnalÃ­ticas</span>
+                </div>
+                <div class="menu-item" data-page="exports">
+                    <i class="fas fa-file-export"></i>
+                    <span class="menu-label">Exportaciones</span>
+                </div>
+            </div>
+
+            <!-- Administration Section -->
+            <div class="menu-section" data-role="admin-only">
+                <div class="menu-section-title">AdministraciÃ³n</div>
+                <div class="menu-item" data-page="users">
+                    <i class="fas fa-users"></i>
+                    <span class="menu-label">Usuarios</span>
+                </div>
+                <div class="menu-item" data-page="roles">
+                    <i class="fas fa-user-shield"></i>
+                    <span class="menu-label">Roles y Permisos</span>
+                </div>
+                <div class="menu-item" data-page="audit">
+                    <i class="fas fa-history"></i>
+                    <span class="menu-label">AuditorÃ­a</span>
+                </div>
+                <div class="menu-item" data-page="settings">
+                    <i class="fas fa-cogs"></i>
+                    <span class="menu-label">ConfiguraciÃ³n</span>
+                </div>
+            </div>
+
+            <!-- Tools Section -->
+            <div class="menu-section">
+                <div class="menu-section-title">Herramientas</div>
+                <div class="menu-item" data-page="qrgenerator">
+                    <i class="fas fa-qrcode"></i>
+                    <span class="menu-label">Generar QR</span>
+                </div>
+                <div class="menu-item" data-page="import">
+                    <i class="fas fa-file-import"></i>
+                    <span class="menu-label">Importar Datos</span>
+                </div>
+                <div class="menu-item" data-page="backup">
+                    <i class="fas fa-database"></i>
+                    <span class="menu-label">Respaldo</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="sidebar-footer">
+            <div>SIBIM v2.0</div>
+            <div class="security-badge">
+                <i class="fas fa-lock"></i>
+                <span>ConexiÃ³n Segura</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- MAIN CONTENT AREA -->
+    <div class="container">
+        <!-- Dashboard Content -->
+        <div class="main-content active" id="dashboard">
+            <div class="page-header">
+                <div>
+                    <h1 class="page-title">Dashboard</h1>
+                    <p class="page-subtitle">Resumen y estadÃ­sticas del sistema</p>
+                </div>
+                <div class="page-actions">
+                    <button class="btn btn-secondary">
+                        <i class="fas fa-download"></i> Exportar
+                    </button>
+                    <button class="btn btn-primary">
+                        <i class="fas fa-sync-alt"></i> Actualizar
+                    </button>
+                </div>
+            </div>
+
+            <div class="role-info-panel">
+                <div class="role-info-header">
+                    <div class="role-info-icon" style="background-color: #dc3545;">
+                        <i class="fas fa-user-shield"></i>
+                    </div>
+                    <div>
+                        <div class="role-info-title">Rol: Administrador</div>
+                        <div class="role-info-desc">Tiene acceso completo a todas las funcionalidades del sistema</div>
+                    </div>
+                </div>
+                <div class="role-permissions-list">
+                    <div class="role-permission-item">
+                        <i class="fas fa-check-circle"></i>
+                        <span>GestiÃ³n completa de inventario</span>
+                    </div>
+                    <div class="role-permission-item">
+                        <i class="fas fa-check-circle"></i>
+                        <span>AdministraciÃ³n de usuarios</span>
+                    </div>
+                    <div class="role-permission-item">
+                        <i class="fas fa-check-circle"></i>
+                        <span>GeneraciÃ³n de reportes</span>
+                    </div>
+                    <div class="role-permission-item">
+                        <i class="fas fa-check-circle"></i>
+                        <span>ConfiguraciÃ³n del sistema</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="welcome-section">
+                <h2>Â¡Bienvenido de nuevo, MarÃ­a!</h2>
+                <p>Estos son los datos mÃ¡s importantes de tu inventario municipal hoy.</p>
+                
+                <div class="user-welcome">
+                    <div class="user-welcome-avatar" style="background-color: #38a3a5;">MA</div>
+                    <div class="user-welcome-info">
+                        <h4>MarÃ­a Admin</h4>
+                        <p>Ãšltimo acceso: Hoy, 10:30 AM</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-boxes"></i>
+                    </div>
+                    <div class="stat-value">1,254</div>
+                    <div class="stat-label">ArtÃ­culos en Inventario</div>
+                    <div class="stat-trend positive">
+                        <i class="fas fa-arrow-up"></i> 5% vs mes anterior
+                    </div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-exchange-alt"></i>
+                    </div>
+                    <div class="stat-value">45</div>
+                    <div class="stat-label">Movimientos Hoy</div>
+                    <div class="stat-trend positive">
+                        <i class="fas fa-arrow-up"></i> 12% vs ayer
+                    </div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-exclamation-triangle"></i>
+                    </div>
+                    <div class="stat-value">23</div>
+                    <div class="stat-label">ArtÃ­culos Bajo MÃ­nimo</div>
+                    <div class="stat-trend negative">
+                        <i class="fas fa-arrow-up"></i> Necesitan atenciÃ³n
+                    </div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-truck"></i>
+                    </div>
+                    <div class="stat-value">8</div>
+                    <div class="stat-label">Ã“rdenes Pendientes</div>
+                    <div class="stat-trend positive">
+                        <i class="fas fa-arrow-down"></i> 2 completadas hoy
+                    </div>
+                </div>
+            </div>
+
+            <div class="charts-container">
+                <div class="chart-card">
+                    <h3 class="chart-title">
+                        <i class="fas fa-chart-line"></i> Movimientos por Mes
+                    </h3>
+                    <div class="chart-container">
+                        <canvas id="movementsChart"></canvas>
+                    </div>
+                </div>
+                
+                <div class="chart-card">
+                    <h3 class="chart-title">
+                        <i class="fas fa-chart-pie"></i> Inventario por CategorÃ­a
+                    </h3>
+                    <div class="chart-container">
+                        <canvas id="categoriesChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modules-grid">
+                <div class="module-card" data-page="inventory">
+                    <div class="module-header">
+                        <div class="module-icon">
+                            <i class="fas fa-boxes"></i>
+                        </div>
+                        <div class="module-title">Inventario</div>
+                    </div>
+                    <p class="module-desc">Gestiona todos los artÃ­culos del inventario municipal. Agrega, modifica o elimina productos.</p>
+                    <button class="btn btn-primary">Acceder</button>
+                </div>
+                
+                <div class="module-card" data-page="movements">
+                    <div class="module-header">
+                        <div class="module-icon">
+                            <i class="fas fa-exchange-alt"></i>
+                        </div>
+                        <div class="module-title">Movimientos</div>
+                    </div>
+                    <p class="module-desc">Registra entradas, salidas y transferencias de inventario entre almacenes.</p>
+                    <button class="btn btn-primary">Acceder</button>
+                </div>
+                
+                <div class="module-card" data-page="reports">
+                    <div class="module-header">
+                        <div class="module-icon">
+                            <i class="fas fa-chart-bar"></i>
+                        </div>
+                        <div class="module-title">Reportes</div>
+                    </div>
+                    <p class="module-desc">Genera reportes detallados de inventario, movimientos y estadÃ­sticas.</p>
+                    <button class="btn btn-primary">Acceder</button>
+                </div>
+                
+                <div class="module-card" data-page="qrgenerator">
+                    <div class="module-header">
+                        <div class="module-icon">
+                            <i class="fas fa-qrcode"></i>
+                        </div>
+                        <div class="module-title">CÃ³digos QR</div>
+                    </div>
+                    <p class="module-desc">Genera cÃ³digos QR para artÃ­culos del inventario y gestiÃ³n rÃ¡pida.</p>
+                    <button class="btn btn-primary">Acceder</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Inventory Content -->
+        <div class="main-content" id="inventory">
+            <div class="page-header">
+                <div>
+                    <h1 class="page-title">Inventario</h1>
+                    <p class="page-subtitle">GestiÃ³n de artÃ­culos del inventario municipal</p>
+                </div>
+                <div class="page-actions">
+                    <button class="btn btn-secondary">
+                        <i class="fas fa-filter"></i> Filtros
+                    </button>
+                    <button class="btn btn-primary" id="addInventoryBtn">
+                        <i class="fas fa-plus"></i> Nuevo ArtÃ­culo
+                    </button>
+                </div>
+            </div>
+
+            <div class="search-container">
+                <div class="search-box">
+                    <input type="text" class="search-input" placeholder="Buscar artÃ­culo por nombre, cÃ³digo o descripciÃ³n...">
+                    <button class="btn btn-primary">
+                        <i class="fas fa-search"></i> Buscar
+                    </button>
+                </div>
+                <div class="filters-container">
+                    <div class="filter-group">
+                        <label class="filter-label">CategorÃ­a</label>
+                        <select class="filter-select">
+                            <option value="">Todas las categorÃ­as</option>
+                            <option value="1">Oficina</option>
+                            <option value="2">Limpieza</option>
+                            <option value="3">InformÃ¡tica</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label class="filter-label">AlmacÃ©n</label>
+                        <select class="filter-select">
+                            <option value="">Todos los almacenes</option>
+                            <option value="1">AlmacÃ©n Central</option>
+                            <option value="2">AlmacÃ©n Norte</option>
+                            <option value="3">AlmacÃ©n Sur</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label class="filter-label">Estado</label>
+                        <select class="filter-select">
+                            <option value="">Todos los estados</option>
+                            <option value="active">Activo</option>
+                            <option value="inactive">Inactivo</option>
+                            <option value="low">Bajo Stock</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="table-container">
+                <div class="table-responsive">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>CÃ³digo</th>
+                                <th>ArtÃ­culo</th>
+                                <th>CategorÃ­a</th>
+                                <th>Stock</th>
+                                <th>UbicaciÃ³n</th>
+                                <th>Estado</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="inventoryTableBody">
+                            <!-- Los datos se cargarÃ¡n dinÃ¡micamente -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- QR Generator Content -->
+        <div class="main-content" id="qrgenerator">
+            <div class="page-header">
+                <div>
+                    <h1 class="page-title">Generador de CÃ³digos QR</h1>
+                    <p class="page-subtitle">Genera cÃ³digos QR para artÃ­culos del inventario</p>
+                </div>
+                <div class="page-actions">
+                    <button class="btn btn-secondary">
+                        <i class="fas fa-history"></i> Historial
+                    </button>
+                </div>
+            </div>
+
+            <div class="qr-generator">
+                <h3>Generar Nuevo CÃ³digo QR</h3>
+                <p>Ingresa los datos del artÃ­culo para generar su cÃ³digo QR</p>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">CÃ³digo del ArtÃ­culo</label>
+                        <input type="text" class="form-control" id="qrItemCode" placeholder="Ej: INV-001">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Nombre del ArtÃ­culo</label>
+                        <input type="text" class="form-control" id="qrItemName" placeholder="Ej: Silla de oficina">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">InformaciÃ³n Adicional (JSON)</label>
+                    <textarea class="form-control form-textarea" id="qrAdditionalInfo" rows="4" placeholder='{"categoria": "Oficina", "almacen": "Central", "responsable": "Juan PÃ©rez"}'></textarea>
+                </div>
+                
+                <div class="text-center mt-3">
+                    <button class="btn btn-primary btn-lg" id="generateQRBtn">
+                        <i class="fas fa-qrcode"></i> Generar CÃ³digo QR
+                    </button>
+                </div>
+            </div>
+
+            <div class="qr-result hidden" id="qrResult">
+                <h3>CÃ³digo QR Generado</h3>
+                <div class="qr-code-container">
+                    <div class="qr-code" id="qrcode"></div>
+                    <div id="qrInfo">
+                        <h4 id="qrItemTitle"></h4>
+                        <p id="qrItemDetails"></p>
+                    </div>
+                </div>
+                <div class="qr-actions">
+                    <button class="btn btn-secondary" id="downloadQRBtn">
+                        <i class="fas fa-download"></i> Descargar PNG
+                    </button>
+                    <button class="btn btn-primary" id="printQRBtn">
+                        <i class="fas fa-print"></i> Imprimir
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Reports Content -->
+        <div class="main-content" id="reports">
+            <div class="page-header">
+                <div>
+                    <h1 class="page-title">Reportes</h1>
+                    <p class="page-subtitle">Genera reportes del sistema de inventario</p>
+                </div>
+                <div class="page-actions">
+                    <button class="btn btn-primary" id="generateReportBtn">
+                        <i class="fas fa-plus"></i> Nuevo Reporte
+                    </button>
+                </div>
+            </div>
+
+            <div class="modules-grid">
+                <div class="module-card" id="inventoryReport">
+                    <div class="module-header">
+                        <div class="module-icon">
+                            <i class="fas fa-boxes"></i>
+                        </div>
+                        <div class="module-title">Reporte de Inventario</div>
+                    </div>
+                    <p class="module-desc">Reporte completo del inventario actual con filtros por categorÃ­a y almacÃ©n.</p>
+                    <button class="btn btn-primary">Generar</button>
+                </div>
+                
+                <div class="module-card" id="movementsReport">
+                    <div class="module-header">
+                        <div class="module-icon">
+                            <i class="fas fa-exchange-alt"></i>
+                        </div>
+                        <div class="module-title">Reporte de Movimientos</div>
+                    </div>
+                    <p class="module-desc">Movimientos de inventario por perÃ­odo con anÃ¡lisis de tendencias.</p>
+                    <button class="btn btn-primary">Generar</button>
+                </div>
+                
+                <div class="module-card" id="valuationReport">
+                    <div class="module-header">
+                        <div class="module-icon">
+                            <i class="fas fa-dollar-sign"></i>
+                        </div>
+                        <div class="module-title">ValuaciÃ³n de Inventario</div>
+                    </div>
+                    <p class="module-desc">Valor total del inventario por categorÃ­as y proyecciones.</p>
+                    <button class="btn btn-primary">Generar</button>
+                </div>
+                
+                <div class="module-card" id="auditReport">
+                    <div class="module-header">
+                        <div class="module-icon">
+                            <i class="fas fa-clipboard-check"></i>
+                        </div>
+                        <div class="module-title">AuditorÃ­a</div>
+                    </div>
+                    <p class="module-desc">Reporte de auditorÃ­a con todas las transacciones del sistema.</p>
+                    <button class="btn btn-primary">Generar</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Users Management (Admin Only) -->
+        <div class="main-content" id="users">
+            <div class="page-header">
+                <div>
+                    <h1 class="page-title">GestiÃ³n de Usuarios</h1>
+                    <p class="page-subtitle">Administra los usuarios del sistema</p>
+                </div>
+                <div class="page-actions">
+                    <button class="btn btn-primary" id="addUserBtn">
+                        <i class="fas fa-plus"></i> Nuevo Usuario
+                    </button>
+                </div>
+            </div>
+
+            <div class="table-container">
+                <div class="table-responsive">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Usuario</th>
+                                <th>Nombre</th>
+                                <th>Email</th>
+                                <th>Rol</th>
+                                <th>Estado</th>
+                                <th>Ãšltimo Acceso</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="usersTableBody">
+                            <!-- Los datos se cargarÃ¡n dinÃ¡micamente -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Roles Management (Admin Only) -->
+        <div class="main-content" id="roles">
+            <div class="page-header">
+                <div>
+                    <h1 class="page-title">Roles y Permisos</h1>
+                    <p class="page-subtitle">Configura los roles y permisos del sistema</p>
+                </div>
+                <div class="page-actions">
+                    <button class="btn btn-primary" id="addRoleBtn">
+                        <i class="fas fa-plus"></i> Nuevo Rol
+                    </button>
+                </div>
+            </div>
+
+            <div class="modules-grid">
+                <div class="module-card">
+                    <div class="module-header">
+                        <div class="module-icon" style="background-color: #dc3545;">
+                            <i class="fas fa-user-shield"></i>
+                        </div>
+                        <div class="module-title">Administrador</div>
+                    </div>
+                    <p class="module-desc">Acceso completo a todas las funcionalidades del sistema.</p>
+                    <div class="role-badge role-badge-admin">5 usuarios</div>
+                    <button class="btn btn-secondary mt-2">Editar Permisos</button>
+                </div>
+                
+                <div class="module-card">
+                    <div class="module-header">
+                        <div class="module-icon" style="background-color: #28a745;">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <div class="module-title">Usuario EstÃ¡ndar</div>
+                    </div>
+                    <p class="module-desc">Acceso a consultas y operaciones bÃ¡sicas de inventario.</p>
+                    <div class="role-badge role-badge-user">12 usuarios</div>
+                    <button class="btn btn-secondary mt-2">Editar Permisos</button>
+                </div>
+                
+                <div class="module-card">
+                    <div class="module-header">
+                        <div class="module-icon" style="background-color: #17a2b8;">
+                            <i class="fas fa-keyboard"></i>
+                        </div>
+                        <div class="module-title">Capturista</div>
+                    </div>
+                    <p class="module-desc">Solo puede registrar movimientos y actualizar existencias.</p>
+                    <div class="role-badge role-badge-capturista">8 usuarios</div>
+                    <button class="btn btn-secondary mt-2">Editar Permisos</button>
+                </div>
+                
+                <div class="module-card">
+                    <div class="module-header">
+                        <div class="module-icon" style="background-color: #ffc107;">
+                            <i class="fas fa-eye"></i>
+                        </div>
+                        <div class="module-title">Supervisor</div>
+                    </div>
+                    <p class="module-desc">Puede ver todo pero no modificar configuraciones crÃ­ticas.</p>
+                    <div class="role-badge role-badge-supervisor">3 usuarios</div>
+                    <button class="btn btn-secondary mt-2">Editar Permisos</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Other pages would continue here... -->
+    </div>
+
+    <!-- MODALS -->
+    <!-- Add Inventory Modal -->
+    <div class="modal" id="addInventoryModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Nuevo ArtÃ­culo de Inventario</h2>
+                <button class="close-modal" data-modal="addInventoryModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="inventoryForm">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">CÃ³digo *</label>
+                            <input type="text" class="form-control" name="code" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Nombre *</label>
+                            <input type="text" class="form-control" name="name" required>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">CategorÃ­a *</label>
+                            <select class="form-control" name="category" required>
+                                <option value="">Seleccionar categorÃ­a</option>
+                                <option value="1">Oficina</option>
+                                <option value="2">Limpieza</option>
+                                <option value="3">InformÃ¡tica</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Unidad de Medida</label>
+                            <select class="form-control" name="unit">
+                                <option value="pza">Pieza</option>
+                                <option value="kg">Kilogramo</option>
+                                <option value="lt">Litro</option>
+                                <option value="m">Metro</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">DescripciÃ³n</label>
+                        <textarea class="form-control form-textarea" name="description" rows="3"></textarea>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Stock MÃ­nimo</label>
+                            <input type="number" class="form-control" name="min_stock">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Stock MÃ¡ximo</label>
+                            <input type="number" class="form-control" name="max_stock">
+                        </div>
+                    </div>
+                    
+                    <div class="text-right">
+                        <button type="button" class="btn btn-secondary" data-modal="addInventoryModal">Cancelar</button>
+                        <button type="submit" class="btn btn-primary">Guardar ArtÃ­culo</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Change Role Modal -->
+    <div class="modal" id="changeRoleModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Cambiar Rol de Usuario</h2>
+                <button class="close-modal" data-modal="changeRoleModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p>Selecciona un rol para cambiar temporalmente tus permisos en el sistema:</p>
+                
+                <div class="modules-grid mt-3">
+                    <div class="module-card role-selector" data-role="admin">
+                        <div class="module-header">
+                            <div class="module-icon" style="background-color: #dc3545;">
+                                <i class="fas fa-user-shield"></i>
+                            </div>
+                            <div class="module-title">Administrador</div>
+                        </div>
+                        <p class="module-desc">Acceso completo a todas las funcionalidades.</p>
+                        <div class="role-badge role-badge-admin">Actual</div>
+                    </div>
+                    
+                    <div class="module-card role-selector" data-role="user">
+                        <div class="module-header">
+                            <div class="module-icon" style="background-color: #28a745;">
+                                <i class="fas fa-user"></i>
+                            </div>
+                            <div class="module-title">Usuario EstÃ¡ndar</div>
+                        </div>
+                        <p class="module-desc">Acceso bÃ¡sico a consultas y operaciones.</p>
+                    </div>
+                    
+                    <div class="module-card role-selector" data-role="capturista">
+                        <div class="module-header">
+                            <div class="module-icon" style="background-color: #17a2b8;">
+                                <i class="fas fa-keyboard"></i>
+                            </div>
+                            <div class="module-title">Capturista</div>
+                        </div>
+                        <p class="module-desc">Solo registro de movimientos y existencias.</p>
+                    </div>
+                    
+                    <div class="module-card role-selector" data-role="supervisor">
+                        <div class="module-header">
+                            <div class="module-icon" style="background-color: #ffc107;">
+                                <i class="fas fa-eye"></i>
+                            </div>
+                            <div class="module-title">Supervisor</div>
+                        </div>
+                        <p class="module-desc">Solo visualizaciÃ³n, sin modificaciones crÃ­ticas.</p>
+                    </div>
+                    
+                    <div class="module-card role-selector" data-role="reportes">
+                        <div class="module-header">
+                            <div class="module-icon" style="background-color: #6f42c1;">
+                                <i class="fas fa-chart-bar"></i>
+                            </div>
+                            <div class="module-title">Solo Reportes</div>
+                        </div>
+                        <p class="module-desc">Acceso exclusivo a mÃ³dulo de reportes.</p>
+                    </div>
+                </div>
+                
+                <div class="text-right mt-3">
+                    <button type="button" class="btn btn-secondary" data-modal="changeRoleModal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" id="confirmRoleChange">Cambiar Rol</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Floating Action Button -->
+    <button class="floating-button" id="quickActionBtn">
+        <i class="fas fa-bolt"></i>
+    </button>
+
+    <!-- Toast Notifications Container -->
+    <div id="toastContainer" style="position: fixed; top: 20px; right: 20px; z-index: 9999;"></div>
+
+    <script>
+        // ========== SISTEMA DE ROLES Y PERMISOS ==========
+        const ROLES = {
+            ADMIN: {
+                id: 'admin',
+                name: 'Administrador',
+                color: '#dc3545',
+                permissions: {
+                    inventory: { create: true, read: true, update: true, delete: true },
+                    users: { create: true, read: true, update: true, delete: true },
+                    reports: { create: true, read: true, export: true },
+                    settings: { read: true, update: true }
+                }
+            },
+            USER: {
+                id: 'user',
+                name: 'Usuario EstÃ¡ndar',
+                color: '#28a745',
+                permissions: {
+                    inventory: { create: false, read: true, update: false, delete: false },
+                    users: { create: false, read: false, update: false, delete: false },
+                    reports: { create: false, read: true, export: false },
+                    settings: { read: false, update: false }
+                }
+            },
+            CAPTURISTA: {
+                id: 'capturista',
+                name: 'Capturista',
+                color: '#17a2b8',
+                permissions: {
+                    inventory: { create: true, read: true, update: true, delete: false },
+                    users: { create: false, read: false, update: false, delete: false },
+                    reports: { create: false, read: true, export: false },
+                    settings: { read: false, update: false }
+                }
+            },
+            SUPERVISOR: {
+                id: 'supervisor',
+                name: 'Supervisor',
+                color: '#ffc107',
+                permissions: {
+                    inventory: { create: false, read: true, update: false, delete: false },
+                    users: { create: false, read: true, update: false, delete: false },
+                    reports: { create: true, read: true, export: true },
+                    settings: { read: true, update: false }
+                }
+            },
+            REPORTES: {
+                id: 'reportes',
+                name: 'Solo Reportes',
+                color: '#6f42c1',
+                permissions: {
+                    inventory: { create: false, read: true, update: false, delete: false },
+                    users: { create: false, read: false, update: false, delete: false },
+                    reports: { create: true, read: true, export: true },
+                    settings: { read: false, update: false }
+                }
+            }
+        };
+
+        // Estado de la aplicaciÃ³n
+        let currentUser = {
+            id: 1,
+            name: 'MarÃ­a Admin',
+            email: 'maria@municipio.com',
+            role: ROLES.ADMIN,
+            avatarColor: '#38a3a5'
+        };
+
+        let currentPage = 'dashboard';
+
+        // ========== FUNCIONES DE ROLES ==========
+        function setUserRole(role) {
+            currentUser.role = role;
+            
+            // Actualizar interfaz
+            document.getElementById('userRole').textContent = role.name;
+            document.getElementById('userAvatar').style.backgroundColor = role.color;
+            document.body.className = `role-${role.id}`;
+            
+            // Actualizar permisos en la interfaz
+            applyRolePermissions();
+            
+            // Mostrar notificaciÃ³n
+            showToast(`Rol cambiado a: ${role.name}`, 'success', `toast-role toast-role-${role.id}`);
+            
+            // Guardar en localStorage
+            localStorage.setItem('sibim_user_role', JSON.stringify({
+                role: role.id,
+                timestamp: new Date().getTime()
+            }));
+        }
+
+        function applyRolePermissions() {
+            const role = currentUser.role;
+            
+            // Aplicar restricciones a botones
+            document.querySelectorAll('[data-permission]').forEach(element => {
+                const permission = element.getAttribute('data-permission');
+                const [module, action] = permission.split('.');
+                
+                if (role.permissions[module] && role.permissions[module][action] !== undefined) {
+                    if (!role.permissions[module][action]) {
+                        element.classList.add('restricted');
+                        element.title = `Permiso denegado: ${module}.${action}`;
+                    } else {
+                        element.classList.remove('restricted');
+                        element.title = '';
+                    }
+                }
+            });
+            
+            // Ocultar/mostrar secciones administrativas
+            const adminSections = document.querySelectorAll('[data-role="admin-only"]');
+            adminSections.forEach(section => {
+                section.style.display = role.id === 'admin' ? 'block' : 'none';
+            });
+            
+            // Actualizar panel de informaciÃ³n de rol
+            updateRoleInfoPanel();
+        }
+
+        function updateRoleInfoPanel() {
+            const role = currentUser.role;
+            const panel = document.querySelector('.role-info-panel');
+            
+            if (panel) {
+                panel.querySelector('.role-info-title').textContent = `Rol: ${role.name}`;
+                panel.querySelector('.role-info-icon').style.backgroundColor = role.color;
+                
+                // Actualizar lista de permisos
+                const permissionsList = panel.querySelector('.role-permissions-list');
+                permissionsList.innerHTML = '';
+                
+                Object.entries(role.permissions).forEach(([module, actions]) => {
+                    Object.entries(actions).forEach(([action, allowed]) => {
+                        if (allowed) {
+                            const item = document.createElement('div');
+                            item.className = 'role-permission-item';
+                            item.innerHTML = `
+                                <i class="fas fa-check-circle"></i>
+                                <span>${getPermissionDescription(module, action)}</span>
+                            `;
+                            permissionsList.appendChild(item);
+                        }
+                    });
+                });
+            }
+        }
+
+        function getPermissionDescription(module, action) {
+            const descriptions = {
+                inventory: {
+                    create: 'Crear artÃ­culos de inventario',
+                    read: 'Ver inventario',
+                    update: 'Actualizar inventario',
+                    delete: 'Eliminar artÃ­culos'
+                },
+                users: {
+                    create: 'Crear usuarios',
+                    read: 'Ver usuarios',
+                    update: 'Actualizar usuarios',
+                    delete: 'Eliminar usuarios'
+                },
+                reports: {
+                    create: 'Crear reportes',
+                    read: 'Ver reportes',
+                    export: 'Exportar reportes'
+                },
+                settings: {
+                    read: 'Ver configuraciÃ³n',
+                    update: 'Modificar configuraciÃ³n'
+                }
+            };
+            
+            return descriptions[module]?.[action] || `${module}.${action}`;
+        }
+
+        function checkPermission(module, action) {
+            return currentUser.role.permissions[module] && 
+                   currentUser.role.permissions[module][action] === true;
+        }
+
+        // ========== FUNCIONES DE INTERFAZ ==========
+        function showToast(message, type = 'info', customClass = '') {
+            const toastContainer = document.getElementById('toastContainer');
+            const toastId = 'toast-' + Date.now();
+            
+            const toast = document.createElement('div');
+            toast.id = toastId;
+            toast.className = `toast ${customClass}`;
+            toast.style.cssText = `
+                background: white;
+                padding: 1rem;
+                margin-bottom: 0.5rem;
+                border-radius: 5px;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                min-width: 300px;
+                transform: translateX(100%);
+                animation: slideIn 0.3s forwards;
+            `;
+            
+            toast.innerHTML = `
+                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                    <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'}" 
+                       style="color: ${type === 'success' ? '#28a745' : type === 'error' ? '#dc3545' : '#17a2b8'}"></i>
+                    <div>${message}</div>
+                </div>
+            `;
+            
+            toastContainer.appendChild(toast);
+            
+            // Auto-remove after 5 seconds
+            setTimeout(() => {
+                const toastEl = document.getElementById(toastId);
+                if (toastEl) {
+                    toastEl.style.transform = 'translateX(100%)';
+                    setTimeout(() => toastEl.remove(), 300);
+                }
+            }, 5000);
+        }
+
+        function navigateToPage(pageId) {
+            // Hide all pages
+            document.querySelectorAll('.main-content').forEach(page => {
+                page.classList.remove('active');
+            });
+            
+            // Show selected page
+            const targetPage = document.getElementById(pageId);
+            if (targetPage) {
+                targetPage.classList.add('active');
+                currentPage = pageId;
+                
+                // Update active menu item
+                document.querySelectorAll('.menu-item').forEach(item => {
+                    item.classList.remove('active');
+                    if (item.getAttribute('data-page') === pageId) {
+                        item.classList.add('active');
+                    }
+                });
+                
+                // Check permissions for this page
+                if (!checkPagePermission(pageId)) {
+                    showPermissionDenied(pageId);
+                }
+            }
+        }
+
+        function checkPagePermission(pageId) {
+            const pagePermissions = {
+                'dashboard': true, // Todos pueden ver el dashboard
+                'inventory': checkPermission('inventory', 'read'),
+                'users': checkPermission('users', 'read'),
+                'roles': currentUser.role.id === 'admin',
+                'reports': checkPermission('reports', 'read'),
+                'qrgenerator': checkPermission('inventory', 'read')
+            };
+            
+            return pagePermissions[pageId] !== false;
+        }
+
+        function showPermissionDenied(pageId) {
+            const page = document.getElementById(pageId);
+            const pageName = page.querySelector('.page-title')?.textContent || pageId;
+            
+            page.innerHTML = `
+                <div class="permission-denied">
+                    <i class="fas fa-lock"></i>
+                    <h3>Acceso Denegado</h3>
+                    <p>No tienes permisos para acceder a "${pageName}".</p>
+                    <p>Tu rol actual (${currentUser.role.name}) no tiene los permisos necesarios.</p>
+                    <button class="btn btn-primary" onclick="navigateToPage('dashboard')">
+                        <i class="fas fa-arrow-left"></i> Volver al Dashboard
+                    </button>
+                </div>
+            `;
+        }
+
+        // ========== FUNCIONES DE DATOS ==========
+        function loadInventoryData() {
+            // Datos de ejemplo para el inventario
+            const inventoryData = [
+                { id: 1, code: 'INV-001', name: 'Silla de Oficina', category: 'Oficina', stock: 45, minStock: 10, location: 'AlmacÃ©n Central', status: 'active' },
+                { id: 2, code: 'INV-002', name: 'Escritorio Ejecutivo', category: 'Oficina', stock: 12, minStock: 5, location: 'AlmacÃ©n Central', status: 'active' },
+                { id: 3, code: 'INV-003', name: 'Computadora Dell', category: 'InformÃ¡tica', stock: 8, minStock: 3, location: 'AlmacÃ©n Norte', status: 'low' },
+                { id: 4, code: 'INV-004', name: 'Impresora HP', category: 'InformÃ¡tica', stock: 15, minStock: 5, location: 'AlmacÃ©n Central', status: 'active' },
+                { id: 5, code: 'INV-005', name: 'Detergente', category: 'Limpieza', stock: 3, minStock: 10, location: 'AlmacÃ©n Sur', status: 'critical' }
+            ];
+
+            const tbody = document.getElementById('inventoryTableBody');
+            if (!tbody) return;
+
+            tbody.innerHTML = '';
+            
+            inventoryData.forEach(item => {
+                const row = document.createElement('tr');
+                let statusBadge = '';
+                
+                if (item.stock < item.minStock) {
+                    statusBadge = '<span class="badge badge-danger">Bajo Stock</span>';
+                } else if (item.status === 'critical') {
+                    statusBadge = '<span class="badge badge-danger">CrÃ­tico</span>';
+                } else if (item.status === 'low') {
+                    statusBadge = '<span class="badge badge-warning">Bajo</span>';
+                } else {
+                    statusBadge = '<span class="badge badge-success">Normal</span>';
+                }
+                
+                row.innerHTML = `
+                    <td><strong>${item.code}</strong></td>
+                    <td>${item.name}</td>
+                    <td>${item.category}</td>
+                    <td>${item.stock} <small class="text-muted">(mÃ­n: ${item.minStock})</small></td>
+                    <td>${item.location}</td>
+                    <td>${statusBadge}</td>
+                    <td>
+                        <div class="table-actions">
+                            <div class="action-btn action-view" title="Ver detalles" onclick="viewItem(${item.id})">
+                                <i class="fas fa-eye"></i>
+                            </div>
+                            <div class="action-btn action-edit" title="Editar" onclick="editItem(${item.id})" data-permission="inventory.update">
+                                <i class="fas fa-edit"></i>
+                            </div>
+                            <div class="action-btn action-qr" title="Generar QR" onclick="generateItemQR(${item.id})">
+                                <i class="fas fa-qrcode"></i>
+                            </div>
+                            <div class="action-btn action-delete" title="Eliminar" onclick="deleteItem(${item.id})" data-permission="inventory.delete">
+                                <i class="fas fa-trash"></i>
+                            </div>
+                        </div>
+                    </td>
+                `;
+                
+                tbody.appendChild(row);
+            });
+            
+            // Aplicar permisos a los botones
+            applyRolePermissions();
+        }
+
+        function loadUsersData() {
+            const usersData = [
+                { id: 1, username: 'admin', name: 'MarÃ­a Admin', email: 'maria@municipio.com', role: 'Administrador', status: 'active', lastLogin: '2024-01-15 10:30' },
+                { id: 2, username: 'jperez', name: 'Juan PÃ©rez', email: 'juan@municipio.com', role: 'Usuario EstÃ¡ndar', status: 'active', lastLogin: '2024-01-15 09:15' },
+                { id: 3, username: 'mgarcia', name: 'MarÃ­a GarcÃ­a', email: 'mgarcia@municipio.com', role: 'Capturista', status: 'active', lastLogin: '2024-01-14 16:45' },
+                { id: 4, username: 'rlopez', name: 'Roberto LÃ³pez', email: 'rlopez@municipio.com', role: 'Supervisor', status: 'inactive', lastLogin: '2024-01-10 11:20' }
+            ];
+
+            const tbody = document.getElementById('usersTableBody');
+            if (!tbody) return;
+
+            tbody.innerHTML = '';
+            
+            usersData.forEach(user => {
+                const row = document.createElement('tr');
+                const statusBadge = user.status === 'active' 
+                    ? '<span class="badge badge-success">Activo</span>'
+                    : '<span class="badge badge-secondary">Inactivo</span>';
+                
+                row.innerHTML = `
+                    <td>${user.username}</td>
+                    <td>${user.name}</td>
+                    <td>${user.email}</td>
+                    <td><span class="role-badge role-badge-${user.role.toLowerCase().includes('admin') ? 'admin' : user.role.toLowerCase().includes('capturista') ? 'capturista' : user.role.toLowerCase().includes('supervisor') ? 'supervisor' : 'user'}">${user.role}</span></td>
+                    <td>${statusBadge}</td>
+                    <td>${user.lastLogin}</td>
+                    <td>
+                        <div class="table-actions">
+                            <div class="action-btn action-edit" title="Editar" onclick="editUser(${user.id})" data-permission="users.update">
+                                <i class="fas fa-edit"></i>
+                            </div>
+                            <div class="action-btn action-delete" title="Eliminar" onclick="deleteUser(${user.id})" data-permission="users.delete">
+                                <i class="fas fa-trash"></i>
+                            </div>
+                        </div>
+                    </td>
+                `;
+                
+                tbody.appendChild(row);
+            });
+            
+            applyRolePermissions();
+        }
+
+        // ========== FUNCIONES DE QR ==========
+        function generateQRCode(text, containerId) {
+            const container = document.getElementById(containerId);
+            if (!container) return;
+            
+            container.innerHTML = '';
+            
+            QRCode.toCanvas(container, text, {
+                width: 180,
+                height: 180,
+                margin: 1,
+                color: {
+                    dark: '#1a5f7a',
+                    light: '#ffffff'
+                }
+            }, function(error) {
+                if (error) {
+                    console.error('Error generando QR:', error);
+                    showToast('Error al generar el cÃ³digo QR', 'error');
+                }
+            });
+        }
+
+        // ========== FUNCIONES DE CHARTS ==========
+        function initializeCharts() {
+            // Chart 1: Movimientos por Mes
+            const movementsCtx = document.getElementById('movementsChart')?.getContext('2d');
+            if (movementsCtx) {
+                new Chart(movementsCtx, {
+                    type: 'line',
+                    data: {
+                        labels: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'],
+                        datasets: [{
+                            label: 'Entradas',
+                            data: [65, 59, 80, 81, 56, 55, 40, 45, 60, 70, 75, 80],
+                            borderColor: '#57cc99',
+                            backgroundColor: 'rgba(87, 204, 153, 0.1)',
+                            tension: 0.4,
+                            fill: true
+                        }, {
+                            label: 'Salidas',
+                            data: [28, 48, 40, 19, 86, 27, 90, 35, 45, 50, 60, 65],
+                            borderColor: '#38a3a5',
+                            backgroundColor: 'rgba(56, 163, 165, 0.1)',
+                            tension: 0.4,
+                            fill: true
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'top',
+                            }
+                        }
+                    }
+                });
+            }
+
+            // Chart 2: Inventario por CategorÃ­a
+            const categoriesCtx = document.getElementById('categoriesChart')?.getContext('2d');
+            if (categoriesCtx) {
+                new Chart(categoriesCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Oficina', 'Limpieza', 'InformÃ¡tica', 'Mobiliario', 'Herramientas'],
+                        datasets: [{
+                            data: [35, 20, 25, 15, 5],
+                            backgroundColor: [
+                                '#1a5f7a',
+                                '#57cc99',
+                                '#38a3a5',
+                                '#ffc107',
+                                '#6f42c1'
+                            ],
+                            borderWidth: 2,
+                            borderColor: '#fff'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'right',
+                            }
+                        }
+                    }
+                });
+            }
+        }
+
+        // ========== FUNCIONES DE MODALES ==========
+        function showModal(modalId) {
+            const modal = document.getElementById(modalId);
+            if (modal) {
+                modal.classList.add('active');
+                document.body.style.overflow = 'hidden';
+            }
+        }
+
+        function hideModal(modalId) {
+            const modal = document.getElementById(modalId);
+            if (modal) {
+                modal.classList.remove('active');
+                document.body.style.overflow = 'auto';
+            }
+        }
+
+        // ========== EVENT LISTENERS ==========
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize app
+            setUserRole(currentUser.role);
+            loadInventoryData();
+            loadUsersData();
+            initializeCharts();
+            
+            // Menu navigation
+            document.querySelectorAll('.menu-item').forEach(item => {
+                item.addEventListener('click', function() {
+                    const pageId = this.getAttribute('data-page');
+                    navigateToPage(pageId);
+                });
+            });
+            
+            // Module card navigation
+            document.querySelectorAll('.module-card[data-page]').forEach(card => {
+                card.addEventListener('click', function() {
+                    const pageId = this.getAttribute('data-page');
+                    navigateToPage(pageId);
+                });
+            });
+            
+            // Toggle sidebar
+            document.getElementById('toggleSidebar').addEventListener('click', function() {
+                document.getElementById('sidebar').classList.toggle('active');
+                document.querySelector('.main-content').classList.toggle('expanded');
+            });
+            
+            // Modal controls
+            document.querySelectorAll('.close-modal, [data-modal]').forEach(button => {
+                button.addEventListener('click', function() {
+                    const modalId = this.getAttribute('data-modal');
+                    hideModal(modalId);
+                });
+            });
+            
+            // Add inventory button
+            document.getElementById('addInventoryBtn')?.addEventListener('click', function() {
+                if (checkPermission('inventory', 'create')) {
+                    showModal('addInventoryModal');
+                } else {
+                    showToast('No tienes permisos para agregar artÃ­culos', 'error');
+                }
+            });
+            
+            // Generate QR button
+            document.getElementById('generateQRBtn')?.addEventListener('click', function() {
+                const code = document.getElementById('qrItemCode').value;
+                const name = document.getElementById('qrItemName').value;
+                const info = document.getElementById('qrAdditionalInfo').value;
+                
+                if (!code || !name) {
+                    showToast('Por favor ingresa el cÃ³digo y nombre del artÃ­culo', 'warning');
+                    return;
+                }
+                
+                const qrData = JSON.stringify({
+                    code: code,
+                    name: name,
+                    system: 'SIBIM',
+                    date: new Date().toISOString(),
+                    additional: info ? JSON.parse(info) : null
+                });
+                
+                generateQRCode(qrData, 'qrcode');
+                
+                // Show result
+                document.getElementById('qrResult').classList.remove('hidden');
+                document.getElementById('qrItemTitle').textContent = name;
+                document.getElementById('qrItemDetails').textContent = `CÃ³digo: ${code}`;
+                
+                showToast('CÃ³digo QR generado exitosamente', 'success');
+            });
+            
+            // Download QR button
+            document.getElementById('downloadQRBtn')?.addEventListener('click', function() {
+                const canvas = document.querySelector('#qrcode canvas');
+                if (canvas) {
+                    const link = document.createElement('a');
+                    link.download = `qr-${document.getElementById('qrItemCode').value || 'codigo'}.png`;
+                    link.href = canvas.toDataURL('image/png');
+                    link.click();
+                    showToast('QR descargado exitosamente', 'success');
+                }
+            });
+            
+            // Change role button
+            document.getElementById('changeRoleBtn')?.addEventListener('click', function() {
+                showModal('changeRoleModal');
+            });
+            
+            // Role selection
+            document.querySelectorAll('.role-selector').forEach(selector => {
+                selector.addEventListener('click', function() {
+                    // Remove selection from all
+                    document.querySelectorAll('.role-selector').forEach(s => {
+                        s.style.boxShadow = 'none';
+                        s.style.border = '1px solid #dee2e6';
+                    });
+                    
+                    // Add selection to clicked
+                    this.style.boxShadow = '0 0 0 3px rgba(86, 204, 153, 0.5)';
+                    this.style.border = '1px solid #57cc99';
+                    
+                    // Store selected role
+                    this.selectedRole = this.getAttribute('data-role');
+                });
+            });
+            
+            // Confirm role change
+            document.getElementById('confirmRoleChange')?.addEventListener('click', function() {
+                const selectedCard = document.querySelector('.role-selector[style*="box-shadow"]');
+                if (!selectedCard || !selectedCard.selectedRole) {
+                    showToast('Por favor selecciona un rol', 'warning');
+                    return;
+                }
+                
+                const newRole = ROLES[selectedCard.selectedRole.toUpperCase()];
+                if (newRole) {
+                    setUserRole(newRole);
+                    hideModal('changeRoleModal');
+                }
+            });
+            
+            // Form submissions
+            document.getElementById('inventoryForm')?.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                if (!checkPermission('inventory', 'create')) {
+                    showToast('No tienes permisos para crear artÃ­culos', 'error');
+                    return;
+                }
+                
+                // Simulate form submission
+                showToast('ArtÃ­culo agregado exitosamente', 'success');
+                hideModal('addInventoryModal');
+                this.reset();
+                
+                // Reload inventory data
+                setTimeout(() => loadInventoryData(), 500);
+            });
+            
+            // Logout button
+            document.getElementById('logoutBtn')?.addEventListener('click', function() {
+                if (confirm('Â¿EstÃ¡s seguro de que quieres cerrar sesiÃ³n?')) {
+                    showToast('SesiÃ³n cerrada exitosamente', 'info');
+                    setTimeout(() => {
+                        window.location.href = 'index.html';
+                    }, 1500);
+                }
+            });
+            
+            // Quick action button
+            document.getElementById('quickActionBtn')?.addEventListener('click', function() {
+                // Show quick action menu
+                const actions = [
+                    { icon: 'fa-plus', label: 'Nuevo ArtÃ­culo', action: () => showModal('addInventoryModal'), permission: 'inventory.create' },
+                    { icon: 'fa-qrcode', label: 'Generar QR', action: () => navigateToPage('qrgenerator') },
+                    { icon: 'fa-file-export', label: 'Exportar Reporte', action: () => navigateToPage('reports'), permission: 'reports.export' },
+                    { icon: 'fa-bell', label: 'Ver Alertas', action: () => alert('Funcionalidad en desarrollo') }
+                ];
+                
+                // Filter by permissions
+                const allowedActions = actions.filter(action => {
+                    if (!action.permission) return true;
+                    const [module, perm] = action.permission.split('.');
+                    return checkPermission(module, perm);
+                });
+                
+                if (allowedActions.length === 0) {
+                    showToast('No hay acciones disponibles con tu rol actual', 'warning');
+                    return;
+                }
+                
+                // Create quick action menu
+                const menu = document.createElement('div');
+                menu.style.cssText = `
+                    position: fixed;
+                    bottom: 80px;
+                    right: 20px;
+                    background: white;
+                    border-radius: 10px;
+                    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+                    padding: 1rem;
+                    z-index: 1001;
+                    min-width: 200px;
+                `;
+                
+                allowedActions.forEach(action => {
+                    const item = document.createElement('div');
+                    item.style.cssText = `
+                        padding: 0.75rem;
+                        display: flex;
+                        align-items: center;
+                        gap: 0.75rem;
+                        cursor: pointer;
+                        border-radius: 5px;
+                        transition: background-color 0.2s;
+                    `;
+                    item.innerHTML = `
+                        <i class="fas ${action.icon}" style="color: #1a5f7a;"></i>
+                        <span>${action.label}</span>
+                    `;
+                    item.addEventListener('click', () => {
+                        action.action();
+                        document.body.removeChild(menu);
+                    });
+                    item.addEventListener('mouseenter', () => {
+                        item.style.backgroundColor = '#f8f9fa';
+                    });
+                    item.addEventListener('mouseleave', () => {
+                        item.style.backgroundColor = 'transparent';
+                    });
+                    
+                    menu.appendChild(item);
+                });
+                
+                // Add click outside to close
+                setTimeout(() => {
+                    const closeMenu = (e) => {
+                        if (!menu.contains(e.target) && e.target.id !== 'quickActionBtn') {
+                            document.body.removeChild(menu);
+                            document.removeEventListener('click', closeMenu);
+                        }
+                    };
+                    document.addEventListener('click', closeMenu);
+                }, 100);
+                
+                document.body.appendChild(menu);
+            });
+            
+            // PWA Installation
+            if ('serviceWorker' in navigator) {
+                window.addEventListener('load', () => {
+                    navigator.serviceWorker.register('sw.js')
+                        .then(registration => {
+                            console.log('ServiceWorker registrado:', registration);
+                        })
+                        .catch(error => {
+                            console.log('Error registrando ServiceWorker:', error);
+                        });
+                });
+            }
+            
+            // Check for saved role
+            const savedRole = localStorage.getItem('sibim_user_role');
+            if (savedRole) {
+                try {
+                    const { role, timestamp } = JSON.parse(savedRole);
+                    // Check if saved role is less than 24 hours old
+                    if (Date.now() - timestamp < 24 * 60 * 60 * 1000) {
+                        const roleObj = ROLES[role.toUpperCase()];
+                        if (roleObj) {
+                            setUserRole(roleObj);
+                        }
+                    }
+                } catch (e) {
+                    console.log('Error loading saved role:', e);
+                }
+            }
+        });
+
+        // ========== FUNCIONES AUXILIARES ==========
+        function viewItem(id) {
+            showToast(`Viendo artÃ­culo ${id}`, 'info');
+            // Implementar lÃ³gica para ver detalles
+        }
+
+        function editItem(id) {
+            if (!checkPermission('inventory', 'update')) {
+                showToast('No tienes permisos para editar artÃ­culos', 'error');
+                return;
+            }
+            showToast(`Editando artÃ­culo ${id}`, 'info');
+            // Implementar lÃ³gica para editar
+        }
+
+        function deleteItem(id) {
+            if (!checkPermission('inventory', 'delete')) {
+                showToast('No tienes permisos para eliminar artÃ­culos', 'error');
+                return;
+            }
+            
+            if (confirm('Â¿EstÃ¡s seguro de que quieres eliminar este artÃ­culo?')) {
+                showToast(`ArtÃ­culo ${id} eliminado`, 'success');
+                // Implementar lÃ³gica para eliminar
+            }
+        }
+
+        function generateItemQR(id) {
+            showToast(`Generando QR para artÃ­culo ${id}`, 'info');
+            navigateToPage('qrgenerator');
+            // Implementar lÃ³gica para generar QR especÃ­fico
+        }
+
+        function editUser(id) {
+            if (!checkPermission('users', 'update')) {
+                showToast('No tienes permisos para editar usuarios', 'error');
+                return;
+            }
+            showToast(`Editando usuario ${id}`, 'info');
+            // Implementar lÃ³gica para editar usuario
+        }
+
+        function deleteUser(id) {
+            if (!checkPermission('users', 'delete')) {
+                showToast('No tienes permisos para eliminar usuarios', 'error');
+                return;
+            }
+            
+            if (confirm('Â¿EstÃ¡s seguro de que quieres eliminar este usuario?')) {
+                showToast(`Usuario ${id} eliminado`, 'success');
+                // Implementar lÃ³gica para eliminar usuario
+            }
+        }
+
+        // Add CSS animation for toast
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes slideIn {
+                from { transform: translateX(100%); }
+                to { transform: translateX(0); }
+            }
+            
+            @keyframes slideOut {
+                from { transform: translateX(0); }
+                to { transform: translateX(100%); }
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
+<script>
+// Inicialización SEGURA del dashboard
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('🚀 Dashboard SIBIM iniciando...');
+    
+    // Verificar que Chart.js esté cargado
+    if (typeof Chart === 'undefined') {
+        console.error('❌ Chart.js no cargado. Recargando...');
+        document.getElementById('chart-container').innerHTML = 
+            '<div class="chart-error">' +
+            '<h4><i class="fas fa-exclamation-triangle"></i> Error de gráficos</h4>' +
+            '<p>Chart.js no se cargó correctamente. Recargando librerías...</p>' +
+            '<button class="btn btn-warning" onclick="location.reload()">' +
+            '<i class="fas fa-sync"></i> Reintentar</button>' +
+            '</div>';
+        
+        // Intentar cargar Chart.js dinámicamente
+        const script = document.createElement('script');
+        script.src = 'https://cdn.jsdelivr.net/npm/chart.js';
+        script.onload = function() {
+            console.log('✅ Chart.js cargado dinámicamente');
+            initializeCharts();
+        };
+        document.head.appendChild(script);
+    } else {
+        console.log('✅ Chart.js cargado correctamente');
+        initializeCharts();
+    }
+    
+    // Función de inicialización segura
+    function initializeCharts() {
+        try {
+            console.log('📊 Inicializando gráficos...');
+            
+            // Verificar que existe el canvas
+            const ctx = document.getElementById('inventoryChart');
+            if (!ctx) {
+                console.warn('⚠️  No se encontró canvas para gráficos');
+                return;
+            }
+            
+            // Datos de ejemplo para gráficos
+            const inventoryData = {
+                labels: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun'],
+                datasets: [{
+                    label: 'Artículos en Inventario',
+                    data: [1200, 1250, 1300, 1280, 1320, 1350],
+                    borderColor: '#007bff',
+                    backgroundColor: 'rgba(0, 123, 255, 0.1)',
+                    fill: true
+                }]
+            };
+            
+            // Crear gráfico
+            new Chart(ctx, {
+                type: 'line',
+                data: inventoryData,
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                        },
+                        title: {
+                            display: true,
+                            text: 'Evolución del Inventario'
+                        }
+                    }
+                }
+            });
+            
+            console.log('✅ Gráfico de inventario creado');
+            
+            // Más gráficos si existen
+            initMoreCharts();
+            
+        } catch (error) {
+            console.error('❌ Error creando gráficos:', error);
+            showChartError(error.message);
+        }
+    }
+    
+    function initMoreCharts() {
+        // Inicializar otros gráficos si existen
+        const charts = [
+            { id: 'movementsChart', type: 'bar', label: 'Movimientos Mensuales' },
+            { id: 'categoriesChart', type: 'doughnut', label: 'Categorías' },
+            { id: 'statusChart', type: 'pie', label: 'Estado de Artículos' }
+        ];
+        
+        charts.forEach(chartConfig => {
+            const element = document.getElementById(chartConfig.id);
+            if (element) {
+                try {
+                    new Chart(element, {
+                        type: chartConfig.type,
+                        data: {
+                            labels: ['Datos 1', 'Datos 2', 'Datos 3'],
+                            datasets: [{
+                                label: chartConfig.label,
+                                data: [30, 50, 20],
+                                backgroundColor: ['#007bff', '#28a745', '#ffc107']
+                            }]
+                        }
+                    });
+                    console.log(\✅ Gráfico \ creado\);
+                } catch (error) {
+                    console.warn(\⚠️  No se pudo crear gráfico \\);
+                }
+            }
+        });
+    }
+    
+    function showChartError(message) {
+        const container = document.getElementById('chart-container') || document.body;
+        const errorDiv = document.createElement('div');
+        errorDiv.className = 'alert alert-danger';
+        errorDiv.innerHTML = \
+            <h5><i class="fas fa-exclamation-circle"></i> Error en gráficos</h5>
+            <p>\</p>
+            <p>Usando datos en modo simple...</p>
+        \;
+        container.prepend(errorDiv);
+    }
+    
+    // Inicializar otros componentes
+    initializeDashboard();
+    
+    function initializeDashboard() {
+        console.log('🎛️ Inicializando componentes del dashboard...');
+        
+        // Actualizar estadísticas
+        updateStats({
+            totalItems: 1254,
+            todayMovements: 45,
+            lowStockItems: 23,
+            pendingTasks: 8
+        });
+        
+        // Configurar botones
+        setupButtons();
+        
+        // Cargar datos iniciales
+        loadInitialData();
+    }
+    
+    function updateStats(data) {
+        // Actualizar elementos de estadísticas
+        const elements = {
+            'total-items': data.totalItems,
+            'today-movements': data.todayMovements,
+            'low-stock-items': data.lowStockItems,
+            'pending-tasks': data.pendingTasks
+        };
+        
+        Object.keys(elements).forEach(id => {
+            const element = document.getElementById(id);
+            if (element) {
+                element.textContent = elements[id];
+            }
+        });
+        
+        console.log('📈 Estadísticas actualizadas');
+    }
+    
+    function setupButtons() {
+        // Configurar eventos de botones
+        document.querySelectorAll('.btn-export').forEach(btn => {
+            btn.addEventListener('click', function() {
+                alert('Función de exportación (simulada)');
+            });
+        });
+        
+        document.querySelectorAll('.btn-refresh').forEach(btn => {
+            btn.addEventListener('click', function() {
+                location.reload();
+            });
+        });
+    }
+    
+    function loadInitialData() {
+        console.log('📂 Cargando datos iniciales...');
+        // Simular carga de datos
+        setTimeout(() => {
+            document.body.classList.add('loaded');
+            console.log('✅ Dashboard completamente cargado');
+        }, 500);
+    }
+    
+    // Marcar dashboard como listo
+    window.dashboardReady = true;
+});
+
+// Función global para recargar gráficos
+window.reloadCharts = function() {
+    console.log('🔁 Recargando gráficos...');
+    if (typeof initializeCharts === 'function') {
+        initializeCharts();
+    }
+};
+
+// Manejar errores globales
+window.addEventListener('error', function(e) {
+    console.error('⚠️ Error global:', e.message, e.filename, e.lineno);
+});
+
+console.log('✅ Script de dashboard cargado');
+</script>
+</body>
+</html>
+
+

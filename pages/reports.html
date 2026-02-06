@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reportes Oficiales - SIBIMTZOMP</title>
+    <link rel="stylesheet" href="../css/futuristic.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <style>
+        /* Print Template Styles */
+        .official-page {
+            width: 210mm;
+            min-height: 297mm;
+            padding: 20mm;
+            margin: 10mm auto;
+            background: white;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            color: black;
+            position: relative;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .letterhead-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid #800080;
+            /* Purple line from reference */
+            padding-bottom: 10px;
+            margin-bottom: 30px;
+        }
+
+        .letterhead-header img {
+            height: 25mm;
+        }
+
+        .letterhead-footer {
+            position: absolute;
+            bottom: 20mm;
+            left: 20mm;
+            right: 20mm;
+            text-align: center;
+            font-size: 0.8rem;
+            color: #666;
+            border-top: 1px solid #eee;
+            padding-top: 15px;
+        }
+
+        .report-title {
+            text-align: center;
+            text-transform: uppercase;
+            font-weight: bold;
+            font-size: 1.4rem;
+            margin-bottom: 40px;
+            color: #333;
+        }
+
+        table.official-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        table.official-table th {
+            background: #f4f4f4;
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: left;
+            font-size: 0.9rem;
+        }
+
+        table.official-table td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            font-size: 0.85rem;
+        }
+
+        @media print {
+            body {
+                background: none;
+                padding: 0;
+            }
+
+            .no-print {
+                display: none !important;
+            }
+
+            .official-page {
+                width: 100%;
+                margin: 0;
+                box-shadow: none;
+                padding: 10mm;
+            }
+
+            .official-page {
+                page-break-after: always;
+            }
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-bottom: 30px;
+        }
+    </style>
+</head>
+
+<body class="theme-dark">
+    <header class="no-print">
+        <div class="logo">SIBIMTZOMP</div>
+        <div style="display: flex; align-items: center; gap: 15px;">
+            <a href="../index.html" class="btn btn-outline">Volver</a>
+        </div>
+    </header>
+
+    <main style="padding: 30px 5%;">
+        <div class="btn-group no-print">
+            <button class="btn" style="background: #27ae60; color: white;" onclick="exportToExcel()"><i
+                    class="fas fa-file-excel"></i> Excel</button>
+            <button class="btn" style="background: #e74c3c; color: white;" onclick="window.print()"><i
+                    class="fas fa-file-pdf"></i> Imprimir PDF Oficial</button>
+        </div>
+
+        <!-- Official Format Template -->
+        <div class="official-page" id="printable-report">
+            <div class="letterhead-header">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <img src="../assets/images/logo_municipio.png" alt="Logo Municipio">
+                    <div style="font-weight: bold; color: #800080; font-size: 1.2rem;">Gobierno con sentido</div>
+                </div>
+                <div style="text-align: right;">
+                    <div style="font-weight: bold; font-size: 1rem;">GOBIERNO MUNICIPAL</div>
+                    <div style="font-size: 0.8rem; letter-spacing: 2px;">2024 - 2027</div>
+                </div>
+            </div>
+
+            <h2 class="report-title">Inventario General de Bienes Muebles</h2>
+
+            <div id="report-meta" style="margin-bottom: 20px; font-size: 0.9rem;">
+                <p><strong>Fecha de Emisión:</strong> <span id="current-date">--/--/----</span></p>
+                <p><strong>Estado del Sistema:</strong> Consolidado</p>
+            </div>
+
+            <table class="official-table" id="data-table">
+                <thead>
+                    <tr>
+                        <th>Código</th>
+                        <th>Descripción del Bien</th>
+                        <th>Marca/Modelo</th>
+                        <th>Serie</th>
+                        <th>Departamento</th>
+                        <th>Estado</th>
+                    </tr>
+                </thead>
+                <tbody id="inventory-body">
+                    <!-- Dynamic Rows -->
+                </tbody>
+            </table>
+
+            <div class="letterhead-footer">
+                <div style="font-weight: bold; margin-bottom: 50px;">
+                    <div
+                        style="display: inline-block; border-top: 1px solid black; width: 250px; margin: 0 40px; padding-top: 10px;">
+                        DEPARTAMENTO DE SISTEMAS C2 TZOMPANTEPEC<br>
+                        <span style="font-size: 0.7rem;">SISTEMA DE INVENTARIO SIBIM</span>
+                    </div>
+                </div>
+                <p>Av. Zaragoza no. 1, San Salvador Tzompantepec, Col. Centro, C.P. 90490<br>Tel: 241-4152315</p>
+            </div>
+        </div>
+    </main>
+
+    <script src="../js/config.js"></script>
+    <script src="../js/api.js"></script>
+    <script src="../js/auth.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            Auth.checkAccess();
+            Auth.initTheme();
+
+            document.getElementById('current-date').textContent = new Date().toLocaleDateString();
+
+            const items = await API.fetchItems();
+            const tbody = document.getElementById('inventory-body');
+
+            if (items && items.length > 0) {
+                tbody.innerHTML = items.map(item => `
+                    <tr>
+                        <td>${item.codigo || item.id}</td>
+                        <td>${item.nombre || item.descripcion}</td>
+                        <td>${item.marca || ''} ${item.modelo || ''}</td>
+                        <td>${item.serie || 'N/A'}</td>
+                        <td>${item.departamento || 'Sin Asignar'}</td>
+                        <td>${item.estado || 'Activo'}</td>
+                    </tr>
+                `).join('');
+            }
+        });
+
+        function exportToExcel() {
+            const table = document.getElementById("data-table");
+            const wb = XLSX.utils.table_to_book(table, { sheet: "Inventario" });
+            XLSX.writeFile(wb, "Inventario_Oficial_Tzompantepec.xlsx");
+        }
+    </script>
+</body>
+
+</html>

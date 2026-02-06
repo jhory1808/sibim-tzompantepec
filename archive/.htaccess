@@ -1,0 +1,32 @@
+# SIBIM - Configuración de rutas
+RewriteEngine On
+
+# Redirigir raíz a landing page
+RewriteRule ^$ /public/index.html [L]
+
+# Rutas limpias (clean URLs)
+RewriteRule ^login/?$ /src/pages/auth/login.html [L]
+RewriteRule ^auth/login/?$ /src/pages/auth/login.html [L]
+RewriteRule ^dashboard/?$ /src/pages/dashboard/app.html [L]
+RewriteRule ^app/?$ /src/pages/dashboard/app.html [L]
+RewriteRule ^admin/?$ /src/pages/dashboard/app.html [L]
+
+# Assets - servir directamente
+RewriteRule ^assets/(.*)$ /assets/ [L]
+RewriteRule ^src/(.*)$ /src/ [L]
+RewriteRule ^public/(.*)$ /public/ [L]
+RewriteRule ^config/(.*)$ /config/ [L]
+
+# Para SPA: redirigir todas las demás rutas a index.html
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^(.*)$ /public/index.html [L,QSA]
+
+# Headers de caché
+<FilesMatch "\.(html|htm)$">
+    Header set Cache-Control "no-cache, no-store, must-revalidate"
+</FilesMatch>
+
+<FilesMatch "\.(css|js|png|jpg|jpeg|gif|ico|json)$">
+    Header set Cache-Control "public, max-age=31536000"
+</FilesMatch>

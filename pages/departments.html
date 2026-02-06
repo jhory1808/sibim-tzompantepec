@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Departamentos - SIBIMTZOMP</title>
+    <link rel="stylesheet" href="../css/futuristic.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+
+<body>
+    <header>
+        <div class="logo">SIBIMTZOMP</div>
+        <div style="display: flex; align-items: center; gap: 15px;">
+            <a href="../index.html" class="btn btn-outline" style="padding: 10px 15px;">Volver</a>
+        </div>
+    </header>
+
+    <main style="padding: 30px 5%;">
+        <div class="glass fade-in" style="padding: 30px;">
+            <h1 style="margin-bottom: 20px;">Departamentos Municipales</h1>
+            <div id="dept-list" class="stats-grid">
+                <!-- Dynamically loaded -->
+            </div>
+        </div>
+    </main>
+
+    <script src="../js/config.js"></script>
+    <script src="../js/api.js"></script>
+    <script src="../js/auth.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            Auth.checkAccess();
+            Auth.initTheme();
+            const items = await API.fetchItems();
+            const depts = [...new Set(items.map(i => i.departamento))];
+
+            const list = document.getElementById('dept-list');
+            if (depts.length) {
+                list.innerHTML = depts.map(dept => `
+                    <div class="glass stat-card neon-border-blue">
+                        <i class="fas fa-building" style="font-size:30px; color:var(--accent-blue);"></i>
+                        <h3 style="margin-top:15px;">${dept}</h3>
+                        <p style="color:var(--text-secondary); margin-top:5px;">
+                            ${items.filter(i => i.departamento === dept).length} Artículos
+                        </p>
+                    </div>
+                `).join('');
+            } else {
+                list.innerHTML = '<p>No se encontraron departamentos.</p>';
+            }
+        });
+    </script>
+</body>
+
+</html>

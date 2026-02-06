@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Verificar Archivos SIBIM</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .success { color: green; }
+        .error { color: red; }
+        .warning { color: orange; }
+    </style>
+</head>
+<body>
+    <h1>Verificación de Archivos SIBIM</h1>
+    <div id="results"></div>
+    
+    <script>
+        const requiredFiles = [
+            { name: 'index.html', required: true },
+            { name: 'app.html', required: true },
+            { name: 'app.js', required: true },
+            { name: 'style.css', required: true },
+            { name: 'sw.js', required: true },
+            { name: 'manifest.json', required: true },
+            { name: 'icon-192x192.png', required: true },
+            { name: 'icon-512x512.png', required: true },
+            { name: 'favicon.ico', required: true },
+            { name: '_redirects', required: true },
+            { name: 'netlify.toml', required: false }
+        ];
+        
+        const resultsDiv = document.getElementById('results');
+        
+        async function checkFile(file) {
+            try {
+                const response = await fetch(file.name);
+                if (response.ok) {
+                    return `<p class="success">✅ ${file.name} - ENCONTRADO (${response.status})</p>`;
+                } else {
+                    if (file.required) {
+                        return `<p class="error">❌ ${file.name} - NO ENCONTRADO (${response.status})</p>`;
+                    } else {
+                        return `<p class="warning">⚠️ ${file.name} - OPCIONAL, no encontrado</p>`;
+                    }
+                }
+            } catch (error) {
+                if (file.required) {
+                    return `<p class="error">❌ ${file.name} - ERROR: ${error.message}</p>`;
+                } else {
+                    return `<p class="warning">⚠️ ${file.name} - OPCIONAL, error: ${error.message}</p>`;
+                }
+            }
+        }
+        
+        async function checkAllFiles() {
+            for (const file of requiredFiles) {
+                const result = await checkFile(file);
+                resultsDiv.innerHTML += result;
+            }
+            
+            // Verificar también funciones JavaScript
+            resultsDiv.innerHTML += `<hr><h3>Verificación de Funciones JavaScript</h3>`;
+            
+            const functions = ['showLogin', 'hideLogin', 'authService', 'notifications'];
+            functions.forEach(func => {
+                if (typeof window[func] !== 'undefined') {
+                    resultsDiv.innerHTML += `<p class="success">✅ Función ${func}() definida</p>`;
+                } else {
+                    resultsDiv.innerHTML += `<p class="warning">⚠️ Función ${func}() NO definida</p>`;
+                }
+            });
+        }
+        
+        checkAllFiles();
+    </script>
+</body>
+</html>

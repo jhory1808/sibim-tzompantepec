@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Prueba SIBIM</title>
+    <style>
+        body { font-family: Arial; padding: 20px; }
+        .test-box { padding: 20px; margin: 10px; background: #f5f5f5; border-radius: 10px; }
+        .btn { display: inline-block; padding: 10px 20px; margin: 5px; background: #007bff; color: white; text-decoration: none; border-radius: 5px; }
+        .success { color: green; }
+        .error { color: red; }
+    </style>
+</head>
+<body>
+    <h1>🧪 Prueba de Rutas SIBIM</h1>
+    
+    <div class="test-box">
+        <h2>Rutas principales:</h2>
+        <a class="btn" href="/" target="_blank">🏠 / (Home)</a>
+        <a class="btn" href="/login" target="_blank">🔐 /login</a>
+        <a class="btn" href="/dashboard" target="_blank">📊 /dashboard</a>
+    </div>
+    
+    <div class="test-box">
+        <h2>Archivos estáticos:</h2>
+        <a class="btn" href="/public/index.html" target="_blank">/public/index.html</a>
+        <a class="btn" href="/src/pages/auth/login.html" target="_blank">/src/pages/auth/login.html</a>
+        <a class="btn" href="/src/pages/dashboard/app.html" target="_blank">/src/pages/dashboard/app.html</a>
+    </div>
+    
+    <div class="test-box">
+        <h2>Assets:</h2>
+        <a class="btn" href="/assets/icons/icon-192x192.png" target="_blank">Icono 192x192</a>
+        <a class="btn" href="/config/manifest.json" target="_blank">Manifest JSON</a>
+    </div>
+    
+    <script>
+        // Prueba automática de rutas
+        const routes = ['/', '/login', '/dashboard', '/public/index.html'];
+        let results = {};
+        
+        async function testRoute(route) {
+            try {
+                const response = await fetch(route, {method: 'HEAD'});
+                return response.ok;
+            } catch {
+                return false;
+            }
+        }
+        
+        async function runTests() {
+            const resultsDiv = document.getElementById('results');
+            for (const route of routes) {
+                const success = await testRoute(route);
+                results[route] = success;
+                
+                const status = success ? '✅' : '❌';
+                resultsDiv.innerHTML += <div> </div>;
+            }
+        }
+        
+        // Ejecutar pruebas después de cargar
+        window.addEventListener('load', runTests);
+    </script>
+    
+    <div class="test-box">
+        <h2>Resultados de prueba:</h2>
+        <div id="results"></div>
+    </div>
+</body>
+</html>

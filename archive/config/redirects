@@ -1,0 +1,26 @@
+# Redirecciones absolutas SIBIM
+# Usar rutas completas desde la raíz
+
+/                       /public/index.html     200
+/home                   /public/index.html     200
+/inicio                 /public/index.html     200
+
+/login                  /src/pages/auth/login.html     200
+/auth                   /src/pages/auth/login.html     200
+/ingresar               /src/pages/auth/login.html     200
+
+/dashboard              /src/pages/dashboard/app.html     200
+/app                    /src/pages/dashboard/app.html     200
+/admin                  /src/pages/dashboard/app.html     200
+/panel                  /src/pages/dashboard/app.html     200
+
+/assets/*               /assets/:splat         200
+/src/*                  /src/:splat            200
+/public/*               /public/:splat         200
+/config/*               /config/:splat         200
+
+/404                    /public/404.html       404
+/error                  /public/404.html       404
+
+# SPA: Todas las demás rutas al home
+/*                      /public/index.html     200

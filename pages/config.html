@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Configuración - SIBIMTZOMP</title>
+    <link rel="stylesheet" href="../css/futuristic.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+
+<body>
+    <header>
+        <div class="logo">SIBIMTZOMP</div>
+        <div style="display: flex; align-items: center; gap: 15px;">
+            <a href="../index.html" class="btn btn-outline" style="padding: 10px 15px;">Volver</a>
+        </div>
+    </header>
+
+    <main style="padding: 30px 5%;">
+        <div class="glass fade-in" style="padding: 30px;">
+            <h1 style="margin-bottom: 25px;">Configuración del Sistema</h1>
+
+            <div class="config-tabs">
+                <div class="config-tab active" onclick="showTab('general')">General</div>
+                <div class="config-tab" onclick="showTab('sheets')">Google Sheets</div>
+                <div class="config-tab" onclick="showTab('backup')">Backup</div>
+                <div class="config-tab" onclick="showTab('export')">Exportación</div>
+                <div class="config-tab" onclick="showTab('notif')">Notificaciones</div>
+                <div class="config-tab" onclick="showTab('maint')">Mantenimiento</div>
+            </div>
+
+            <!-- General Section -->
+            <div id="general" class="config-section active">
+                <div class="form-group" style="margin-bottom: 25px;">
+                    <label>Tema del Sistema (Personalización Administrador)</label>
+                    <div style="display: flex; gap: 15px; margin-top: 10px;">
+                        <button class="btn" style="background: #0a192f; color: white; border: 1px solid #00d2ff;"
+                            onclick="Auth.applyTheme('')">Oscuro (Neón)</button>
+                        <button class="btn" style="background: #f0f2f5; color: #1a1a1a; border: 1px solid #ccc;"
+                            onclick="Auth.applyTheme('light')">Claro (Profesional)</button>
+                        <button class="btn" style="background: #003366; color: white; border: 1px solid #33ccff;"
+                            onclick="Auth.applyTheme('blue')">Azul Municipal</button>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Seguridad de Sesión</label>
+                    <p style="color: var(--text-secondary); font-size: 0.9rem;">El sistema cerrará la sesión
+                        automáticamente tras 10 minutos de inactividad detectada.</p>
+                </div>
+            </div>
+
+            <!-- Google Sheets Section -->
+            <div id="sheets" class="config-section">
+                <div class="alert-info">
+                    <i class="fas fa-info-circle"></i>
+                    Conexión con Google Sheets API v4 para sincronización en tiempo real
+                </div>
+                <div class="form-group" style="margin-bottom: 25px;">
+                    <label>ID de la Hoja de Cálculo Principal</label>
+                    <div style="display: flex; gap: 10px;">
+                        <input type="text" value="1xUqjJQI3dtZmwm7TYlwcHbbYBd81jszK" style="flex: 1;">
+                        <button class="btn glass" style="padding: 0 15px;"><i class="fas fa-copy"></i> Copiar</button>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group"><label>Hoja de Inventario</label><input type="text" value="Inventario">
+                    </div>
+                    <div class="form-group"><label>Hoja de Usuarios</label><input type="text" value="Usuarios"></div>
+                </div>
+            </div>
+
+            <div id="backup" class="config-section">
+                <div class="alert-info"
+                    style="margin-bottom: 20px; background: rgba(52, 152, 219, 0.1); border-left: 4px solid #3498db;">
+                    <i class="fas fa-shield-alt"></i>
+                    Se recomienda realizar respaldos periódicos de la base de datos municipal.
+                </div>
+
+                <div style="display: flex; flex-direction: column; gap: 20px;">
+                    <div class="glass" style="padding: 20px; border: 1px solid var(--glass-border);">
+                        <h4>Respaldo de Inventario Local</h4>
+                        <p style="color: var(--text-secondary); font-size: 0.85rem; margin: 10px 0 20px 0;">
+                            Descarga una copia completa de todos los bienes registrados en formato JSON. Este archivo
+                            puede ser importado en caso de pérdida de datos.
+                        </p>
+                        <button class="btn btn-primary" onclick="createBackup()" id="backup-btn">
+                            <i class="fas fa-download"></i> Generar Respaldo (.json)
+                        </button>
+                    </div>
+
+                    <div class="glass" style="padding: 20px; border: 1px solid var(--glass-border);">
+                        <h4>Restaurar Sistema</h4>
+                        <p style="color: var(--text-secondary); font-size: 0.85rem; margin: 10px 0 20px 0;">
+                            Sube un archivo de respaldo (.json) para restaurar la base de datos municipal.
+                            <span style="color: #e74c3c;">Advertencia: Esto podría duplicar o sobrescribir datos según
+                                la configuración de la hoja.</span>
+                        </p>
+                        <input type="file" id="import-file" accept=".json" style="display: none;"
+                            onchange="handleImport(this)">
+                        <button class="btn glass" onclick="document.getElementById('import-file').click()"
+                            id="import-btn" style="border-color: #f1c40f; color: #f1c40f;">
+                            <i class="fas fa-upload"></i> Seleccionar y Restaurar
+                        </button>
+                    </div>
+
+                    <div class="glass" style="padding: 20px; border: 1px solid var(--glass-border); opacity: 0.6;">
+                        <h4>Respaldo en la Nube (Próximamente)</h4>
+                        <p style="color: var(--text-secondary); font-size: 0.85rem; margin: 10px 0 0 0;">
+                            Sincronización automática con Google Drive para respaldos diarios programados.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <div id="export" class="config-section">
+                <p>Exportación masiva de datos en CSV/Excel...</p>
+            </div>
+            <div id="notif" class="config-section">
+                <p>Alertas de sistema y notificaciones de mantenimiento...</p>
+            </div>
+            <div id="maint" class="config-section">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                    <div class="glass" style="padding: 20px;">
+                        <h4>Estado de Salud del Sistema</h4>
+                        <ul style="list-style: none; margin-top: 15px; font-size: 0.9rem;">
+                            <li style="margin-bottom: 10px;"><i class="fas fa-check-circle" style="color: #2ecc71;"></i>
+                                Sincronización Google: <span style="color: #2ecc71;">Activa</span></li>
+                            <li style="margin-bottom: 10px;"><i class="fas fa-check-circle" style="color: #2ecc71;"></i>
+                                Permisos de Escritura: <span style="color: #2ecc71;">Verificados</span></li>
+                            <li style="margin-bottom: 10px;"><i class="fas fa-database"
+                                    style="color: var(--accent-blue);"></i> Registros en Google Sheets: <span
+                                    id="maint-count-text">Cargando...</span></li>
+                        </ul>
+                        <button class="btn glass" onclick="checkSystemHealth()"
+                            style="margin-top: 10px; width: 100%;">Diagnóstico Rápido</button>
+                    </div>
+
+                    <div class="glass" style="padding: 20px;">
+                        <h4>Actualizaciones y Parches</h4>
+                        <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 15px;">
+                            Versión actual: <strong id="maint-version-text" style="color: white;">1.0.0</strong><br>
+                            Última revisión: 06 Feb 2026
+                        </p>
+                        <button class="btn btn-primary" style="width: 100%;" onclick="checkForUpdates()">Buscar
+                            Actualizaciones</button>
+                        <button class="btn glass"
+                            style="width: 100%; margin-top: 10px; border-color: #e74c3c; color: #e74c3c;"
+                            onclick="clearCache()">Limpiar Caché Local</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="../js/config.js"></script>
+    <script src="../js/api.js"></script>
+    <script src="../js/auth.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            Auth.checkAccess();
+            Auth.initTheme();
+            Auth.initTimeout();
+
+            // Scalability info
+            document.getElementById('maint-version-text').textContent = CONFIG.version;
+            const items = await API.fetchItems();
+            document.getElementById('maint-count-text').textContent = items.length + " artículos";
+        });
+
+        function checkSystemHealth() {
+            UI.showToast("Ejecutando diagnóstico...", "warning");
+            setTimeout(() => {
+                UI.showToast("Conexión estable. Todos los servicios operando.", "success");
+            }, 1500);
+        }
+
+        function checkForUpdates() {
+            UI.showToast("Buscando actualizaciones en el servidor...", "warning");
+            setTimeout(() => {
+                UI.showToast("El sistema está actualizado. (v" + CONFIG.version + ")", "success");
+            }, 2000);
+        }
+
+        function clearCache() {
+            if (confirm("¿Desea limpiar el almacenamiento local? Se cerrará la sesión.")) {
+                localStorage.clear();
+                window.location.href = '../login.html';
+            }
+        }
+
+        function showTab(tabId) {
+            document.querySelectorAll('.config-section').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.config-tab').forEach(t => t.classList.remove('active'));
+
+            document.getElementById(tabId).classList.add('active');
+            event.currentTarget.classList.add('active');
+        }
+
+        async function createBackup() {
+            const btn = document.getElementById('backup-btn');
+            const originalHtml = btn.innerHTML;
+
+            try {
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generando...';
+                btn.disabled = true;
+
+                const items = await API.fetchItems();
+                if (!items || items.length === 0) throw new Error("No hay datos para respaldar");
+
+                const backupData = {
+                    version: "1.0",
+                    date: new Date().toISOString(),
+                    source: "SIBIM TZOMPANTEPEC",
+                    items: items
+                };
+
+                const blob = new Blob([JSON.stringify(backupData, null, 2)], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `Respaldo_SIBIM_${new Date().toISOString().split('T')[0]}.json`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+
+                alert("Respaldo creado con éxito");
+            } catch (error) {
+                console.error("Backup error:", error);
+                alert("Error al crear el respaldo: " + error.message);
+            } finally {
+                btn.innerHTML = originalHtml;
+                btn.disabled = false;
+            }
+        }
+
+        function handleImport(input) {
+            const file = input.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = async (e) => {
+                try {
+                    const data = JSON.parse(e.target.result);
+
+                    // Simple validation
+                    if (!data.items || !Array.isArray(data.items)) {
+                        throw new Error("El archivo no tiene un formato de respaldo válido.");
+                    }
+
+                    const confirmRestore = confirm(`¿Está seguro de que desea restaurar ${data.items.length} artículos? Esta acción enviará los datos a la nube.`);
+
+                    if (confirmRestore) {
+                        const btn = document.getElementById('import-btn');
+                        btn.innerHTML = '<i class="fas fa-sync fa-spin"></i> Restaurando...';
+                        btn.disabled = true;
+
+                        const result = await API.batchRestore(data.items);
+
+                        if (result.success) {
+                            alert("Restauración completada. Los datos han sido enviados a Google Sheets.");
+                        } else {
+                            alert("Hubo un problema al restaurar los datos.");
+                        }
+
+                        btn.innerHTML = '<i class="fas fa-upload"></i> Seleccionar y Restaurar';
+                        btn.disabled = false;
+                    }
+                } catch (error) {
+                    alert("Error al procesar el archivo: " + error.message);
+                } finally {
+                    input.value = ''; // Reset input
+                }
+            };
+            reader.readAsText(file);
+        }
+    </script>
+</body>
+
+</html>

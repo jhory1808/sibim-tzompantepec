@@ -1,0 +1,19 @@
+{
+    "scripts":  {
+                    "build":  "echo \u0027Build completo\u0027",
+                    "deploy":  "netlify deploy --prod",
+                    "start":  "live-server public --port=3000"
+                },
+    "description":  "Sistema Integral de Bienes Municipales",
+    "license":  "MIT",
+    "version":  "1.0.0",
+    "author":  "Municipalidad de Tzompantepec",
+    "name":  "sibim-sistema-inventario",
+    "main":  "public/index.html",
+    "devDependencies":  {
+                            "live-server":  "^1.2.2"
+                        },
+    "dependencies":  {
+
+                     }
+}

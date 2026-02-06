@@ -1,0 +1,15 @@
+{
+    "name": "sibimtzomp",
+    "version": "2.0.0",
+    "description": "Plataforma de Inventario Municipal de Vanguardia",
+    "main": "home.html",
+    "scripts": {
+        "start": "live-server . --entry-file=home.html",
+        "dev": "live-server ."
+    },
+    "author": "Antigravity",
+    "license": "MIT",
+    "devDependencies": {
+        "live-server": "^1.2.2"
+    }
+}
