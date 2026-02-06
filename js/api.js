@@ -126,6 +126,11 @@ const API = {
             const data = await response.json();
             const users = data.users || data || [];
             if (!Array.isArray(users)) return [];
+
+            if (users.length > 0) {
+                Logger.log('Columnas detectadas en Usuarios:', Object.keys(users[0]).join(', '));
+            }
+
             Logger.log(`${users.length} usuarios encontrados.`);
             return users;
         } catch (error) {

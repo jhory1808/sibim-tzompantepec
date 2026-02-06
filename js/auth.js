@@ -11,7 +11,7 @@ const Auth = {
             }
 
             const users = await API.getUsers();
-            console.log('Usuarios recuperados de la nube:', users);
+            console.log('Validando contra:', users.length, 'usuarios de la nube');
 
             if (!users || users.length === 0) {
                 console.warn('No se pudieron recuperar usuarios de Google Sheets. Usando solo acceso local.');
@@ -20,20 +20,25 @@ const Auth = {
 
             // Normalizamos búsqueda para soportar columnas en Inglés o Español
             const user = users.find(u => {
-                const uName = u.username || u.Usuario || u.nombre;
-                const uPass = u.password || u.Contraseña || u.clave;
-                return uName === username && String(uPass) === String(password);
+                // Buscamos exacto en las columnas de tu Excel: 'Usuario' y 'Contraseña'
+                const uName = u.Usuario || u.username || u.nombre;
+                const uPass = u.Contraseña || u.password || u.clave;
+
+                return String(uName).trim() === String(username).trim() &&
+                    String(uPass).trim() === String(password).trim();
             });
 
             if (user) {
+                console.log('Login exitoso para:', user.Usuario);
                 const sessionUser = {
-                    username: user.username || user.Usuario || username,
-                    role: user.role || user.Rol || 'User',
+                    username: user.Usuario || user.Nombre || username,
+                    role: user.Rol || user.role || 'User',
                     loginTime: new Date()
                 };
                 localStorage.setItem('sibim_user', JSON.stringify(sessionUser));
                 return true;
             }
+            console.warn('Credenciales no encontradas en la nube.');
             return false;
         } catch (error) {
             console.error('Error crítico en el proceso de login:', error);
