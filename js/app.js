@@ -82,15 +82,18 @@ async function loadDashboardData() {
     const { items, stats } = await API.getStats();
 
     // Update Stats Cards
-    document.querySelector('.stat-card:nth-child(1) .value').textContent = stats.total;
-    document.querySelector('.stat-card:nth-child(2) .value').textContent = stats.departamentos;
-    document.querySelector('.stat-card:nth-child(3) .value').textContent = stats.movimientos;
-    document.querySelector('.stat-card:nth-child(4) .value').textContent = stats.bajas;
+    const totalCount = stats.total || items.length;
+    const deptoCount = stats.departamentos || new Set(items.map(i => i.Departamento || i.departamento)).size;
+
+    document.querySelector('.stat-card:nth-child(1) .value').textContent = totalCount;
+    document.querySelector('.stat-card:nth-child(2) .value').textContent = deptoCount;
+    document.querySelector('.stat-card:nth-child(3) .value').textContent = stats.movimientos || 0;
+    document.querySelector('.stat-card:nth-child(4) .value').textContent = stats.bajas || 0;
 
     // Build Chart Data from Real Items
     const deptCounts = {};
     items.forEach(item => {
-        const dept = item.departamento || 'Sin Asignar';
+        const dept = item.Departamento || item.departamento || 'Sin Asignar';
         deptCounts[dept] = (deptCounts[dept] || 0) + 1;
     });
 

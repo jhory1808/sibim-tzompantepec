@@ -144,9 +144,12 @@ const API = {
             const items = await this.fetchItems();
             const stats = {
                 total: items.length,
-                departamentos: new Set(items.map(i => i.departamento)).size,
-                bajas: items.filter(i => i.estado === 'Baja' || i.status === 'Baja').length,
-                movimientos: Math.floor(items.length * 0.15)
+                departamentos: new Set(items.map(i => i.Departamento || i.departamento)).size,
+                bajas: items.filter(i => {
+                    const st = i.Estado || i.estado || '';
+                    return st.toLowerCase() === 'baja';
+                }).length,
+                movimientos: Math.floor(items.length * 0.15) // Simulado
             };
             return { items, stats };
         } catch (error) {

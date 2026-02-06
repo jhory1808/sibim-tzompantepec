@@ -414,22 +414,32 @@
             const items = await API.fetchItems();
 
             if (items && items.length > 0) {
-                tableBody.innerHTML = items.map(item => `
+                tableBody.innerHTML = items.map(item => {
+                    const code = item.Codigo || item.codigo || item.id || '---';
+                    const name = item.Nombre || item.nombre || '---';
+                    const brand = item.Marca || item.marca || '';
+                    const model = item.Modelo || item.modelo || '';
+                    const serie = item['Numero de Serie'] || item.Serie || item.serie || 'N/A';
+                    const dept = item.Departamento || item.departamento || '---';
+                    const resp = item.Responsable || item.responsable || '---';
+                    const status = item.Estado || item.estado || 'Activo';
+
+                    return `
                     <tr>
-                        <td>${item.codigo || item.id}</td>
-                        <td>${item.nombre || item.descripcion}</td>
-                        <td>${item.marca || ''} ${item.modelo || ''}</td>
-                        <td>${item.serie || 'N/A'}</td>
-                        <td>${item.departamento}</td>
-                        <td>${item.responsable || '---'}</td>
-                        <td><span class="badge badge-active">${item.estado || 'Activo'}</span></td>
+                        <td>${code}</td>
+                        <td>${name}</td>
+                        <td>${brand} ${model}</td>
+                        <td>${serie}</td>
+                        <td>${dept}</td>
+                        <td>${resp}</td>
+                        <td><span class="badge badge-active">${status}</span></td>
                         <td>
                             <button class="action-btn" title="Editar"><i class="fas fa-edit"></i></button>
-                            <button class="action-btn" onclick="printLabelFromData('${item.codigo}', '${item.nombre}')" title="Imprimir"><i class="fas fa-print"></i></button>
+                            <button class="action-btn" onclick="printLabelFromData('${code}', '${name}')" title="Imprimir"><i class="fas fa-print"></i></button>
                             <button class="action-btn" style="color: #e74c3c;"><i class="fas fa-trash"></i></button>
                         </td>
                     </tr>
-                `).join('');
+                `}).join('');
             } else {
                 tableBody.innerHTML = '<tr><td colspan="8" style="text-align:center; padding:50px;">Sin datos.</td></tr>';
             }
