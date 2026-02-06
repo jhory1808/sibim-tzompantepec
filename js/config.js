@@ -3,7 +3,7 @@ const CONFIG = {
     scriptUrl: 'https://script.google.com/macros/s/AKfycbxg7QTZ7hGo6qNfIVe8uujyt5Rh6Ww3BfJ97cz-FuCtlm7_QHkH3NjcKgleLDQNK5M5pw/exec',
 
     // ID de la hoja de cálculo de Google
-    spreadsheetId: '1XUqjJQI3dtZmwm7TYlwcHbbYBd81jszK',
+    spreadsheetId: '1sNOZaDhhkCMRcY2u038tlKHQXS02dSQD3jdTwcQD22Q',
 
     // Metadatos de la aplicación
     appName: 'SIBIM TZOMPANTEPEC',
@@ -44,7 +44,7 @@ const Logger = {
     error: (msg, err) => {
         console.error(`[SIBIM ERROR]: ${msg}`, err);
         if (err && (JSON.stringify(err).includes('getSheetByName') || (err.message && err.message.includes('getSheetByName')))) {
-            alert("DIAGNÓSTICO CLOUD: El servidor indica que no encuentra una pestaña en tu Google Sheet. Por favor, asegúrate de que tu Spreadsheet tenga las pestañas: 'Inventario', 'Departamentos', 'Usuarios', 'Movimientos', 'Actualizaciones' y 'Configuración' con esos nombres exactos.");
+            alert("DIAGNÓSTICO CLOUD: El servidor indica que no encuentra una pestaña en tu Google Sheet. Por favor, asegúrate de que tu Spreadsheet tenga las pestañas: 'Inventario', 'Usuarios', 'Departamentos', 'Movimientos', 'Actualizaciones' y 'Configuracion' (exactamente con esos nombres).");
         }
     }
 };
