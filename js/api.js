@@ -1,8 +1,35 @@
 const API = {
+    // Helper centralized for Google Apps Script calls
+    async gasFetch(action, params = {}) {
+        try {
+            const queryParams = new URLSearchParams({
+                action: action,
+                t: Date.now(),
+                ...params
+            });
+            const url = `${CONFIG.scriptUrl}?${queryParams.toString()}`;
+
+            // Re-intento de fetch simplificado al máximo para evitar problemas de CORS/Redirección en GAS
+            const response = await fetch(url);
+
+            if (!response.ok) throw new Error(`HTTP ${response.status}`);
+            const data = await response.json();
+
+            if (data && data.error) {
+                Logger.error(`Error de GAS en acción ${action}:`, data.message);
+                return null;
+            }
+            return data;
+        } catch (error) {
+            Logger.error(`Fallo crítico de red en acción ${action}:`, error);
+            return null;
+        }
+    },
+
     async fetchItems() {
         const CACHE_KEY = 'sibim_inventory_cache';
         const CACHE_TIME_KEY = 'sibim_cache_timestamp';
-        const TTL = 300000; // 5 minutos de caché
+        const TTL = 300000;
 
         try {
             const cachedData = localStorage.getItem(CACHE_KEY);
@@ -10,38 +37,24 @@ const API = {
             const now = Date.now();
 
             if (cachedData && lastFetch && (now - lastFetch < TTL)) {
-                Logger.log('Usando Caché Local (Velocidad SQLite)...');
+                Logger.log('Usando Caché Local...');
                 const parsed = JSON.parse(cachedData);
                 if (Array.isArray(parsed)) return parsed;
             }
 
-            Logger.log('Caché expirado. Sincronizando con Google Cloud...');
-            const url = `${CONFIG.scriptUrl}?action=getItems&t=${Date.now()}`;
-            // 'credentials: omit' ayuda a evitar redirecciones de login de Google que causan error de CORS
-            const response = await fetch(url, { credentials: 'omit' });
-
-            if (!response.ok) throw new Error(`HTTP Error: ${response.status}`);
-
-            const data = await response.json();
-            const items = data.items || data;
+            Logger.log('Sincronizando Inventario con Cloud...');
+            const data = await this.gasFetch('getItems');
+            const items = data ? (data.items || data) : null;
 
             if (!Array.isArray(items)) {
-                Logger.error('Formato de datos inválido desde GAS:', data);
+                Logger.error('Formato inválido en Inventario');
                 return [];
-            }
-
-            if (items.length > 0) {
-                Logger.log('Muestra del primer registro:', items[0]);
-                Logger.log('Columnas detectadas:', Object.keys(items[0]).join(', '));
             }
 
             localStorage.setItem(CACHE_KEY, JSON.stringify(items));
             localStorage.setItem(CACHE_TIME_KEY, now.toString());
-
-            Logger.log(`${items.length} bienes sincronizados.`);
             return items;
         } catch (error) {
-            Logger.error('Error de red/GAS:', error);
             const emergencyCache = localStorage.getItem(CACHE_KEY);
             return emergencyCache ? JSON.parse(emergencyCache) : [];
         }
@@ -124,49 +137,25 @@ const API = {
     async getUsers() {
         try {
             Logger.log('Consultando base de datos de usuarios...');
-            // Agregamos un timestamp para evitar que el navegador cachee una respuesta fallida o vieja
-            const url = `${CONFIG.scriptUrl}?action=getUsers&t=${Date.now()}`;
-            const response = await fetch(url, {
-                method: 'GET',
-                mode: 'cors',
-                redirect: 'follow'
-            });
-
-            const data = await response.json();
-            const users = data.users || data || [];
-            if (!Array.isArray(users)) return [];
-
-            if (users.length > 0) {
-                Logger.log('Columnas detectadas en Usuarios:', Object.keys(users[0]).join(', '));
-            }
-
-            Logger.log(`${users.length} usuarios encontrados.`);
-            return users;
+            const data = await this.gasFetch('getUsers');
+            const users = data ? (data.users || data) : [];
+            return Array.isArray(users) ? users : [];
         } catch (error) {
-            Logger.error('Error al recuperar usuarios (CORS o Red/GAS):', error);
             return [];
         }
     },
 
     async getDepartments() {
         try {
-            Logger.log('Consultando base de datos de departamentos...');
-            const url = `${CONFIG.scriptUrl}?action=getDepartments&t=${Date.now()}`;
-            const response = await fetch(url, { credentials: 'omit' });
-            const data = await response.json();
+            Logger.log('Consultando Departamentos...');
+            const data = await this.gasFetch('getDepartments');
+            const depts = data ? (data.departments || data) : null;
 
-            if (data.error) {
-                Logger.warn('GAS Action getDepartments no encontrada, usando fallback.');
+            if (!depts || (Array.isArray(depts) && depts.length === 0)) {
                 return this.getDepartmentsFallback();
             }
-
-            const depts = data.departments || data || [];
-            if (depts.length === 0) return this.getDepartmentsFallback();
-
-            Logger.log(`${depts.length} departamentos encontrados.`);
             return depts;
         } catch (error) {
-            Logger.warn('Error de red al obtener departamentos, intentando fallback...');
             return this.getDepartmentsFallback();
         }
     },
@@ -190,39 +179,27 @@ const API = {
 
     async getMovements() {
         try {
-            Logger.log('Consultando historial de movimientos...');
-            const url = `${CONFIG.scriptUrl}?action=getMovements&t=${Date.now()}`;
-            const response = await fetch(url, { credentials: 'omit' });
-            const data = await response.json();
-            return data.movements || data || [];
+            const data = await this.gasFetch('getMovements');
+            return data ? (data.movements || data) : [];
         } catch (error) {
-            Logger.error('Error al recuperar movimientos:', error);
             return [];
         }
     },
 
     async getUpdates() {
         try {
-            Logger.log('Consultando registro de actualizaciones...');
-            const url = `${CONFIG.scriptUrl}?action=getUpdates&t=${Date.now()}`;
-            const response = await fetch(url, { credentials: 'omit' });
-            const data = await response.json();
-            return data.updates || data || [];
+            const data = await this.gasFetch('getUpdates');
+            return data ? (data.updates || data) : [];
         } catch (error) {
-            Logger.error('Error al recuperar actualizaciones:', error);
             return [];
         }
     },
 
     async getSystemConfig() {
         try {
-            Logger.log('Consultando parámetros de configuración...');
-            const url = `${CONFIG.scriptUrl}?action=getConfig&t=${Date.now()}`;
-            const response = await fetch(url, { credentials: 'omit' });
-            const data = await response.json();
-            return data.config || data || [];
+            const data = await this.gasFetch('getConfig');
+            return data ? (data.config || data) : [];
         } catch (error) {
-            Logger.error('Error al recuperar configuración:', error);
             return [];
         }
     },

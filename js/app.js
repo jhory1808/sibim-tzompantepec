@@ -98,6 +98,10 @@ async function loadDashboardData() {
     });
 
     initCharts(Object.keys(deptCounts), Object.values(deptCounts));
+
+    if (items.length === 0) {
+        UI.showToast("No se detectaron bienes. Si tienes datos en tu Excel, limpia el caché (Ctrl+F5) o verifica los permisos del Script de Google.", "warning");
+    }
 }
 
 function updateUIForUser() {
