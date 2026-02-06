@@ -197,14 +197,18 @@
 <body class="theme-dark">
     <!-- Splash Screen Loader -->
     <div id="app-loader">
-        <h1 style="color:white; font-size:2rem; letter-spacing:5px;">SIBIM</h1>
-        <p style="color:var(--accent-blue); font-size:0.8rem;">C2 TZOMPANTEPEC</p>
+        <img src="../assets/images/logo_municipio.png"
+            style="height: 100px; margin-bottom: 20px; filter: drop-shadow(0 0 10px rgba(255,255,255,0.2));">
+        <p style="color:var(--accent-blue); font-size:0.8rem; letter-spacing: 2px;">C2 TZOMPANTEPEC</p>
         <div class="loader-bar">
             <div class="loader-progress"></div>
         </div>
     </div>
     <header>
-        <div class="logo">SIBIMTZOMP</div>
+        <div class="logo" style="display: flex; align-items: center; gap: 10px;">
+            <img src="../assets/images/logo_municipio.png" style="height: 40px; width: auto;">
+            <span>SIBIMTZOMP</span>
+        </div>
         <div style="display: flex; align-items: center; gap: 15px;">
             <button class="btn" style="background: #2ecc71; color: white;" onclick="openNewArticleModal()"><i
                     class="fas fa-plus"></i> Nuevo Artículo</button>

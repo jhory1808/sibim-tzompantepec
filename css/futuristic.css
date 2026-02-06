@@ -225,16 +225,21 @@ body.theme-blue {
     margin-bottom: 20px;
 }
 
+.logo-img-main {
+    max-height: 180px;
+    width: auto;
+    filter: drop-shadow(0 0 25px rgba(0, 210, 255, 0.4));
+    transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    cursor: pointer;
+}
+
+.logo-img-main:hover {
+    transform: scale(1.05) rotate(-1deg);
+}
+
 .logo-main {
-    font-size: 5rem;
-    font-weight: 900;
-    letter-spacing: 15px;
-    background: linear-gradient(to bottom, #fff 40%, var(--accent-blue));
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
-    filter: drop-shadow(0 0 20px rgba(0, 210, 255, 0.4));
-    margin: 0;
+    display: none;
+    /* Ocultamos si hay imagen */
 }
 
 .subtitle-main {
