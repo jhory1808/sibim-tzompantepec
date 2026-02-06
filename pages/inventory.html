@@ -320,7 +320,7 @@
                         </div>
 
                         <!-- Tab 1: Detalles Adicionales -->
-                        <div class="tab-content" id="tab-1" style="display: none;">
+                        <div class="tab-content" id="tab-1">
                             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
                                 <div class="filter-group">
                                     <label>Número de Serie</label>
@@ -350,7 +350,7 @@
                         </div>
 
                         <!-- Tab 2: Imagen -->
-                        <div class="tab-content" id="tab-2" style="display: none;">
+                        <div class="tab-content" id="tab-2">
                             <div class="upload-area" onclick="document.getElementById('art-img-input').click()"
                                 style="border: 2px dashed rgba(255,255,255,0.1); padding: 50px; text-align: center; border-radius: 12px; cursor: pointer;">
                                 <i class="fas fa-camera fa-2x"
@@ -365,7 +365,7 @@
                         </div>
 
                         <!-- Tab 3: Resguardo (PDF) -->
-                        <div class="tab-content" id="tab-3" style="display: none;">
+                        <div class="tab-content" id="tab-3">
                             <div class="upload-area" onclick="document.getElementById('art-pdf-input').click()"
                                 style="border: 2px dashed #e74c3c; padding: 50px; text-align: center; border-radius: 12px; cursor: pointer;">
                                 <i class="fas fa-file-pdf fa-2x" style="color: #e74c3c; margin-bottom: 15px;"></i>
@@ -379,7 +379,7 @@
                         </div>
 
                         <!-- Tab 4: Acta Legal -->
-                        <div class="tab-content" id="tab-4" style="display: none;">
+                        <div class="tab-content" id="tab-4">
                             <div class="upload-area" onclick="document.getElementById('art-acta-input').click()"
                                 style="border: 2px dashed #f1c40f; padding: 40px; text-align: center; border-radius: 12px;">
                                 <i class="fas fa-gavel fa-2x" style="color: #f1c40f; margin-bottom: 15px;"></i>
@@ -486,7 +486,11 @@
                 }
             } catch (err) {
                 console.error("Error cargando inventario:", err);
-                tableBody.innerHTML = `<tr><td colspan="8" style="text-align:center; padding:50px; color:#e74c3c;"><i class="fas fa-exclamation-triangle"></i> Error: ${err.message}</td></tr>`;
+                let errorMsg = err.message;
+                if (err.message.includes('Failed to fetch')) {
+                    errorMsg = "Error de CORS/Red: El navegador bloqueó la conexión. Verifica que el script de Google esté desplegado como 'Cualquier persona' (Anyone).";
+                }
+                tableBody.innerHTML = `<tr><td colspan="8" style="text-align:center; padding:50px; color:#e74c3c;"><i class="fas fa-exclamation-triangle"></i> Error: ${errorMsg}</td></tr>`;
             }
         }
 
@@ -496,6 +500,8 @@
             });
             document.querySelectorAll('.tab-content').forEach((c, i) => {
                 c.classList.toggle('active', i === index);
+                // Aseguramos visibilidad removiendo cualquier estilo inline previo
+                c.style.display = (i === index) ? 'block' : 'none';
             });
         }
 
