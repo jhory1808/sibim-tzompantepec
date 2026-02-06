@@ -322,15 +322,15 @@ body.theme-blue {
 
 .dropdown-box {
     position: absolute;
-    top: calc(100% + 5px);
+    top: calc(100% + 8px);
     right: 0;
-    width: 100%;
+    width: 260px;
     background: rgba(10, 25, 47, 0.95);
     backdrop-filter: blur(15px);
     border-radius: 12px;
     box-shadow: 0 15px 40px rgba(0, 0, 0, 0.5);
     display: none;
-    z-index: 1000;
+    z-index: 9999;
     overflow: hidden;
     border: 1px solid var(--accent-blue);
     animation: slideDown 0.3s ease-out;
@@ -401,12 +401,13 @@ body {
 
 /* Glassmorphism utility */
 .glass {
-    background: var(--card-bg);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border: 1px solid var(--glass-border);
+    background: rgba(255, 255, 255, 0.05);
+    /* Much more transparent */
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 20px;
-    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
 }
 
 .neon-border-blue {
@@ -473,9 +474,9 @@ header {
     padding: 0 5%;
     position: sticky;
     top: 0;
-    z-index: 1000;
-    background: rgba(10, 25, 47, 0.85);
-    backdrop-filter: blur(10px);
+    z-index: 9000;
+    background: rgba(10, 25, 47, 0.9);
+    backdrop-filter: blur(15px);
 }
 
 .logo {
@@ -493,11 +494,15 @@ header {
 /* Navigation - Horizontal */
 .nav-bar {
     display: flex;
-    gap: 10px;
-    padding: 10px;
-    border-radius: 15px;
-    z-index: 1000;
+    gap: 15px;
+    padding: 10px 25px;
+    border-radius: 20px;
+    z-index: 50;
+    /* Lower z-index */
     position: relative;
+    max-width: fit-content;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 .nav-item {
