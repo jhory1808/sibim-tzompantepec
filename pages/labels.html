@@ -132,10 +132,99 @@
                 <div id="qr-code" class="qr-box"></div>
             </div>
 
-            <button onclick="window.print()" id="print-btn" class="btn btn-outline"
-                style="display: none; margin: 20px auto;">Imprimir Etiqueta</button>
+            <div style="display: flex; gap: 10px; justify-content: center; margin-top: 20px;">
+                <button onclick="window.print()" id="print-btn" class="btn btn-primary" style="display: none;"><i
+                        class="fas fa-print"></i> Imprimir Estándar</button>
+                <button onclick="printBrotherQL800()" id="brother-print-btn" class="btn btn-outline"
+                    style="display: none; border-color: #2ecc71; color: #2ecc71;">
+                    <i class="fas fa-print"></i> Brother QL-800 (DK-1201)
+                </button>
+            </div>
+        </div>
+
+        <!-- Plantilla específica para Brother QL-800 -->
+        <div id="brother-template" class="brother-label" style="display: none;">
+            <div class="brother-content">
+                <div class="brother-left">
+                    <img src="../assets/images/logo_municipio.png" style="height: 35px;">
+                    <div id="brother-desc" class="brother-title"></div>
+                    <div id="brother-code" class="brother-id"></div>
+                </div>
+                <div id="brother-qr" class="brother-qr-box"></div>
+            </div>
         </div>
     </main>
+
+    <style>
+        /* Estilos para Brother QL-800 (29mm x 90mm) */
+        .brother-label {
+            width: 340px;
+            /* aprox 90mm */
+            height: 110px;
+            /* aprox 29mm */
+            background: white;
+            color: black;
+            padding: 5px 15px;
+            font-family: Arial, sans-serif;
+            border: 1px solid #ccc;
+            margin: 0 auto;
+        }
+
+        .brother-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 100%;
+        }
+
+        .brother-left {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            flex: 1;
+        }
+
+        .brother-title {
+            font-size: 11px;
+            font-weight: bold;
+            margin-top: 3px;
+            text-transform: uppercase;
+            overflow: hidden;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            line-clamp: 2;
+            -webkit-box-orient: vertical;
+        }
+
+        .brother-id {
+            font-size: 14px;
+            font-weight: 800;
+            margin-top: 2px;
+        }
+
+        .brother-qr-box {
+            width: 80px;
+            height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        @media print {
+            .brother-label-print {
+                visibility: visible !important;
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 90mm;
+                height: 29mm;
+            }
+
+            .brother-label-print * {
+                visibility: visible !important;
+            }
+        }
+    </style>
 
     <script>
         function generateLabel() {
@@ -147,10 +236,15 @@
             document.getElementById('display-desc').innerText = desc;
             document.getElementById('display-code').innerText = 'Código: ' + code;
 
-            // Clear previous QR
-            document.getElementById('qr-code').innerHTML = '';
+            // For Brother
+            document.getElementById('brother-desc').innerText = desc;
+            document.getElementById('brother-code').innerText = code;
 
-            // Generate QR
+            // Clear previous QRs
+            document.getElementById('qr-code').innerHTML = '';
+            document.getElementById('brother-qr').innerHTML = '';
+
+            // Generate Standard QR
             new QRCode(document.getElementById("qr-code"), {
                 text: code,
                 width: 100,
@@ -160,8 +254,33 @@
                 correctLevel: QRCode.CorrectLevel.H
             });
 
+            // Generate Brother QR
+            new QRCode(document.getElementById("brother-qr"), {
+                text: code,
+                width: 75,
+                height: 75,
+                colorDark: "#000000",
+                colorLight: "#ffffff",
+                correctLevel: QRCode.CorrectLevel.H
+            });
+
             document.getElementById('label-result').style.display = 'grid';
-            document.getElementById('print-btn').style.display = 'flex';
+            document.getElementById('print-btn').style.display = 'block';
+            document.getElementById('brother-print-btn').style.display = 'block';
+        }
+
+        function printBrotherQL800() {
+            const label = document.getElementById('brother-template');
+            label.style.display = 'block';
+            label.classList.add('brother-label-print');
+
+            window.print();
+
+            // Restore after print
+            setTimeout(() => {
+                label.style.display = 'none';
+                label.classList.remove('brother-label-print');
+            }, 500);
         }
     </script>
 </body>

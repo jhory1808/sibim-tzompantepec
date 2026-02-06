@@ -92,75 +92,70 @@
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
             <div>
                 <h1 style="color: var(--accent-blue);">Historial de Movimientos</h1>
-                <p style="color: var(--text-secondary); font-size: 0.9rem;">Registro de todas las operaciones del
-                    sistema</p>
+                <p style="color: var(--text-secondary); font-size: 0.9rem;">Registro institucional de operaciones y
+                    cambios de estado</p>
             </div>
             <div style="display: flex; gap: 10px;">
                 <button class="btn" style="background: #2ecc71; color: white;" onclick="exportToPDF()"><i
-                        class="fas fa-file-pdf"></i> Exportar PDF</button>
+                        class="fas fa-file-pdf"></i> PDF</button>
                 <button class="btn" style="background: #ecf0f1; color: #333;" onclick="exportToExcel()"><i
-                        class="fas fa-file-excel"></i> Exportar Excel</button>
-                <button class="btn" style="background: #e74c3c; color: white;" onclick="clearHistory()"><i
-                        class="fas fa-trash"></i> Limpiar Historial</button>
-                <button class="btn" style="background: #f1c40f; color: black;"><i class="fas fa-search"></i> Consulta
-                    Rápida</button>
+                        class="fas fa-file-excel"></i> Excel</button>
+                <button class="btn" style="background: #f1c40f; color: black;" onclick="loadMovements()"><i
+                        class="fas fa-sync"></i> Actualizar</button>
             </div>
         </div>
 
         <div class="glass" style="padding: 20px; margin-bottom: 20px;">
-            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 15px;">
+            <div
+                style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 15px;">
                 <div class="form-group">
-                    <label>Filtrar por Tipo</label>
-                    <select class="form-control">
-                        <option>Todos los tipos</option>
+                    <label>Filtrar por Acción</label>
+                    <select id="filter-action" class="form-control" onchange="filterMovements()">
+                        <option value="">Todas las acciones</option>
+                        <option value="LOGIN">Acceso</option>
+                        <option value="UPDATE">Actualización</option>
+                        <option value="CREATE">Creación</option>
+                        <option value="DELETE">Eliminación</option>
                     </select>
                 </div>
                 <div class="form-group">
-                    <label>Filtrar por Usuario</label>
-                    <select class="form-control">
-                        <option>Todos los usuarios</option>
-                    </select>
+                    <label>Buscar por Bien</label>
+                    <input type="text" id="search-item" class="form-control" placeholder="Código o Nombre..."
+                        onkeyup="filterMovements()">
                 </div>
                 <div class="form-group">
                     <label>Fecha Desde</label>
-                    <input type="date" class="form-control">
+                    <input type="date" id="date-from" class="form-control" onchange="filterMovements()">
                 </div>
                 <div class="form-group">
                     <label>Fecha Hasta</label>
-                    <input type="date" class="form-control">
+                    <input type="date" id="date-to" class="form-control" onchange="filterMovements()">
                 </div>
-            </div>
-            <div style="display: flex; gap: 10px;">
-                <button class="btn" style="background: #2ecc71; color: white;">Aplicar Filtros</button>
-                <button class="btn glass">Limpiar Filtros</button>
             </div>
         </div>
 
-        <div class="glass" style="padding: 0; overflow: hidden; border-radius: 12px;">
-            <table style="width: 100%; border-collapse: collapse;">
-                <thead style="background: rgba(0,0,0,0.1);">
+        <div class="glass" style="padding: 0; overflow-x: auto; border-radius: 12px; margin-bottom: 50px;">
+            <table style="width: 100%; border-collapse: collapse; min-width: 1500px;">
+                <thead style="background: rgba(0,0,0,0.2);">
                     <tr>
                         <th style="padding: 15px; text-align: left;">ID</th>
                         <th style="padding: 15px; text-align: left;">Fecha</th>
                         <th style="padding: 15px; text-align: left;">Usuario</th>
                         <th style="padding: 15px; text-align: left;">Acción</th>
-                        <th style="padding: 15px; text-align: left;">Tipo</th>
+                        <th style="padding: 15px; text-align: left;">Bien</th>
+                        <th style="padding: 15px; text-align: left;">Depto. Origen</th>
+                        <th style="padding: 15px; text-align: left;">Depto. Destino</th>
+                        <th style="padding: 15px; text-align: left;">Est. Anterior</th>
+                        <th style="padding: 15px; text-align: left;">Est. Nuevo</th>
                         <th style="padding: 15px; text-align: left;">Detalles</th>
-                        <th style="padding: 15px; text-align: center;">Acciones</th>
+                        <th style="padding: 15px; text-align: center;">IP / Sist.</th>
                     </tr>
                 </thead>
                 <tbody id="movements-table-body">
                     <tr>
-                        <td style="padding: 15px;">1</td>
-                        <td style="padding: 15px;">${new Date().toLocaleString()}</td>
-                        <td style="padding: 15px;">admin</td>
-                        <td style="padding: 15px;">Inicio de sesión</td>
-                        <td style="padding: 15px;"><span class="badge"
-                                style="background: #f1c40f33; color: #f1c40f; padding: 4px 8px; border-radius: 4px;">Sistema</span>
+                        <td colspan="11" style="padding: 40px; text-align: center; color: var(--text-secondary);">
+                            <i class="fas fa-spinner fa-spin"></i> Cargando historial desde la nube...
                         </td>
-                        <td style="padding: 15px;">Usuario inició sesión en el sistema</td>
-                        <td style="padding: 15px; text-align: center;"><i class="fas fa-eye"
-                                style="color: #17a2b8; cursor: pointer;"></i></td>
                     </tr>
                 </tbody>
             </table>
@@ -172,14 +167,91 @@
     <script src="../js/auth.js"></script>
     <script src="../js/app.js"></script>
     <script>
+        let allMovements = [];
+
         document.addEventListener('DOMContentLoaded', async () => {
             Auth.checkAccess();
             Auth.initTheme();
+            loadMovements();
         });
 
+        async function loadMovements() {
+            const tbody = document.getElementById('movements-table-body');
+            try {
+                allMovements = await API.getMovements();
+                renderMovements(allMovements);
+            } catch (error) {
+                tbody.innerHTML = `<tr><td colspan="11" style="text-align:center; color:red; padding:20px;">Error al conectar con la base de datos cloud.</td></tr>`;
+            }
+        }
+
+        function renderMovements(data) {
+            const tbody = document.getElementById('movements-table-body');
+            if (!data || data.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="11" style="text-align:center; padding:20px;">No se encontraron registros de movimientos.</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = data.map(m => `
+                <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                    <td style="padding: 12px 15px; font-size: 0.85rem;">${m.ID || m.id || '---'}</td>
+                    <td style="padding: 12px 15px; font-size: 0.85rem;">${m.Fecha || m.fecha || '---'}</td>
+                    <td style="padding: 12px 15px; font-weight: 500;">${m.Usuario || m.usuario || '---'}</td>
+                    <td style="padding: 12px 15px;">
+                        <span class="badge" style="background: ${getActionColor(m.Accion || m.accion)}; color: white; padding: 4px 8px; border-radius: 4px; font-size: 0.75rem;">
+                            ${m.Accion || m.accion || 'SISTEMA'}
+                        </span>
+                    </td>
+                    <td style="padding: 12px 15px; font-size: 0.85rem;">
+                        <div style="font-weight: bold;">${m['Codigo Articulo'] || m.codigo || '--'}</div>
+                        <div style="font-size: 0.75rem; color: var(--text-secondary);">${m['Nombre Articulo'] || m.nombre || ''}</div>
+                    </td>
+                    <td style="padding: 12px 15px; font-size: 0.85rem;">${m['Departamento Origen'] || m.origen || '---'}</td>
+                    <td style="padding: 12px 15px; font-size: 0.85rem;">${m['Departamento Destino'] || m.destino || '---'}</td>
+                    <td style="padding: 12px 15px; font-size: 0.85rem;">${m['Estado Anterior'] || '---'}</td>
+                    <td style="padding: 12px 15px; font-size: 0.85rem; color: var(--accent-blue); font-weight: bold;">${m['Estado Nuevo'] || '---'}</td>
+                    <td style="padding: 12px 15px; font-size: 0.8rem; max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${m.Detalles || ''}">
+                        ${m.Detalles || '---'}
+                    </td>
+                    <td style="padding: 12px 15px; text-align: center; font-size: 0.75rem;">
+                        <div>${m['Ip Usuario'] || 'Local'}</div>
+                        <div style="color: var(--text-secondary);">${m.Navegador ? m.Navegador.split(' ')[0] : 'Browser'}</div>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function getActionColor(action) {
+            if (!action) return '#95a5a6';
+            const a = action.toUpperCase();
+            if (a.includes('LOGIN')) return '#3498db';
+            if (a.includes('CREATE')) return '#2ecc71';
+            if (a.includes('UPDATE')) return '#f39c12';
+            if (a.includes('DELETE')) return '#e74c3c';
+            return '#1abc9c';
+        }
+
+        function filterMovements() {
+            const action = document.getElementById('filter-action').value.toUpperCase();
+            const search = document.getElementById('search-item').value.toUpperCase();
+
+            const filtered = allMovements.filter(m => {
+                const matchAction = !action || (m.Accion || m.accion || '').toUpperCase().includes(action);
+                const matchSearch = !search ||
+                    (m['Codigo Articulo'] || '').toUpperCase().includes(search) ||
+                    (m['Nombre Articulo'] || '').toUpperCase().includes(search);
+                return matchAction && matchSearch;
+            });
+
+            renderMovements(filtered);
+        }
+
         function exportToPDF() { window.print(); }
-        function exportToExcel() { alert("Exportando historial a Excel..."); }
-        function clearHistory() { if (confirm("¿Seguro que desea limpiar el historial?")) { alert("Historial limpiado."); } }
+        function exportToExcel() {
+            const table = document.querySelector('table');
+            const wb = XLSX.utils.table_to_book(table, { sheet: "Movimientos" });
+            XLSX.writeFile(wb, `SIBIM_Movimientos_${new Date().toISOString().slice(0, 10)}.xlsx`);
+        }
     </script>
 </body>
 

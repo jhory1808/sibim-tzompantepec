@@ -147,9 +147,89 @@ const API = {
         }
     },
 
+    async getDepartments() {
+        try {
+            Logger.log('Consultando base de datos de departamentos...');
+            const url = `${CONFIG.scriptUrl}?action=getDepartments&t=${Date.now()}`;
+            const response = await fetch(url);
+            const data = await response.json();
+
+            if (data.error) {
+                Logger.warn('GAS Action getDepartments no encontrada, usando fallback.');
+                return this.getDepartmentsFallback();
+            }
+
+            const depts = data.departments || data || [];
+            if (depts.length === 0) return this.getDepartmentsFallback();
+
+            Logger.log(`${depts.length} departamentos encontrados.`);
+            return depts;
+        } catch (error) {
+            Logger.warn('Error de red al obtener departamentos, intentando fallback...');
+            return this.getDepartmentsFallback();
+        }
+    },
+
+    async getDepartmentsFallback() {
+        try {
+            const items = await this.fetchItems();
+            const uniqueDepts = [...new Set(items.map(i => i.Departamento || i.departamento || 'Sin Asignar'))];
+            return uniqueDepts.map((name, index) => ({
+                ID: index + 1,
+                'Nombre Departamento': name,
+                'Encargado': 'Por asignar',
+                'Descripcion': 'Cargado desde Inventario',
+                'Articulos Asignados': items.filter(i => (i.Departamento || i.departamento) === name).length,
+                'Fecha de Creacion': new Date().toLocaleDateString()
+            }));
+        } catch (e) {
+            return [];
+        }
+    },
+
+    async getMovements() {
+        try {
+            Logger.log('Consultando historial de movimientos...');
+            const url = `${CONFIG.scriptUrl}?action=getMovements&t=${Date.now()}`;
+            const response = await fetch(url);
+            const data = await response.json();
+            return data.movements || data || [];
+        } catch (error) {
+            Logger.error('Error al recuperar movimientos:', error);
+            return [];
+        }
+    },
+
+    async getUpdates() {
+        try {
+            Logger.log('Consultando registro de actualizaciones...');
+            const url = `${CONFIG.scriptUrl}?action=getUpdates&t=${Date.now()}`;
+            const response = await fetch(url);
+            const data = await response.json();
+            return data.updates || data || [];
+        } catch (error) {
+            Logger.error('Error al recuperar actualizaciones:', error);
+            return [];
+        }
+    },
+
+    async getSystemConfig() {
+        try {
+            Logger.log('Consultando parámetros de configuración...');
+            const url = `${CONFIG.scriptUrl}?action=getConfig&t=${Date.now()}`;
+            const response = await fetch(url);
+            const data = await response.json();
+            return data.config || data || [];
+        } catch (error) {
+            Logger.error('Error al recuperar configuración:', error);
+            return [];
+        }
+    },
+
     async getStats() {
         try {
             const items = await this.fetchItems();
+            const movements = await this.getMovements();
             const stats = {
                 total: items.length,
                 departamentos: new Set(items.map(i => i.Departamento || i.departamento)).size,
@@ -157,7 +237,7 @@ const API = {
                     const st = i.Estado || i.estado || '';
                     return st.toLowerCase() === 'baja';
                 }).length,
-                movimientos: Math.floor(items.length * 0.15) // Simulado
+                movimientos: movements.length
             };
             return { items, stats };
         } catch (error) {
