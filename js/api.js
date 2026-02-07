@@ -10,8 +10,8 @@ const API = {
             const url = `${CONFIG.scriptUrl}?${queryParams.toString()}`;
             console.log(`[DIAGNÓSTICO] Haz clic aquí para probar el backend: ${url}`);
 
-            // INTENTO FINAL: forzar modo anónimo para evitar conflicto de múltiples cuentas de Google
-            const response = await fetch(url, { redirect: "follow", headers: { "Content-Type": "text/plain;charset=utf-8" } });
+            // FETCH PURO: Dejamos que el navegador maneje todo. Al ser público, no requiere headers.
+            const response = await fetch(url);
 
             if (!response.ok) throw new Error(`HTTP ${response.status}`);
             const data = await response.json();
