@@ -7,8 +7,8 @@ const CONFIG = {
 
     // Metadatos de la aplicación
     appName: 'SIBIM TZOMPANTEPEC',
-    version: '1.4.3',
-    lastUpdate: '2026-02-07 15:45',
+    version: '1.4.4',
+    lastUpdate: '2026-02-08 17:50',
 
     // Configuración de Escalabilidad
     settings: {
