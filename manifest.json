@@ -1,21 +1,88 @@
 {
     "name": "SIBIM Tzompantepec",
     "short_name": "SIBIMTZ",
-    "description": "Sistema de Inventario de Bienes Inmuebles y Muebles de Tzompantepec",
+    "description": "Sistema de Inventario de Bienes Inmuebles y Muebles - H. Ayuntamiento de Tzompantepec",
     "start_url": "/index.html",
+    "scope": "/",
     "display": "standalone",
+    "orientation": "any",
     "background_color": "#0a192f",
     "theme_color": "#00d2ff",
+    "lang": "es-MX",
+    "categories": [
+        "business",
+        "productivity",
+        "utilities"
+    ],
     "icons": [
         {
             "src": "assets/images/logo_municipio.png",
+            "sizes": "72x72",
+            "type": "image/png",
+            "purpose": "any"
+        },
+        {
+            "src": "assets/images/logo_municipio.png",
+            "sizes": "96x96",
+            "type": "image/png",
+            "purpose": "any"
+        },
+        {
+            "src": "assets/images/logo_municipio.png",
+            "sizes": "128x128",
+            "type": "image/png",
+            "purpose": "any"
+        },
+        {
+            "src": "assets/images/logo_municipio.png",
             "sizes": "192x192",
-            "type": "image/png"
+            "type": "image/png",
+            "purpose": "any maskable"
+        },
+        {
+            "src": "assets/images/logo_municipio.png",
+            "sizes": "384x384",
+            "type": "image/png",
+            "purpose": "any"
         },
         {
             "src": "assets/images/logo_municipio.png",
             "sizes": "512x512",
-            "type": "image/png"
+            "type": "image/png",
+            "purpose": "any maskable"
+        }
+    ],
+    "screenshots": [
+        {
+            "src": "assets/images/screenshot_dashboard.png",
+            "sizes": "1280x720",
+            "type": "image/png",
+            "form_factor": "wide",
+            "label": "Dashboard Principal"
+        }
+    ],
+    "shortcuts": [
+        {
+            "name": "Inventario",
+            "short_name": "Inventario",
+            "url": "/pages/inventory.html",
+            "icons": [
+                {
+                    "src": "assets/images/logo_municipio.png",
+                    "sizes": "96x96"
+                }
+            ]
+        },
+        {
+            "name": "Escáner QR",
+            "short_name": "Escáner",
+            "url": "/pages/scanner.html",
+            "icons": [
+                {
+                    "src": "assets/images/logo_municipio.png",
+                    "sizes": "96x96"
+                }
+            ]
         }
     ]
 }
