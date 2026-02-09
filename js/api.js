@@ -13,6 +13,12 @@ const API = {
             // FETCH PURO: Dejamos que el navegador maneje todo. Al ser público, no requiere headers.
             const response = await fetch(url);
 
+            if (response.status === 403 || response.status === 401) {
+                console.error("⛔ ACCESO PROHIBIDO (403): El script de Google NO está público.");
+                // Intentamos notificar a la UI si es posible, o retornamos un objeto error específico
+                return { error: true, message: "PERMISOS_INSUFICIENTES" };
+            }
+
             if (!response.ok) throw new Error(`HTTP ${response.status}`);
             const data = await response.json();
 
