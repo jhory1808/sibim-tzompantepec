@@ -1,14 +1,14 @@
 const CONFIG = {
     // URL del Web App de Google Apps Script
-    scriptUrl: 'https://script.google.com/macros/s/AKfycbyEjHqqnu0SLJrgaxmM2pzxwDpL7QivTqGVXgnyas127v5irYQLvA1jKGHDLkKCASytRg/exec',
+    scriptUrl: 'https://script.google.com/macros/s/AKfycbyis5q008P457-txgEii0JhUpx8HEO2w_9dlVi3Q1zrWU2GtgX7-uanaS1PR_2B2f-3jg/exec',
 
     // ID de la hoja de cálculo de Google
     spreadsheetId: '1sNOZaDhhkCMRcY2u038tlKHQXS02dSQD3jdTwcQD22Q',
 
     // Metadatos de la aplicación
     appName: 'SIBIM TZOMPANTEPEC',
-    version: '1.5.5',
-    lastUpdate: '2026-02-08 18:55',
+    version: '1.5.6',
+    lastUpdate: '2026-02-08 19:05',
 
     // Configuración de Escalabilidad
     settings: {
