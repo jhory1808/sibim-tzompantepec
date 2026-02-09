@@ -7,8 +7,8 @@ const CONFIG = {
 
     // Metadatos de la aplicación
     appName: 'SIBIM TZOMPANTEPEC',
-    version: '1.5.3',
-    lastUpdate: '2026-02-08 18:40',
+    version: '1.5.4',
+    lastUpdate: '2026-02-08 18:45',
 
     // Configuración de Escalabilidad
     settings: {
@@ -18,22 +18,23 @@ const CONFIG = {
         debugMode: true       // Activado para diagnóstico
     },
 
-    // Mapeo Real basado en captura de Inventario
+    // Mapeo Real basado en captura de Inventario (v1.5.4)
     columnMap: {
         id: 'A',
         codigo: 'B',
         nombre: 'C',
-        marca: 'D', // Header en hoja dice 'marco', pero asumimos Marca
+        marca: 'D',
         modelo: 'E',
-        serie: 'F',
-        grupo: 'G',
-        departamento: 'H',
-        responsable: 'I',
-        area: 'J',
-        proveedor: 'K',
-        valor: 'L',
-        fecha_adquisicion: 'M',
-        estado: 'N'
+        serie: 'F',      // Numero de Serie
+        categoria: 'G',  // Nueva columna detectada
+        grupo: 'H',
+        departamento: 'I', // Desplazado por inserción de Categoria
+        responsable: 'J',
+        area: 'K',
+        proveedor: 'L',
+        valor: 'M',
+        fecha_adquisicion: 'N',
+        estado: 'O'      // Estimado basado en desplazamiento
     },
 
     // Endpoint de Actualizaciones (Simulado)
