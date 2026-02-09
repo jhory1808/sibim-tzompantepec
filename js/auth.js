@@ -20,12 +20,16 @@ const Auth = {
 
             // Normalizamos búsqueda para soportar columnas en Inglés o Español
             const user = users.find(u => {
-                // Buscamos exacto en las columnas de tu Excel: 'Usuario' y 'Contraseña'
-                const uName = u.Usuario || u.username || u.nombre;
-                const uPass = u.Contraseña || u.password || u.clave;
+                // Buscamos exacto en las columnas de tu Excel: 'Usuario' y 'Clave'
+                const uName = u.Usuario || u.usuario || u.Users || '';
+                const uPass = u.Clave || u.clave || u.Password || '';
 
-                return String(uName).trim() === String(username).trim() &&
-                    String(uPass).trim() === String(password).trim();
+                // Usuario: Insensible a mayúsculas/minúsculas
+                const nameMatch = String(uName).trim().toLowerCase() === String(username).trim().toLowerCase();
+                // Clave: Exacta (pero sin espacios extra)
+                const passMatch = String(uPass).trim() === String(password).trim();
+
+                return nameMatch && passMatch;
             });
 
             if (user) {
