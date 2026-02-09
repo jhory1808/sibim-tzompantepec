@@ -141,6 +141,25 @@ const API = {
         }
     },
 
+    async addUser(userData) {
+        try {
+            // Enviamos POST al Script de Google
+            const response = await fetch(CONFIG.scriptUrl, {
+                method: 'POST',
+                mode: 'no-cors', // Importante para Google Apps Script
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    action: 'addUser',
+                    data: userData
+                })
+            });
+            return { success: true };
+        } catch (error) {
+            console.error("Error creating user:", error);
+            return { success: false, error };
+        }
+    },
+
     async getUsers() {
         try {
             Logger.log('Consultando base de datos de usuarios...');

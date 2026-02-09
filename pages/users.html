@@ -139,8 +139,46 @@
     <script>
         document.addEventListener('DOMContentLoaded', async () => {
             Auth.checkAccess();
-            Auth.initTheme();
             loadUsers();
+
+            // Lógica para guardar usuario
+            const form = document.getElementById('add-user-form');
+            if (form) {
+                form.addEventListener('submit', async (e) => {
+                    e.preventDefault();
+
+                    const btn = form.querySelector('button[type="submit"]');
+                    const originalText = btn.innerHTML;
+                    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...';
+                    btn.disabled = true;
+
+                    const inputs = form.querySelectorAll('input, select');
+                    const userData = {
+                        Usuario: inputs[0].value,
+                        Clave: inputs[1].value,
+                        Nombre: inputs[2].value,
+                        Email: inputs[3].value,
+                        Rol: inputs[4].value,
+                        Departamento: inputs[5].value,
+                        Estado: inputs[6].value,
+                        'Ultimo Acceso': new Date().toISOString().split('T')[0]
+                    };
+
+                    try {
+                        await API.addUser(userData);
+                        alert("✅ Usuario guardado correctamente (Puede tardar unos segundos en reflejarse)");
+                        closeAddUserModal();
+                        form.reset();
+                        // Recargar lista
+                        loadUsers();
+                    } catch (err) {
+                        alert("❌ Error al guardar usuario: " + err.message);
+                    } finally {
+                        btn.innerHTML = originalText;
+                        btn.disabled = false;
+                    }
+                });
+            }
         });
 
         async function loadUsers() {
