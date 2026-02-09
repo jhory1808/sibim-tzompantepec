@@ -7,8 +7,8 @@ const CONFIG = {
 
     // Metadatos de la aplicación
     appName: 'SIBIM TZOMPANTEPEC',
-    version: '1.5.2',
-    lastUpdate: '2026-02-08 18:25',
+    version: '1.5.3',
+    lastUpdate: '2026-02-08 18:40',
 
     // Configuración de Escalabilidad
     settings: {
@@ -45,8 +45,8 @@ const Logger = {
     log: (msg, data = '') => CONFIG.settings.debugMode && console.log(`[SIBIM LOG]: ${msg}`, data),
     error: (msg, err) => {
         console.error(`[SIBIM ERROR]: ${msg}`, err);
-        if (err && (JSON.stringify(err).includes('getSheetByName') || (err.message && err.message.includes('getSheetByName')))) {
-            alert("DIAGNÓSTICO CLOUD: El servidor indica que no encuentra una pestaña en tu Google Sheet. Por favor, asegúrate de que tu Spreadsheet tenga las pestañas: 'Inventario', 'Usuarios', 'Departamentos', 'Movimientos', 'Actualizaciones' y 'Configuracion' (exactamente con esos nombres).");
+        if (err && (JSON.stringify(err).includes('getSheetByName') || (err.message && err.message.includes('No se encontró la pestaña')))) {
+            alert("✅ ¡CONEXIÓN ESTABLECIDA! Pero faltan hojas en tu Excel.\n\nEl sistema ya conecta, pero no encuentra las pestañas necesarias.\n\nPor favor, crea estas hojas vacías en tu Google Sheet:\n1. Usuarios\n2. Departamentos\n3. Movimientos\n4. Actualizaciones\n5. Configuracion\n\n(Respeta las mayúsculas)");
         }
     },
     warn: (msg, data = '') => CONFIG.settings.debugMode && console.warn(`[SIBIM WARN]: ${msg}`, data)
