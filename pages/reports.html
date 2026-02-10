@@ -11,6 +11,11 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.5/xlsx.full.min.js"></script>
     <style>
         @media print {
+            @page {
+                size: letter;
+                margin: 1.5cm;
+            }
+
             .no-print {
                 display: none !important;
             }
@@ -24,7 +29,7 @@
                 display: block !important;
                 width: 100%;
                 margin: 0;
-                padding: 20px;
+                padding: 0;
             }
 
             .glass {
@@ -50,23 +55,22 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border-bottom: 2px solid #800080;
+            border-bottom: 3px solid #00d2ff;
             padding-bottom: 20px;
             margin-bottom: 30px;
         }
 
         .letterhead-header img {
-            height: 75px;
+            height: 90px;
         }
 
         .report-title {
             text-align: center;
             text-transform: uppercase;
-            font-size: 1.5rem;
+            font-size: 1.8rem;
             margin-bottom: 30px;
             color: #1a1a1a;
-            border-bottom: 1px solid #eee;
-            padding-bottom: 10px;
+            font-weight: 800;
         }
 
         .official-table {
@@ -80,12 +84,13 @@
             border: 1px solid #ddd;
             padding: 10px;
             text-align: left;
-            font-size: 0.85rem;
+            font-size: 0.8rem;
         }
 
         .official-table th {
-            background-color: #f2f2f2;
+            background-color: #f8f9fa;
             font-weight: bold;
+            color: #333;
         }
 
         /* Estilos para el scroll horizontal */
@@ -95,7 +100,6 @@
             padding: 20px;
             overflow-x: auto;
             align-items: stretch;
-            min-height: 500px;
         }
 
         .horizontal-section {
@@ -104,47 +108,50 @@
             flex-direction: column;
         }
 
-        .title-section {
-            min-width: 300px;
+        .stats-section {
+            min-width: 600px;
         }
 
-        .stats-section {
-            min-width: 650px;
+        .escudo-header {
+            height: 60px;
+            filter: drop-shadow(0 0 5px rgba(0, 210, 255, 0.3));
         }
     </style>
 </head>
 
 <body class="theme-dark">
     <header class="no-print"
-        style="height: 80px; display: flex; justify-content: space-between; align-items: center; padding: 0 5%;">
-        <div class="logo" style="font-size: 1.8rem; font-weight: 800; color: #00d2ff; letter-spacing: 2px;">SIBIMTZOMP
+        style="height: 100px; display: flex; justify-content: space-between; align-items: center; padding: 0 5%;">
+        <div class="logo" style="display: flex; align-items: center; gap: 20px;">
+            <img src="../assets/images/logo_municipio.png" style="height: 70px;">
+            <span style="font-size: 1.8rem; font-weight: 800; color: #00d2ff; letter-spacing: 2px;">SIBIMTZOMP</span>
         </div>
-        <div style="display: flex; align-items: center; gap: 15px;">
+        <div style="display: flex; align-items: center; gap: 25px;">
+            <img src="../assets/images/escudo.png" class="escudo-header" alt="Escudo Tzompantepec">
             <a href="../index.html" class="btn btn-outline"
                 style="border-radius: 50px; padding: 10px 30px; font-weight: bold; border-color: #00d2ff; color: #00d2ff;">VOLVER</a>
         </div>
     </header>
 
+    <!-- Page Title Center -->
+    <div class="no-print" style="text-align: center; padding: 20px 0; margin-top: 10px;">
+        <h1
+            style="color: #00d2ff; font-size: 3rem; font-weight: 800; text-transform: uppercase; letter-spacing: 3px; line-height: 1.1;">
+            Reportes y Estadísticas
+        </h1>
+        <p style="color: var(--text-secondary); font-size: 1.1rem; opacity: 0.7;">Gestión integral de reportes
+            institucionales y análisis patrimonial.</p>
+    </div>
+
     <main class="no-print" style="padding: 20px; overflow-x: auto;">
-        <div class="horizontal-layout" style="min-width: 1800px; display: flex; gap: 30px; align-items: stretch;">
+        <div class="horizontal-layout"
+            style="min-width: 1600px; display: flex; gap: 30px; align-items: stretch; justify-content: center;">
 
-            <!-- Section 1: Vertical Title -->
-            <div
-                style="min-width: 200px; display: flex; flex-direction: column; justify-content: center; padding-left: 20px;">
-                <i class="fas fa-file-invoice" style="font-size: 3.5rem; color: #00d2ff; margin-bottom: 20px;"></i>
-                <h1 style="color: #00d2ff; font-size: 3.2rem; font-weight: 800; line-height: 0.9; margin: 0;">
-                    Reportes<br>y<br>Estadísticas
-                </h1>
-                <p style="color: var(--text-secondary); font-size: 0.85rem; margin-top: 20px; max-width: 180px;">
-                    Gestión integral de reportes institucionales y análisis patrimonial.
-                </p>
-            </div>
-
-            <!-- Section 2: Generar Reportes -->
-            <div class="glass" style="min-width: 320px; padding: 25px; border-radius: 25px;">
+            <!-- Section 1: Generar Reportes -->
+            <div class="glass" style="min-width: 350px; padding: 30px; border-radius: 25px;">
                 <h3
-                    style="margin-bottom: 25px; color: #00d2ff; display: flex; align-items: center; gap: 10px; font-size: 1.1rem;">
-                    <i class="fas fa-edit"></i> Generar Reportes
+                    style="margin-bottom: 25px; color: #00d2ff; display: flex; align-items: center; gap: 12px; font-size: 1.2rem; font-weight: 700;">
+                    <i class="fas fa-edit"></i> GENERAR REPORTES
                 </h3>
                 <div style="display: flex; flex-direction: column; gap: 12px;">
                     <button class="btn"
@@ -313,11 +320,15 @@
     <!-- Template de Impresión (Oculto) -->
     <div class="official-page" id="printable-report" style="display: none;">
         <div class="letterhead-header">
-            <img src="../assets/images/logo_municipio.png" alt="Logo Municipio">
-            <div style="text-align: right;">
-                <div style="font-weight: 800; font-size: 1.2rem; color: #1a1a1a;">TZOMPANTEPEC</div>
-                <div style="font-size: 0.8rem; letter-spacing: 2px; color: #666;">GOBIERNO MUNICIPAL 2024 - 2027</div>
+            <img src="../assets/images/logo_municipio.png">
+            <div style="text-align: center; flex: 1;">
+                <div style="font-weight: 900; font-size: 1.6rem; color: #1a1a1a; letter-spacing: 1px;">MUNICIPIO DE
+                    TZOMPANTEPEC</div>
+                <div style="font-size: 0.9rem; letter-spacing: 3px; color: #333; font-weight: 600;">GOBIERNO MUNICIPAL
+                    2024 - 2027</div>
+                <div style="font-size: 0.7rem; color: #666; margin-top: 5px;">"Tzompantepec: Lugar de los Arcos"</div>
             </div>
+            <img src="../assets/images/escudo.png" style="height: 90px;">
         </div>
 
         <h2 class="report-title" id="report-title-text">Cargando Reporte...</h2>
