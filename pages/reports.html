@@ -115,177 +115,197 @@
 </head>
 
 <body class="theme-dark">
-    <header class="no-print">
-        <div class="logo">SIBIMTZOMP</div>
+    <header class="no-print"
+        style="height: 80px; display: flex; justify-content: space-between; align-items: center; padding: 0 5%;">
+        <div class="logo" style="font-size: 1.8rem; font-weight: 800; color: #00d2ff; letter-spacing: 2px;">SIBIMTZOMP
+        </div>
         <div style="display: flex; align-items: center; gap: 15px;">
-            <a href="../index.html" class="btn btn-outline" style="padding: 10px 15px;">Volver</a>
+            <a href="../index.html" class="btn btn-outline"
+                style="border-radius: 50px; padding: 10px 30px; font-weight: bold; border-color: #00d2ff; color: #00d2ff;">VOLVER</a>
         </div>
     </header>
 
     <main class="no-print" style="padding: 20px; overflow-x: auto;">
-        <div class="horizontal-layout" style="min-width: 2200px;">
+        <div class="horizontal-layout" style="min-width: 1800px; display: flex; gap: 30px; align-items: stretch;">
 
-            <!-- Section 1: Title & Icon -->
-            <div class="horizontal-section title-section">
-                <div style="height: 100%; display: flex; flex-direction: column; justify-content: center;">
-                    <h1
-                        style="color: var(--accent-blue); font-size: 3rem; font-weight: 800; line-height: 1; margin-bottom: 15px;">
-                        <i class="fas fa-file-invoice"
-                            style="display: block; font-size: 4rem; margin-bottom: 25px; color: #00d2ff;"></i>
-                        Reportes<br>y<br>Estadísticas
-                    </h1>
-                    <p style="color: var(--text-secondary); font-size: 1rem; opacity: 0.8;">Gestión integral de reportes
-                        institucionales y análisis patrimonial.</p>
-                </div>
+            <!-- Section 1: Vertical Title -->
+            <div
+                style="min-width: 200px; display: flex; flex-direction: column; justify-content: center; padding-left: 20px;">
+                <i class="fas fa-file-invoice" style="font-size: 3.5rem; color: #00d2ff; margin-bottom: 20px;"></i>
+                <h1 style="color: #00d2ff; font-size: 3.2rem; font-weight: 800; line-height: 0.9; margin: 0;">
+                    Reportes<br>y<br>Estadísticas
+                </h1>
+                <p style="color: var(--text-secondary); font-size: 0.85rem; margin-top: 20px; max-width: 180px;">
+                    Gestión integral de reportes institucionales y análisis patrimonial.
+                </p>
             </div>
 
             <!-- Section 2: Generar Reportes -->
-            <div class="glass horizontal-section" style="padding: 30px; border-radius: 20px;">
+            <div class="glass" style="min-width: 320px; padding: 25px; border-radius: 25px;">
                 <h3
-                    style="margin-bottom: 25px; color: var(--accent-blue); display: flex; align-items: center; gap: 12px; font-size: 1.2rem;">
-                    <i class="fas fa-magic"></i> Generar Reportes
+                    style="margin-bottom: 25px; color: #00d2ff; display: flex; align-items: center; gap: 10px; font-size: 1.1rem;">
+                    <i class="fas fa-edit"></i> Generar Reportes
                 </h3>
-                <div style="display: flex; flex-direction: column; gap: 15px; flex-grow: 1;">
-                    <button class="btn" style="background: #3498db; color: white; padding: 15px;"
+                <div style="display: flex; flex-direction: column; gap: 12px;">
+                    <button class="btn"
+                        style="background: #3498db; color: white; border-radius: 12px; padding: 12px; font-weight: bold; text-align: center;"
                         onclick="generateReport('Inventario')">
                         <i class="fas fa-boxes"></i> REPORTE DE INVENTARIO
                     </button>
-                    <button class="btn" style="background: #2ecc71; color: white; padding: 15px;"
+                    <button class="btn"
+                        style="background: #2ecc71; color: white; border-radius: 12px; padding: 12px; font-weight: bold;"
                         onclick="generateReport('Movimientos')">
                         <i class="fas fa-history"></i> REPORTE DE MOVIMIENTOS
                     </button>
-                    <button class="btn" style="background: #f39c12; color: white; padding: 15px;"
+                    <button class="btn"
+                        style="background: #f39c12; color: white; border-radius: 12px; padding: 12px; font-weight: bold;"
                         onclick="generateReport('Departamentos')">
                         <i class="fas fa-building"></i> REPORTE POR DEPTOS.
                     </button>
-                    <button class="btn" style="background: #9b59b6; color: white; padding: 15px;"
+                    <button class="btn"
+                        style="background: #9b59b6; color: white; border-radius: 12px; padding: 12px; font-weight: bold;"
                         onclick="generateReport('Estado')">
                         <i class="fas fa-tasks"></i> REPORTE POR ESTADO
                     </button>
-                    <button class="btn" style="background: #e74c3c; color: white; padding: 15px;"
+                    <button class="btn"
+                        style="background: #e74c3c; color: white; border-radius: 12px; padding: 12px; font-weight: bold;"
                         onclick="generateReport('Mantenimiento')">
                         <i class="fas fa-tools"></i> REPORTE MANTENIMIENTO
                     </button>
                 </div>
-                <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.1);">
-                    <p style="font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 15px; font-weight: bold;">
+                <div style="margin-top: 25px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.05);">
+                    <p
+                        style="font-size: 0.75rem; color: var(--text-secondary); margin-bottom: 12px; font-weight: bold;">
                         Exportar a Formato:</p>
-                    <div style="display: flex; gap: 10px;">
-                        <button class="btn glass" onclick="exportFormat('PDF')" style="flex: 1;"><i
-                                class="fas fa-file-pdf"></i> PDF</button>
-                        <button class="btn glass" onclick="exportFormat('Excel')" style="flex: 1;"><i
-                                class="fas fa-file-excel"></i> XLSX</button>
-                        <button class="btn glass" onclick="exportFormat('CSV')" style="flex: 1;"><i
-                                class="fas fa-file-csv"></i> CSV</button>
+                    <div style="display: flex; gap: 8px;">
+                        <button class="btn glass" onclick="exportFormat('PDF')"
+                            style="flex: 1; padding: 8px; font-size: 0.8rem;"><i class="fas fa-file-pdf"></i>
+                            PDF</button>
+                        <button class="btn glass" onclick="exportFormat('Excel')"
+                            style="flex: 1; padding: 8px; font-size: 0.8rem;"><i class="fas fa-file-excel"></i>
+                            XLSX</button>
+                        <button class="btn glass" onclick="exportFormat('CSV')"
+                            style="flex: 1; padding: 8px; font-size: 0.8rem;"><i class="fas fa-file-csv"></i>
+                            CSV</button>
                     </div>
                 </div>
             </div>
 
             <!-- Section 3: Filtros -->
-            <div class="glass horizontal-section" style="padding: 30px; border-radius: 20px; min-width: 400px;">
+            <div class="glass" style="min-width: 380px; padding: 25px; border-radius: 25px;">
                 <h3
-                    style="margin-bottom: 25px; color: var(--accent-blue); display: flex; align-items: center; gap: 12px; font-size: 1.2rem;">
+                    style="margin-bottom: 25px; color: #00d2ff; display: flex; align-items: center; gap: 10px; font-size: 1.1rem;">
                     <i class="fas fa-filter"></i> Filtros del Reporte
                 </h3>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; flex-grow: 1;">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
                     <div class="form-group">
-                        <label>Fecha Inicio</label>
-                        <input type="date" id="filter-date-start" class="form-control glass" style="color: grey;">
+                        <label style="font-size: 0.75rem;">Fecha Inicio</label>
+                        <input type="date" id="filter-date-start" class="form-control glass"
+                            style="font-size: 0.85rem; padding: 8px;">
                     </div>
                     <div class="form-group">
-                        <label>Fecha Fin</label>
-                        <input type="date" id="filter-date-end" class="form-control glass" style="color: grey;">
+                        <label style="font-size: 0.75rem;">Fecha Fin</label>
+                        <input type="date" id="filter-date-end" class="form-control glass"
+                            style="font-size: 0.85rem; padding: 8px;">
                     </div>
                     <div class="form-group" style="grid-column: span 2;">
-                        <label>Departamento Responsable</label>
-                        <select id="filter-dept" class="form-control glass">
+                        <label style="font-size: 0.75rem;">Departamento Responsable</label>
+                        <select id="filter-dept" class="form-control glass" style="font-size: 0.85rem; padding: 8px;">
                             <option>Todos los departamentos</option>
                         </select>
                     </div>
                     <div class="form-group" style="grid-column: span 2;">
-                        <label>Estado del Bien</label>
-                        <select id="filter-status" class="form-control glass">
+                        <label style="font-size: 0.75rem;">Estado del Bien</label>
+                        <select id="filter-status" class="form-control glass" style="font-size: 0.85rem; padding: 8px;">
                             <option>Todos los estados</option>
                             <option>ACTIVO</option>
                             <option>MANTENIMIENTO</option>
                             <option>BAJA</option>
                         </select>
                     </div>
-                    <div class="form-group" style="grid-column: span 2;">
-                        <label>Categoría / Tipo</label>
-                        <select id="filter-type" class="form-control glass">
+                    <div class="form-group" style="grid-column: span 2; margin-bottom: 5px;">
+                        <label style="font-size: 0.75rem;">Categoría / Tipo</label>
+                        <select id="filter-type" class="form-control glass" style="font-size: 0.85rem; padding: 8px;">
                             <option>Todos los tipos</option>
                         </select>
                     </div>
                 </div>
-                <div style="display: flex; gap: 15px; margin-top: 30px;">
-                    <button class="btn btn-primary" style="flex: 2; height: 50px;" onclick="applyFilters()">
+                <div style="display: flex; gap: 12px; margin-top: 15px;">
+                    <button class="btn btn-primary"
+                        style="flex: 2; height: 45px; border-radius: 10px; font-size: 0.9rem;" onclick="applyFilters()">
                         <i class="fas fa-check"></i> APLICAR FILTROS
                     </button>
-                    <button class="btn btn-outline" style="flex: 1;" onclick="clearFilters()">
-                        <i class="fas fa-sync"></i> LIMPIAR
+                    <button class="btn btn-outline" style="flex: 1; border-radius: 10px; font-size: 0.9rem;"
+                        onclick="clearFilters()">
+                        <i class="fas fa-redo"></i> LIMPIAR
                     </button>
                 </div>
             </div>
 
             <!-- Section 4: Estadísticas -->
-            <div class="glass horizontal-section stats-section" style="padding: 30px; border-radius: 20px;">
+            <div class="glass" style="min-width: 550px; padding: 25px; border-radius: 25px;">
                 <h3
-                    style="margin-bottom: 25px; color: var(--accent-blue); display: flex; align-items: center; gap: 12px; font-size: 1.2rem;">
+                    style="margin-bottom: 25px; color: #00d2ff; display: flex; align-items: center; gap: 10px; font-size: 1.1rem;">
                     <i class="fas fa-chart-bar"></i> Estadísticas Generales
                 </h3>
-                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; flex-grow: 1;">
-                    <div class="stat-card glass"
-                        style="padding: 25px; text-align: center; border-bottom: 5px solid #9b59b6;">
-                        <div class="value" id="stat-total"
-                            style="font-size: 4rem; font-weight: 800; color: #9b59b6; line-height: 1;">0</div>
-                        <div style="color: var(--text-secondary); margin-top: 10px; font-weight: bold;">ARTÍCULOS
-                            TOTALES</div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                    <div class="glass"
+                        style="padding: 25px; text-align: center; border-radius: 20px; border-bottom: 6px solid #9b59b6;">
+                        <div id="stat-total"
+                            style="font-size: 3.5rem; font-weight: 800; color: #9b59b6; line-height: 1;">0</div>
+                        <div
+                            style="color: var(--text-secondary); font-size: 0.7rem; font-weight: 800; margin-top: 5px; text-transform: uppercase;">
+                            Artículos Totales</div>
                     </div>
-                    <div class="stat-card glass"
-                        style="padding: 25px; text-align: center; border-bottom: 5px solid #3498db;">
-                        <div class="value" id="stat-value"
-                            style="font-size: 4rem; font-weight: 800; color: #3498db; line-height: 1;">$0</div>
-                        <div style="color: var(--text-secondary); margin-top: 10px; font-weight: bold;">VALOR ESTIMADO
-                        </div>
+                    <div class="glass"
+                        style="padding: 25px; text-align: center; border-radius: 20px; border-bottom: 6px solid #3498db;">
+                        <div id="stat-value"
+                            style="font-size: 3.5rem; font-weight: 800; color: #3498db; line-height: 1;">$0</div>
+                        <div
+                            style="color: var(--text-secondary); font-size: 0.7rem; font-weight: 800; margin-top: 5px; text-transform: uppercase;">
+                            Valor Estimado</div>
                     </div>
-                    <div class="stat-card glass"
-                        style="padding: 25px; text-align: center; border-bottom: 5px solid #2ecc71;">
-                        <div class="value" id="stat-active"
-                            style="font-size: 4rem; font-weight: 800; color: #2ecc71; line-height: 1;">0</div>
-                        <div style="color: var(--text-secondary); margin-top: 10px; font-weight: bold;">BIENES ACTIVOS
-                        </div>
+                    <div class="glass"
+                        style="padding: 25px; text-align: center; border-radius: 20px; border-bottom: 6px solid #2ecc71;">
+                        <div id="stat-active"
+                            style="font-size: 3.5rem; font-weight: 800; color: #2ecc71; line-height: 1;">0</div>
+                        <div
+                            style="color: var(--text-secondary); font-size: 0.7rem; font-weight: 800; margin-top: 5px; text-transform: uppercase;">
+                            Bienes Activos</div>
                     </div>
-                    <div class="stat-card glass"
-                        style="padding: 25px; text-align: center; border-bottom: 5px solid #e74c3c;">
-                        <div class="value" id="stat-maint"
-                            style="font-size: 4rem; font-weight: 800; color: #e74c3c; line-height: 1;">0</div>
-                        <div style="color: var(--text-secondary); margin-top: 10px; font-weight: bold;">EN MANTENIMIENTO
-                        </div>
+                    <div class="glass"
+                        style="padding: 25px; text-align: center; border-radius: 20px; border-bottom: 6px solid #e74c3c;">
+                        <div id="stat-maint"
+                            style="font-size: 3.5rem; font-weight: 800; color: #e74c3c; line-height: 1;">0</div>
+                        <div
+                            style="color: var(--text-secondary); font-size: 0.7rem; font-weight: 800; margin-top: 5px; text-transform: uppercase;">
+                            En Mantenimiento</div>
                     </div>
                 </div>
             </div>
 
-            <!-- Section 5: Top Depts -->
-            <div class="glass horizontal-section" style="padding: 30px; border-radius: 20px; min-width: 320px;">
-                <h3
-                    style="margin-bottom: 25px; color: white; font-size: 1.1rem; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px;">
-                    Top Departamentos
-                </h3>
-                <div id="top-depts-list" style="display: flex; flex-direction: column; gap: 15px;">
-                    <!-- JS populated -->
-                </div>
-            </div>
+        </div>
 
-            <!-- Section 6: Distribución -->
-            <div class="glass horizontal-section"
-                style="padding: 30px; border-radius: 20px; min-width: 400px; text-align: center;">
-                <h3 style="margin-bottom: 25px; color: white; text-align: left; font-size: 1.1rem;">Distribución por
-                    Estado</h3>
-                <div style="height: 300px; width: 100%;">
-                    <canvas id="statusDistChart"></canvas>
-                </div>
+        <!-- Section 5: Top Depts -->
+        <div class="glass horizontal-section" style="padding: 30px; border-radius: 20px; min-width: 320px;">
+            <h3
+                style="margin-bottom: 25px; color: white; font-size: 1.1rem; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px;">
+                Top Departamentos
+            </h3>
+            <div id="top-depts-list" style="display: flex; flex-direction: column; gap: 15px;">
+                <!-- JS populated -->
             </div>
+        </div>
+
+        <!-- Section 6: Distribución -->
+        <div class="glass horizontal-section"
+            style="padding: 30px; border-radius: 20px; min-width: 400px; text-align: center;">
+            <h3 style="margin-bottom: 25px; color: white; text-align: left; font-size: 1.1rem;">Distribución por
+                Estado</h3>
+            <div style="height: 300px; width: 100%;">
+                <canvas id="statusDistChart"></canvas>
+            </div>
+        </div>
 
         </div>
     </main>

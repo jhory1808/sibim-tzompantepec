@@ -78,7 +78,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Load Dashboard Data if on index.html
-    if (document.getElementById('statsChart')) {
+    if (document.getElementById('statusChart')) {
         loadDashboardData().finally(() => UI.hideLoader());
     } else {
         // For other pages that might have the loader
