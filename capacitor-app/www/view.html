@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visor de Activo - SIBIMTZOMP</title>
+    <link rel="stylesheet" href="css/futuristic.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .view-card {
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 40px;
+            text-align: center;
+        }
+
+        .data-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            text-align: left;
+            margin-top: 30px;
+        }
+
+        .data-item label {
+            color: var(--text-secondary);
+            font-size: 0.8rem;
+            display: block;
+        }
+
+        .data-item span {
+            font-size: 1.1rem;
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body class="theme-blue">
+    <div class="view-card glass fade-in">
+        <img src="assets/images/logo_municipio.png" style="max-width: 250px; margin-bottom: 30px;">
+        <h1 id="item-name">Cargando...</h1>
+        <p id="item-code" style="color: var(--accent-blue); font-weight: bold; font-size: 1.2rem;"></p>
+
+        <div class="data-grid">
+            <div class="data-item">
+                <label>Marca / Modelo</label>
+                <span id="item-brand">---</span>
+            </div>
+            <div class="data-item">
+                <label>Número de Serie</label>
+                <span id="item-serial">---</span>
+            </div>
+            <div class="data-item">
+                <label>Departamento</label>
+                <span id="item-dept">---</span>
+            </div>
+            <div class="data-item">
+                <label>Responsable</label>
+                <span id="item-resp">---</span>
+            </div>
+            <div class="data-item">
+                <label>Estado del Bien</label>
+                <span id="item-status">---</span>
+            </div>
+            <div class="data-item">
+                <label>Categoría</label>
+                <span id="item-cat">---</span>
+            </div>
+        </div>
+
+        <div style="margin-top: 40px;">
+            <a href="login.html" class="btn btn-primary" style="width: 100%;">Acceder al Sistema</a>
+        </div>
+    </div>
+
+    <script src="js/config.js"></script>
+    <script src="js/api.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            const params = new URLSearchParams(window.location.search);
+            const id = params.get('id');
+
+            if (!id) {
+                document.getElementById('item-name').textContent = "ID de activo no proporcionado";
+                return;
+            }
+
+            const item = await API.getItemById(id);
+            if (item) {
+                document.getElementById('item-name').textContent = item.nombre || item.descripcion;
+                document.getElementById('item-code').textContent = item.codigo || id;
+                document.getElementById('item-brand').textContent = `${item.marca || ''} ${item.modelo || ''}`;
+                document.getElementById('item-serial').textContent = item.serie || item.numero_serie || 'N/A';
+                document.getElementById('item-dept').textContent = item.departamento || 'Sin Asignar';
+                document.getElementById('item-resp').textContent = item.responsable || 'No asignado';
+                document.getElementById('item-status').textContent = item.estado || 'Activo';
+                document.getElementById('item-cat').textContent = item.categoria || 'General';
+            } else {
+                document.getElementById('item-name').textContent = "Activo no encontrado";
+            }
+        });
+    </script>
+</body>
+
+</html>

@@ -81,80 +81,92 @@
 </head>
 
 <body>
-    <header>
-        <div class="logo">SIBIMTZOMP</div>
-        <div style="display: flex; align-items: center; gap: 15px;">
-            <a href="../index.html" class="btn btn-outline">Volver</a>
+    <header
+        style="padding: 15px 5%; display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.2);">
+        <div class="logo" style="font-size: 1.5rem; font-weight: bold; color: var(--accent-blue);">
+            <i class="fas fa-history" style="margin-right: 10px;"></i>Historial de Movimientos
         </div>
+        <a href="../index.html" class="btn btn-primary"><i class="fas fa-arrow-left"></i> Volver al Dashboard</a>
     </header>
 
-    <main style="padding: 20px 5%;">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
-            <div>
-                <h1 style="color: var(--accent-blue);">Historial de Movimientos</h1>
-                <p style="color: var(--text-secondary); font-size: 0.9rem;">Registro institucional de operaciones y
-                    cambios de estado</p>
-            </div>
-            <div style="display: flex; gap: 10px;">
-                <button class="btn" style="background: #2ecc71; color: white;" onclick="exportToPDF()"><i
-                        class="fas fa-file-pdf"></i> PDF</button>
-                <button class="btn" style="background: #ecf0f1; color: #333;" onclick="exportToExcel()"><i
-                        class="fas fa-file-excel"></i> Excel</button>
-                <button class="btn" style="background: #f1c40f; color: black;" onclick="loadMovements()"><i
-                        class="fas fa-sync"></i> Actualizar</button>
-            </div>
+    <main style="padding: 30px 5%;">
+        <!-- Action Buttons -->
+        <div style="display: flex; gap: 15px; margin-bottom: 30px;">
+            <button class="btn btn-primary" style="padding: 12px 25px; border-radius: 8px; font-weight: bold;"
+                onclick="exportToPDF()">
+                <i class="fas fa-file-pdf"></i> GENERAR REPORTE
+            </button>
+            <button class="btn"
+                style="padding: 12px 25px; border-radius: 8px; font-weight: bold; background: #f39c12; color: white;"
+                onclick="exportToExcel()">
+                <i class="fas fa-file-excel"></i> EXPORTAR EXCEL
+            </button>
+            <button class="btn btn-danger" style="padding: 12px 25px; border-radius: 8px; font-weight: bold;"
+                onclick="clearHistory()">
+                <i class="fas fa-trash-alt"></i> LIMPIAR HISTORIAL
+            </button>
         </div>
 
-        <div class="glass" style="padding: 20px; margin-bottom: 20px;">
-            <div
-                style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 15px;">
+        <!-- Filters Section -->
+        <div class="glass" style="padding: 25px; border-radius: 15px; margin-bottom: 30px;">
+            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px;">
                 <div class="form-group">
-                    <label>Filtrar por Acción</label>
-                    <select id="filter-action" class="form-control" onchange="filterMovements()">
-                        <option value="">Todas las acciones</option>
-                        <option value="LOGIN">Acceso</option>
-                        <option value="UPDATE">Actualización</option>
-                        <option value="CREATE">Creación</option>
-                        <option value="DELETE">Eliminación</option>
+                    <label
+                        style="color: #9b59b6; font-weight: bold; font-size: 0.85rem; margin-bottom: 8px; display: block;">Filtrar
+                        por Tipo</label>
+                    <select id="filter-type" class="form-control glass" onchange="filterMovements()"
+                        style="color: grey;">
+                        <option value="">Todos los tipos</option>
+                        <option value="Sincronización">Sincronización</option>
+                        <option value="Alta">Alta</option>
+                        <option value="Actualización">Actualización</option>
+                        <option value="Baja">Baja</option>
                     </select>
                 </div>
                 <div class="form-group">
-                    <label>Buscar por Bien</label>
-                    <input type="text" id="search-item" class="form-control" placeholder="Código o Nombre..."
-                        onkeyup="filterMovements()">
+                    <label
+                        style="color: #9b59b6; font-weight: bold; font-size: 0.85rem; margin-bottom: 8px; display: block;">Filtrar
+                        por Usuario</label>
+                    <select id="filter-user" class="form-control glass" onchange="filterMovements()"
+                        style="color: grey;">
+                        <option value="">Todos los usuarios</option>
+                        <!-- To be populated via JS -->
+                    </select>
                 </div>
                 <div class="form-group">
-                    <label>Fecha Desde</label>
-                    <input type="date" id="date-from" class="form-control" onchange="filterMovements()">
+                    <label
+                        style="color: #9b59b6; font-weight: bold; font-size: 0.85rem; margin-bottom: 8px; display: block;">Fecha
+                        Desde</label>
+                    <input type="date" id="date-from" class="form-control glass" onchange="filterMovements()"
+                        style="color: grey;">
                 </div>
                 <div class="form-group">
-                    <label>Fecha Hasta</label>
-                    <input type="date" id="date-to" class="form-control" onchange="filterMovements()">
+                    <label
+                        style="color: #9b59b6; font-weight: bold; font-size: 0.85rem; margin-bottom: 8px; display: block;">Fecha
+                        Hasta</label>
+                    <input type="date" id="date-to" class="form-control glass" onchange="filterMovements()"
+                        style="color: grey;">
                 </div>
             </div>
         </div>
 
-        <div class="glass" style="padding: 0; overflow-x: auto; border-radius: 12px; margin-bottom: 50px;">
-            <table style="width: 100%; border-collapse: collapse; min-width: 1500px;">
-                <thead style="background: rgba(0,0,0,0.2);">
-                    <tr>
+        <!-- Movements Table -->
+        <div class="glass" style="padding: 0; overflow: hidden; border-radius: 15px;">
+            <table style="width: 100%; border-collapse: collapse;">
+                <thead>
+                    <tr style="background: linear-gradient(90deg, #3498db, #5e35b1); color: white;">
                         <th style="padding: 15px; text-align: left;">ID</th>
-                        <th style="padding: 15px; text-align: left;">Fecha</th>
-                        <th style="padding: 15px; text-align: left;">Usuario</th>
-                        <th style="padding: 15px; text-align: left;">Acción</th>
-                        <th style="padding: 15px; text-align: left;">Bien</th>
-                        <th style="padding: 15px; text-align: left;">Depto. Origen</th>
-                        <th style="padding: 15px; text-align: left;">Depto. Destino</th>
-                        <th style="padding: 15px; text-align: left;">Est. Anterior</th>
-                        <th style="padding: 15px; text-align: left;">Est. Nuevo</th>
-                        <th style="padding: 15px; text-align: left;">Detalles</th>
-                        <th style="padding: 15px; text-align: center;">IP / Sist.</th>
+                        <th style="padding: 15px; text-align: left;">FECHA</th>
+                        <th style="padding: 15px; text-align: left;">USUARIO</th>
+                        <th style="padding: 15px; text-align: left;">ACCIÓN</th>
+                        <th style="padding: 15px; text-align: left;">TIPO</th>
+                        <th style="padding: 15px; text-align: left;">DETALLES</th>
                     </tr>
                 </thead>
-                <tbody id="movements-table-body">
+                <tbody id="movements-table-body" style="background: white; color: #333;">
                     <tr>
-                        <td colspan="11" style="padding: 40px; text-align: center; color: var(--text-secondary);">
-                            <i class="fas fa-spinner fa-spin"></i> Cargando historial desde la nube...
+                        <td colspan="6" style="padding: 50px; text-align: center; color: #666;">
+                            <i class="fas fa-spinner fa-spin"></i> Cargando historial...
                         </td>
                     </tr>
                 </tbody>
@@ -179,71 +191,84 @@
             const tbody = document.getElementById('movements-table-body');
             try {
                 allMovements = await API.getMovements();
+                populateUserFilter(allMovements);
                 renderMovements(allMovements);
             } catch (error) {
-                tbody.innerHTML = `<tr><td colspan="11" style="text-align:center; color:red; padding:20px;">Error al conectar con la base de datos cloud.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:red; padding:20px;">Error al conectar con la base de datos cloud.</td></tr>`;
             }
+        }
+
+        function populateUserFilter(data) {
+            const userSelect = document.getElementById('filter-user');
+            const users = [...new Set(data.map(m => m.Usuario || m.usuario).filter(Boolean))];
+            users.sort().forEach(u => {
+                const opt = document.createElement('option');
+                opt.value = u;
+                opt.textContent = u;
+                userSelect.appendChild(opt);
+            });
         }
 
         function renderMovements(data) {
             const tbody = document.getElementById('movements-table-body');
             if (!data || data.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="11" style="text-align:center; padding:20px;">No se encontraron registros de movimientos.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:20px; color: #666;">No se encontraron registros de movimientos.</td></tr>`;
                 return;
             }
 
             tbody.innerHTML = data.map(m => `
-                <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
-                    <td style="padding: 12px 15px; font-size: 0.85rem;">${m.ID || m.id || '---'}</td>
-                    <td style="padding: 12px 15px; font-size: 0.85rem;">${m.Fecha || m.fecha || '---'}</td>
-                    <td style="padding: 12px 15px; font-weight: 500;">${m.Usuario || m.usuario || '---'}</td>
+                <tr style="border-bottom: 1px solid #eee;">
+                    <td style="padding: 12px 15px; font-weight: bold;">${m.ID || m.id || '---'}</td>
+                    <td style="padding: 12px 15px;">${m.Fecha || m.fecha || '---'}</td>
+                    <td style="padding: 12px 15px;">${m.Usuario || m.usuario || '---'}</td>
+                    <td style="padding: 12px 15px;">${m.Accion || m.accion || '---'}</td>
                     <td style="padding: 12px 15px;">
-                        <span class="badge" style="background: ${getActionColor(m.Accion || m.accion)}; color: white; padding: 4px 8px; border-radius: 4px; font-size: 0.75rem;">
-                            ${m.Accion || m.accion || 'SISTEMA'}
+                        <span class="badge" style="background: ${getTypeColor(m.Tipo || m.tipo || 'Alta')}; color: white; padding: 4px 10px; border-radius: 20px; font-size: 0.75rem;">
+                            ${m.Tipo || m.tipo || 'Alta'}
                         </span>
                     </td>
-                    <td style="padding: 12px 15px; font-size: 0.85rem;">
-                        <div style="font-weight: bold;">${m['Codigo Articulo'] || m.codigo || '--'}</div>
-                        <div style="font-size: 0.75rem; color: var(--text-secondary);">${m['Nombre Articulo'] || m.nombre || ''}</div>
-                    </td>
-                    <td style="padding: 12px 15px; font-size: 0.85rem;">${m['Departamento Origen'] || m.origen || '---'}</td>
-                    <td style="padding: 12px 15px; font-size: 0.85rem;">${m['Departamento Destino'] || m.destino || '---'}</td>
-                    <td style="padding: 12px 15px; font-size: 0.85rem;">${m['Estado Anterior'] || '---'}</td>
-                    <td style="padding: 12px 15px; font-size: 0.85rem; color: var(--accent-blue); font-weight: bold;">${m['Estado Nuevo'] || '---'}</td>
-                    <td style="padding: 12px 15px; font-size: 0.8rem; max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${m.Detalles || ''}">
-                        ${m.Detalles || '---'}
-                    </td>
-                    <td style="padding: 12px 15px; text-align: center; font-size: 0.75rem;">
-                        <div>${m['Ip Usuario'] || 'Local'}</div>
-                        <div style="color: var(--text-secondary);">${m.Navegador ? m.Navegador.split(' ')[0] : 'Browser'}</div>
-                    </td>
+                    <td style="padding: 12px 15px; font-size: 0.85rem; color: #666;">${m.Detalles || '---'}</td>
                 </tr>
             `).join('');
         }
 
-        function getActionColor(action) {
-            if (!action) return '#95a5a6';
-            const a = action.toUpperCase();
-            if (a.includes('LOGIN')) return '#3498db';
-            if (a.includes('CREATE')) return '#2ecc71';
-            if (a.includes('UPDATE')) return '#f39c12';
-            if (a.includes('DELETE')) return '#e74c3c';
-            return '#1abc9c';
+        function getTypeColor(type) {
+            if (!type) return '#95a5a6';
+            const t = type.toLowerCase();
+            if (t.includes('sincro')) return '#3498db'; // Azul
+            if (t.includes('alta')) return '#2ecc71';  // Verde
+            if (t.includes('actualiza')) return '#9b59b6'; // Morado
+            if (t.includes('baja')) return '#e74c3c'; // Rojo
+            return '#2ecc71';
         }
 
         function filterMovements() {
-            const action = document.getElementById('filter-action').value.toUpperCase();
-            const search = document.getElementById('search-item').value.toUpperCase();
+            const type = document.getElementById('filter-type').value.toLowerCase();
+            const user = document.getElementById('filter-user').value.toLowerCase();
+            const dateFrom = document.getElementById('date-from').value;
+            const dateTo = document.getElementById('date-to').value;
 
             const filtered = allMovements.filter(m => {
-                const matchAction = !action || (m.Accion || m.accion || '').toUpperCase().includes(action);
-                const matchSearch = !search ||
-                    (m['Codigo Articulo'] || '').toUpperCase().includes(search) ||
-                    (m['Nombre Articulo'] || '').toUpperCase().includes(search);
-                return matchAction && matchSearch;
+                const mType = (m.Tipo || m.tipo || '').toLowerCase();
+                const mUser = (m.Usuario || m.usuario || '').toLowerCase();
+                const mDate = (m.Fecha || m.fecha || '').split(' ')[0];
+
+                const matchType = !type || mType.includes(type);
+                const matchUser = !user || mUser === user;
+                const matchDateFrom = !dateFrom || mDate >= dateFrom;
+                const matchDateTo = !dateTo || mDate <= dateTo;
+
+                return matchType && matchUser && matchDateFrom && matchDateTo;
             });
 
             renderMovements(filtered);
+        }
+
+        function clearHistory() {
+            if (confirm('¿Estás seguro de que deseas limpiar el historial local? Esta acción no borrará los datos de la nube.')) {
+                allMovements = [];
+                renderMovements([]);
+            }
         }
 
         function exportToPDF() { window.print(); }

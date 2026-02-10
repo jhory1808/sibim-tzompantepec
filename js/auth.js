@@ -103,5 +103,40 @@ const Auth = {
     isAdmin() {
         const user = this.getCurrentUser();
         return user && user.role === 'Admin';
+    },
+
+    getPermissions(role) {
+        const roleLower = String(role || '').toLowerCase();
+
+        // Admin tiene todo
+        if (roleLower === 'admin') return ['*'];
+
+        // Usuarios: dashbord, reportes, etiquetas y movimientos
+        if (roleLower === 'usuarios' || roleLower === 'usuario') {
+            return ['index.html', 'reports.html', 'labels.html', 'movements.html'];
+        }
+
+        // Capturistas: dashboard, inventario, registrar nuevo articulo (inventory), buscar/update repositorio QR
+        if (roleLower === 'capturistas' || roleLower === 'capturista') {
+            return ['index.html', 'inventory.html', 'qr-repository.html', 'scanner.html'];
+        }
+
+        return ['index.html']; // Default basic access
+    },
+
+    isPageAllowed(pageName) {
+        const user = this.getCurrentUser();
+        if (!user) return false;
+
+        const permissions = this.getPermissions(user.role);
+        if (permissions.includes('*')) return true;
+
+        // Limpiamos el nombre de la página (ej: 'pages/reports.html' -> 'reports.html')
+        const cleanPage = pageName.split('/').pop().split('?')[0];
+
+        // index.html es permitido para todos usualmente
+        if (cleanPage === 'index.html' || cleanPage === '') return true;
+
+        return permissions.includes(cleanPage);
     }
 };

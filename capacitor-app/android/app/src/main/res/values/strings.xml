@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">SIBIM Tzompantepec</string>
+    <string name="title_activity_main">SIBIM Tzompantepec</string>
+    <string name="package_name">com.tzompantepec.sibim</string>
+    <string name="custom_url_scheme">com.tzompantepec.sibim</string>
+</resources>

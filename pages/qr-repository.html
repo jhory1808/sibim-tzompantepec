@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Repositorio QR - SIBIMTZOMP</title>
+    <link rel="stylesheet" href="../css/futuristic.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .qr-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 20px;
+        }
+
+        .qr-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--glass-border);
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            transition: all 0.3s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .qr-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+            border-color: var(--accent-blue);
+        }
+
+        .qr-canvas {
+            background: white;
+            padding: 10px;
+            border-radius: 10px;
+            margin: 15px 0;
+        }
+
+        .print-btn {
+            margin-top: auto;
+            background: rgba(46, 204, 113, 0.2);
+            color: #2ecc71;
+            border: 1px solid #2ecc71;
+            padding: 5px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.8rem;
+        }
+
+        .print-btn:hover {
+            background: #2ecc71;
+            color: white;
+        }
+    </style>
+</head>
+
+<body class="theme-dark">
+    <header>
+        <div class="logo">
+            <img src="../assets/images/logo_municipio.png" style="height: 40px;">
+            <span>Repositorio QR</span>
+        </div>
+        <div>
+            <a href="inventory.html" class="btn btn-outline">Volver</a>
+        </div>
+    </header>
+
+    <main style="padding: 30px 5%;">
+        <div class="glass" style="padding: 30px; margin-bottom: 20px;">
+            <h1><i class="fas fa-qrcode"></i> Galería de Códigos QR</h1>
+            <p style="color:var(--text-secondary)">Acceso rápido para visualizar e imprimir códigos identificadores.</p>
+
+            <div style="margin-top: 20px;">
+                <input type="text" id="filter-qr" placeholder="Filtrar por nombre o código..."
+                    style="padding: 10px; width: 100%; max-width: 400px; border-radius: 5px; background: rgba(0,0,0,0.3); color: white; border: 1px solid var(--glass-border);"
+                    onkeyup="filterGrid()">
+            </div>
+        </div>
+
+        <div id="qr-container" class="qr-grid">
+            <div style="grid-column: 1/-1; text-align: center; padding: 50px;">
+                <i class="fas fa-spinner fa-spin fa-2x"></i> Cargando QRs...
+            </div>
+        </div>
+    </main>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script src="../js/config.js"></script>
+    <script src="../js/api.js"></script>
+    <script src="../js/auth.js"></script>
+    <script src="../js/app.js"></script>
+
+    <script>
+        let allItems = [];
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            const container = document.getElementById('qr-container');
+            try {
+                const items = await API.fetchItems();
+                if (!items || items.length === 0) {
+                    container.innerHTML = '<p>No hay artículos registrados.</p>';
+                    return;
+                }
+
+                allItems = items;
+                renderGrid(items);
+
+            } catch (e) {
+                container.innerHTML = '<p style="color:red">Error cargando inventario.</p>';
+            }
+        });
+
+        function renderGrid(items) {
+            const container = document.getElementById('qr-container');
+            container.innerHTML = '';
+
+            // Limit to first 50 to avoid browser freeze, load more on scroll? 
+            // For now, let's show first 100
+            const limit = items.slice(0, 100);
+
+            limit.forEach(item => {
+                const code = item.Codigo || item.codigo || item.id || '---';
+                const name = item.Nombre || item.nombre || 'Sin Nombre';
+
+                const card = document.createElement('div');
+                card.className = 'qr-card';
+                card.setAttribute('data-search', (code + ' ' + name).toLowerCase());
+
+                const title = document.createElement('div');
+                title.innerHTML = `<strong>${code}</strong><br><span style="font-size:0.8rem; color:#aaa;">${name}</span>`;
+
+                const qrDiv = document.createElement('div');
+                qrDiv.className = 'qr-canvas';
+
+                // Button
+                const btn = document.createElement('button');
+                btn.className = 'print-btn';
+                btn.innerHTML = '<i class="fas fa-print"></i> Imprimir';
+                btn.onclick = () => window.open(`print-label.html?id=${code}&desc=${encodeURIComponent(name)}`, '_blank');
+
+                card.appendChild(title);
+                card.appendChild(qrDiv);
+                card.appendChild(btn);
+                container.appendChild(card);
+
+                // Generate QR
+                const url = `${window.location.origin}/view.html?id=${code}`;
+                new QRCode(qrDiv, {
+                    text: url,
+                    width: 100,
+                    height: 100
+                });
+            });
+
+            if (items.length > 100) {
+                const warning = document.createElement('div');
+                warning.style.gridColumn = '1 / -1';
+                warning.style.textAlign = 'center';
+                warning.style.padding = '20px';
+                warning.innerHTML = `<button class="btn btn-outline" onclick="alert('Funcionalidad de paginación pendiente de optimización')">Cargar más resultados (${items.length - 100} restantes)</button>`;
+                container.appendChild(warning);
+            }
+        }
+
+        function filterGrid() {
+            const query = document.getElementById('filter-qr').value.toLowerCase();
+            const filtered = allItems.filter(item => {
+                const code = (item.Codigo || item.codigo || item.id || '').toString().toLowerCase();
+                const name = (item.Nombre || item.nombre || '').toString().toLowerCase();
+                return code.includes(query) || name.includes(query);
+            });
+            renderGrid(filtered);
+        }
+    </script>
+</body>
+
+</html>

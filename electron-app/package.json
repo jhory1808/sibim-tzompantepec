@@ -1,0 +1,48 @@
+{
+    "name": "sibim-tzompantepec",
+    "version": "2.0.0",
+    "description": "Sistema de Inventario de Bienes Inmuebles y Muebles - H. Ayuntamiento de Tzompantepec",
+    "main": "main.js",
+    "author": "Depto. Sistemas C2 - H. Ayuntamiento de Tzompantepec",
+    "license": "MIT",
+    "scripts": {
+        "start": "electron .",
+        "build": "electron-builder --win --x64",
+        "build-all": "electron-builder --win --mac --linux"
+    },
+    "build": {
+        "appId": "com.tzompantepec.sibim",
+        "productName": "SIBIM Tzompantepec",
+        "directories": {
+            "output": "dist"
+        },
+        "win": {
+            "target": [
+                {
+                    "target": "nsis",
+                    "arch": [
+                        "x64"
+                    ]
+                },
+                {
+                    "target": "portable",
+                    "arch": [
+                        "x64"
+                    ]
+                }
+            ],
+            "icon": "../assets/images/logo_municipio.png"
+        },
+        "nsis": {
+            "oneClick": false,
+            "allowToChangeInstallationDirectory": true,
+            "createDesktopShortcut": true,
+            "createStartMenuShortcut": true,
+            "shortcutName": "SIBIM Tzompantepec"
+        }
+    },
+    "devDependencies": {
+        "electron": "^28.0.0",
+        "electron-builder": "^24.9.1"
+    }
+}

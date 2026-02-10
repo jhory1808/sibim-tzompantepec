@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - SIBIMTZOMP</title>
+    <link rel="stylesheet" href="./css/futuristic.css?v=2.1.0">
+    <link rel="manifest" href="manifest.json">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="icon" type="image/png" href="assets/images/favicon.png">
+    <meta name="theme-color" content="#00d2ff">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body>
+    <!-- Splash Screen Loader -->
+    <div id="app-loader">
+        <img src="assets/images/logo_municipio.png"
+            style="height: 120px; margin-bottom: 20px; filter: drop-shadow(0 0 10px rgba(255,255,255,0.2));">
+        <p style="color:var(--accent-blue); font-size:0.8rem; letter-spacing: 2px;">C2 TZOMPANTEPEC</p>
+        <div class="loader-bar">
+            <div class="loader-progress"></div>
+        </div>
+    </div>
+    <header style="display: flex; justify-content: space-between; align-items: center; padding: 10px 5%; height: 80px;">
+        <div class="header-left">
+            <img src="assets/images/logo_municipio.png" style="height: 60px; width: auto;" alt="Logo Municipio">
+        </div>
+
+        <div class="main-title-container" style="padding: 0; margin: 0;">
+            <p class="subtitle-main" style="margin: 0; font-weight: bold; font-size: 1rem;">Sistema de Inventario
+                Tzompantepec 2024-2027</p>
+        </div>
+
+        <div class="user-profile-menu" onclick="toggleUserDropdown()">
+            <div class="user-header-btn">
+                <div class="avatar-initial" id="user-avatar">A</div>
+                <div class="user-info-text">
+                    <span class="name" id="user-name-display">Administrador Sistema</span>
+                    <span class="role" id="user-role-display">Administrador</span>
+                </div>
+                <i class="fas fa-chevron-down" style="font-size: 0.8rem; margin-left: auto;"></i>
+            </div>
+            <div class="dropdown-box" id="user-dropdown">
+                <a href="#" class="dropdown-item"><i class="fas fa-user-circle"></i> Mi Perfil</a>
+                <a href="pages/scanner.html" class="dropdown-item"><i class="fas fa-search"></i> Consulta Rápida</a>
+                <div id="admin-only-tools">
+                    <a href="pages/config.html" class="dropdown-item"><i class="fas fa-key"></i> Cambiar Contraseña</a>
+                </div>
+                <a href="#" onclick="logout()" class="dropdown-item" style="color: #e74c3c;"><i
+                        class="fas fa-sign-out-alt"></i> Cerrar Sesión</a>
+            </div>
+        </div>
+    </header>
+
+    <main style="padding: 20px 5%;">
+        <!-- Horizontal Navigation -->
+        <nav class="glass nav-bar" style="margin-bottom: 30px; justify-content: center; gap: 10px; flex-wrap: wrap;">
+            <a href="dashboard.html" class="nav-item active"><i class="fas fa-home"></i>Dashboard</a>
+            <a href="pages/inventory.html" class="nav-item"><i class="fas fa-boxes"></i>Inventario</a>
+            <a href="pages/management.html" class="nav-item"><i class="fas fa-sync"></i>Gestión</a>
+            <a href="pages/qr-repository.html" class="nav-item"><i class="fas fa-qrcode"></i>Repositorio QR</a>
+            <a href="pages/scanner.html" class="nav-item"><i class="fas fa-camera"></i>Escáner QR</a>
+            <a href="pages/labels.html" class="nav-item"><i class="fas fa-tag"></i>Etiquetas</a>
+            <a href="pages/departments.html" class="nav-item"><i class="fas fa-building"></i>Deptos</a>
+            <a href="pages/movements.html" class="nav-item"><i class="fas fa-history"></i>Movimientos</a>
+            <a href="pages/updates.html" class="nav-item"><i class="fas fa-shield-alt"></i>Auditoría</a>
+            <a href="pages/reports.html" class="nav-item"><i class="fas fa-file-alt"></i>Reportes</a>
+            <a href="pages/users.html" class="nav-item"><i class="fas fa-users"></i>Usuarios</a>
+            <a href="pages/config.html" class="nav-item"><i class="fas fa-cog"></i>Config</a>
+        </nav>
+
+        <!-- Stats Grid -->
+        <div class="stats-grid">
+            <div class="glass stat-card neon-border-blue fade-in">
+                <div style="color: var(--text-secondary);">Total Artículos</div>
+                <div class="value">1,248</div>
+                <div style="color: #00ff88; font-size: 0.8rem;"><i class="fas fa-caret-up"></i> +12 este mes</div>
+            </div>
+            <div class="glass stat-card fade-in" style="animation-delay: 0.1s;">
+                <div style="color: var(--text-secondary);">Departamentos</div>
+                <div class="value">24</div>
+                <div style="font-size: 0.8rem;">Activos</div>
+            </div>
+            <div class="glass stat-card fade-in" style="animation-delay: 0.2s;">
+                <div style="color: var(--text-secondary);">Movimientos</div>
+                <div class="value">85</div>
+                <div style="color: var(--accent-blue); font-size: 0.8rem;">Últimas 24h</div>
+            </div>
+            <div class="glass stat-card neon-border-purple fade-in" style="animation-delay: 0.3s;">
+                <div style="color: var(--text-secondary);">Bajas</div>
+                <div class="value">0</div>
+                <div style="color: #ff4d4d; font-size: 0.8rem;">Histórico</div>
+            </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 30px;">
+            <!-- Charts Section -->
+            <div class="glass" style="padding: 30px;">
+                <h3 style="margin-bottom: 20px;">Distribución de Bienes</h3>
+                <canvas id="statsChart" style="max-height: 300px;"></canvas>
+            </div>
+
+            <!-- Updates / Search Section -->
+            <div id="updates" class="glass" style="padding: 30px;">
+                <h3 style="margin-bottom: 20px;">Sincronización / Edición</h3>
+                <div style="display: flex; gap: 10px;">
+                    <input type="text" id="inventory-id-search" class="glass" placeholder="ID o Código..."
+                        style="flex: 1; padding: 10px; color: white;">
+                    <button id="search-item-btn" class="btn btn-primary" style="padding: 10px 20px;"><i
+                            class="fas fa-search"></i></button>
+                </div>
+                <div id="search-results">
+                    <!-- Results will be injected here -->
+                    <p style="margin-top: 20px; color: var(--text-secondary); font-size: 0.9rem;">Ingrese un ID para
+                        buscar y editar en tiempo real.</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Botón Flotante de Accesos Rápidos (FAB) -->
+    <div class="fab-container">
+        <button class="fab-main">
+            <i class="fas fa-plus"></i>
+        </button>
+        <div class="fab-menu">
+            <a href="pages/inventory.html" class="fab-item" data-tooltip="Nuevo Bien">
+                <i class="fas fa-box-open"></i>
+            </a>
+            <a href="pages/scanner.html" class="fab-item" data-tooltip="Escanear QR">
+                <i class="fas fa-qrcode"></i>
+            </a>
+            <a href="pages/labels.html" class="fab-item" data-tooltip="Imprimir">
+                <i class="fas fa-print"></i>
+            </a>
+            <a href="pages/config.html" class="fab-item" data-tooltip="Configuración">
+                <i class="fas fa-cog"></i>
+            </a>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="./js/config.js?v=2.1.0"></script>
+    <script src="./js/api.js?v=2.1.0"></script>
+    <script src="./js/auth.js?v=2.1.0"></script>
+    <script src="./js/updates-manager.js?v=2.1.0"></script>
+    <script src="./js/app.js?v=2.1.0"></script>
+
+    <!-- Version Indicator -->
+    <div
+        style="position: fixed; bottom: 10px; right: 10px; font-size: 0.6rem; color: rgba(255,255,255,0.2); pointer-events: none;">
+        SIBIM TZOMP v2.1.0
+    </div>
+</body>
+
+</html>

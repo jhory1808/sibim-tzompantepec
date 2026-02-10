@@ -1,0 +1,22 @@
+{
+    "appId": "com.tzompantepec.sibim",
+    "appName": "SIBIM Tzompantepec",
+    "webDir": "www",
+    "android": {
+        "allowMixedContent": true,
+        "captureInput": true,
+        "webContentsDebuggingEnabled": true
+    },
+    "ios": {
+        "contentInset": "automatic",
+        "allowsLinkPreview": true
+    },
+    "plugins": {
+        "SplashScreen": {
+            "launchShowDuration": 2000,
+            "backgroundColor": "#0a192f",
+            "showSpinner": true,
+            "spinnerColor": "#00d2ff"
+        }
+    }
+}

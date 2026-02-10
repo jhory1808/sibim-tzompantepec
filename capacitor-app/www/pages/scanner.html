@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Escáner QR - SIBIMTZOMP</title>
+    <link rel="stylesheet" href="../css/futuristic.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://unpkg.com/html5-qrcode"></script>
+    <style>
+        #reader {
+            width: 100%;
+            max-width: 500px;
+            margin: 0 auto;
+            border-radius: 20px;
+            overflow: hidden;
+            border: 2px solid var(--accent-blue) !important;
+        }
+
+        #reader__dashboard_section_csr button {
+            background: var(--accent-blue) !important;
+            color: white !important;
+            border: none !important;
+            padding: 10px 20px !important;
+            border-radius: 10px !important;
+            cursor: pointer !important;
+            margin: 10px !important;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <div class="logo">SIBIMTZOMP</div>
+        <div style="display: flex; align-items: center; gap: 20px;">
+            <a href="../index.html" class="btn btn-outline" style="padding: 8px 15px;">Volver</a>
+        </div>
+    </header>
+
+    <main style="padding: 40px 5%;">
+        <div class="glass fade-in" style="padding: 30px; text-align: center;">
+            <h2>Escanear Código QR</h2>
+            <p style="color: var(--text-secondary); margin-bottom: 30px;">Escanea la etiqueta del bien para ver/editar
+                su información.</p>
+
+            <div id="reader"></div>
+
+            <div id="result" class="glass neon-border-blue" style="display: none; margin-top: 30px; padding: 20px;">
+                <h3>Resultado del Escaneo</h3>
+                <p id="scanned-code" style="font-size: 1.5rem; color: var(--accent-blue); margin: 15px 0;"></p>
+                <button id="view-details-btn" class="btn btn-primary">Ver Detalles</button>
+            </div>
+        </div>
+    </main>
+
+    <script src="../js/config.js"></script>
+    <script src="../js/api.js"></script>
+    <script src="../js/auth.js"></script>
+    <script>
+        async function onScanSuccess(decodedText, decodedResult) {
+            html5QrcodeScanner.clear();
+            const resultDiv = document.getElementById('result');
+            const scannedCodeElem = document.getElementById('scanned-code');
+
+            resultDiv.style.display = 'block';
+            scannedCodeElem.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Buscando artículo...';
+
+            const item = await API.getItemById(decodedText);
+
+            if (item) {
+                scannedCodeElem.innerHTML = `
+                    <div style="text-align: left; font-size: 1rem; color: white; margin-top: 15px;">
+                        <p><strong>Descripción:</strong> ${item.nombre || item.descripcion}</p>
+                        <p><strong>Código:</strong> ${item.codigo || item.id || decodedText}</p>
+                        <p><strong>Departamento:</strong> ${item.departamento || 'N/A'}</p>
+                        <p><strong>Estado:</strong> ${item.estado || 'Activo'}</p>
+                    </div>
+                `;
+                document.getElementById('view-details-btn').innerText = "Editar Artículo";
+                document.getElementById('view-details-btn').onclick = () => {
+                    window.location.href = '../index.html?scan=' + decodedText;
+                };
+            } else {
+                scannedCodeElem.innerHTML = `<p style="color: #ff4d4d;">Artículo no encontrado: ${decodedText}</p>`;
+                document.getElementById('view-details-btn').innerText = "Reintentar";
+                document.getElementById('view-details-btn').onclick = () => location.reload();
+            }
+        }
+
+        function onScanFailure(error) { }
+
+        let html5QrcodeScanner = new Html5QrcodeScanner(
+            "reader", { fps: 10, qrbox: { width: 250, height: 250 } }, false);
+        html5QrcodeScanner.render(onScanSuccess, onScanFailure);
+    </script>
+</body>
+
+</html>

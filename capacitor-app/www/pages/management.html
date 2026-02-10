@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Bienes - SIBIMTZOMP</title>
+    <link rel="stylesheet" href="../css/futuristic.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .search-container {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--glass-border);
+            border-radius: 15px;
+            padding: 40px;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .search-box {
+            display: flex;
+            max-width: 600px;
+            margin: 0 auto;
+            gap: 10px;
+        }
+
+        .search-box input {
+            flex: 1;
+            padding: 15px 20px;
+            font-size: 1.1rem;
+            border-radius: 50px;
+            border: 1px solid var(--glass-border);
+            background: rgba(0, 0, 0, 0.3);
+            color: white;
+            outline: none;
+            transition: all 0.3s;
+        }
+
+        .search-box input:focus {
+            border-color: var(--accent-blue);
+            box-shadow: 0 0 15px rgba(0, 210, 255, 0.3);
+        }
+
+        .result-card {
+            display: none;
+            /* Hidden by default */
+            background: var(--card-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            overflow: hidden;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .tabs-header {
+            display: flex;
+            background: rgba(0, 0, 0, 0.2);
+            border-bottom: 1px solid var(--glass-border);
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            color: var(--text-secondary);
+            border-bottom: 3px solid transparent;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .tab-btn:hover {
+            color: white;
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .tab-btn.active {
+            color: var(--accent-blue);
+            border-bottom-color: var(--accent-blue);
+            background: rgba(0, 210, 255, 0.05);
+        }
+
+        .tab-pane {
+            display: none;
+            padding: 30px;
+        }
+
+        .tab-pane.active {
+            display: block;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid var(--glass-border);
+            border-radius: 8px;
+            color: white;
+        }
+
+        .upload-zone {
+            border: 2px dashed var(--glass-border);
+            padding: 40px;
+            text-align: center;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .upload-zone:hover {
+            border-color: var(--accent-blue);
+            background: rgba(0, 210, 255, 0.05);
+        }
+
+        .qr-preview-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 30px;
+            background: white;
+            border-radius: 15px;
+            width: fit-content;
+            margin: 0 auto;
+        }
+    </style>
+</head>
+
+<body class="theme-dark">
+    <!-- Navbar -->
+    <header>
+        <div class="logo" style="display: flex; align-items: center; gap: 10px;">
+            <img src="../assets/images/logo_municipio.png" style="height: 40px; width: auto;">
+            <span>SIBIMTZOMP</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 15px;">
+            <a href="inventory.html" class="btn btn-outline" style="padding: 10px 15px;">Ir al Inventario</a>
+            <a href="../index.html" class="btn btn-outline" style="padding: 10px 15px;">Volver al Inicio</a>
+        </div>
+    </header>
+
+    <main style="padding: 30px 5%;">
+
+        <h1 style="text-align: center; margin-bottom: 10px;">Repositorio de Actualización</h1>
+        <p style="text-align: center; color: var(--text-secondary); margin-bottom: 40px;">Búsqueda y Gestión Integral de
+            Bienes</p>
+
+        <!-- Search Section -->
+        <div class="search-container glass">
+            <h3 style="margin-bottom: 20px;">Buscar Artículo</h3>
+            <div class="search-box">
+                <input type="text" id="search-input" placeholder="Ingrese Nombre, No. Serie o ID...">
+                <button class="btn btn-primary" onclick="performSearch()" style="border-radius: 50px; padding: 0 30px;">
+                    <i class="fas fa-search"></i> Buscar
+                </button>
+            </div>
+            <p style="margin-top: 15px; font-size: 0.9rem; color: var(--text-secondary);">
+                <i class="fas fa-info-circle"></i> La búsqueda consultará la base de datos en tiempo real.
+            </p>
+        </div>
+
+        <!-- Result Section -->
+        <div id="result-container" class="result-card glass">
+            <div class="tabs-header">
+                <div class="tab-btn active" onclick="showTab('info')"><i class="fas fa-edit"></i> Datos Generales</div>
+                <div class="tab-btn" onclick="showTab('photo')"><i class="fas fa-camera"></i> Fotografía</div>
+                <div class="tab-btn" onclick="showTab('files')"><i class="fas fa-file-pdf"></i> Resguardo</div>
+                <div class="tab-btn" onclick="showTab('qr')"><i class="fas fa-qrcode"></i> Código QR</div>
+            </div>
+
+            <form id="update-form">
+                <!-- Info Tab -->
+                <div id="tab-info" class="tab-pane active">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>Código ID (Solo lectura)</label>
+                            <input type="text" id="upd-code" readonly
+                                style="background: rgba(255,255,255,0.05); color: var(--accent-blue); font-weight: bold;">
+                        </div>
+                        <div class="form-group">
+                            <label>Nombre del Bien</label>
+                            <input type="text" id="upd-name">
+                        </div>
+                        <div class="form-group">
+                            <label>Marca</label>
+                            <input type="text" id="upd-brand">
+                        </div>
+                        <div class="form-group">
+                            <label>Modelo</label>
+                            <input type="text" id="upd-model">
+                        </div>
+                        <div class="form-group">
+                            <label>Número de Serie</label>
+                            <input type="text" id="upd-serie">
+                        </div>
+                        <div class="form-group">
+                            <label>Estado</label>
+                            <select id="upd-status">
+                                <option value="Activo">Activo</option>
+                                <option value="Inactivo">Inactivo</option>
+                                <option value="Baja">Baja</option>
+                                <option value="Extraviado">Extraviado</option>
+                                <option value="encomodato">En Comodato</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Departamento</label>
+                            <input type="text" id="upd-dept">
+                        </div>
+                        <div class="form-group">
+                            <label>Responsable</label>
+                            <input type="text" id="upd-resp">
+                        </div>
+                        <div class="form-group" style="grid-column: 1 / -1;">
+                            <label>Observaciones</label>
+                            <textarea id="upd-obs" rows="3"></textarea>
+                        </div>
+                    </div>
+                    <!-- Actions Footer -->
+                    <div
+                        style="padding: 20px 0; margin-top: 20px; border-top: 1px solid var(--glass-border); display: flex; justify-content: flex-end; gap: 15px;">
+                        <button type="button" class="btn btn-outline" style="color: #e74c3c; border-color: #e74c3c;"
+                            onclick="document.getElementById('result-container').style.display='none'">Cancelar</button>
+                        <button type="button" class="btn btn-primary" onclick="submitUpdate()">
+                            <i class="fas fa-save"></i> ACTUALIZAR ARTÍCULO
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Photo Tab -->
+                <div id="tab-photo" class="tab-pane">
+                    <div class="upload-zone" onclick="document.getElementById('file-photo').click()">
+                        <i class="fas fa-cloud-upload-alt fa-3x"
+                            style="color: var(--accent-blue); margin-bottom: 20px;"></i>
+                        <h3>Subir Fotografía del Bien</h3>
+                        <p style="color: var(--text-secondary);">Click para seleccionar imagen (JPG, PNG)</p>
+                        <input type="file" id="file-photo" accept="image/*" hidden onchange="previewImage(this)">
+                        <div id="photo-preview" style="margin-top: 20px;"></div>
+                    </div>
+                </div>
+
+                <!-- Resguardo Tab -->
+                <div id="tab-files" class="tab-pane">
+                    <div class="upload-zone" style="border-color: #e74c3c;"
+                        onclick="document.getElementById('file-pdf').click()">
+                        <i class="fas fa-file-pdf fa-3x" style="color: #e74c3c; margin-bottom: 20px;"></i>
+                        <h3>Subir Resguardo Firmado</h3>
+                        <p style="color: var(--text-secondary);">Click para seleccionar documento PDF</p>
+                        <input type="file" id="file-pdf" accept="application/pdf" hidden onchange="previewPdf(this)">
+                        <div id="pdf-preview" style="margin-top: 20px; font-weight: bold; color: #e74c3c;"></div>
+                    </div>
+                </div>
+
+                <!-- QR Tab -->
+                <div id="tab-qr" class="tab-pane">
+                    <div style="text-align: center;">
+                        <button type="button" class="btn btn-primary" onclick="generateQRInternal()">
+                            <i class="fas fa-sync"></i> Generar / Actualizar QR
+                        </button>
+                        <div style="margin-top: 30px;">
+                            <div id="qr-display" class="qr-preview-container" style="display: none;">
+                                <div id="qr-canvas"></div>
+                                <p style="color: #333; margin-top: 10px; font-weight: bold;" id="qr-legend"></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
+            </form>
+        </div>
+
+    </main>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script src="../js/config.js"></script>
+    <script src="../js/api.js"></script>
+    <script src="../js/auth.js"></script>
+    <script src="../js/app.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const searchParam = urlParams.get('search') || urlParams.get('id');
+            if (searchParam) {
+                document.getElementById('search-input').value = searchParam;
+                // Add a small delay to ensure API is ready if needed, or just run
+                setTimeout(performSearch, 500);
+            }
+        });
+
+        function showTab(tabName) {
+            // Remove active class from all tabs
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+
+            // Add active class to clicked tab and corresponding pane
+            const btn = document.querySelector(`.tab-btn[onclick="showTab('${tabName}')"]`);
+            if (btn) btn.classList.add('active');
+
+            const pane = document.getElementById('tab-' + tabName);
+            if (pane) pane.classList.add('active');
+        }
+
+        async function performSearch() {
+            const query = document.getElementById('search-input').value.trim().toLowerCase();
+            if (!query) return UI.showToast("Ingrese un término de búsqueda", "warning");
+
+            UI.showToast("Buscando en base de datos...", "info");
+
+            try {
+                // Try fetching all items (cached) first, then filtering
+                const items = await API.fetchItems();
+                if (!items) {
+                    return UI.showToast("Error de conexión con el inventario", "error");
+                }
+
+                const found = items.find(i => {
+                    const code = (i.Codigo || i.codigo || i.id || '').toString().toLowerCase();
+                    const name = (i.Nombre || i.nombre || '').toString().toLowerCase();
+                    const serie = (i.Serie || i['Numero de Serie'] || '').toString().toLowerCase();
+
+                    return code === query || name.includes(query) || serie.includes(query);
+                });
+
+                if (found) {
+                    populateForm(found);
+                    document.getElementById('result-container').style.display = 'block';
+                    UI.showToast("Artículo encontrado", "success");
+                } else {
+                    document.getElementById('result-container').style.display = 'none';
+                    UI.showToast("No se encontró ningún artículo con esos datos", "error");
+                }
+            } catch (e) {
+                console.error(e);
+                UI.showToast("Error al procesar la búsqueda", "error");
+            }
+        }
+
+        function populateForm(item) {
+            // Map keys loosely to handle casing variations
+            const getKey = (keys) => {
+                for (let k of keys) {
+                    if (item[k] !== undefined && item[k] !== null) return item[k];
+                }
+                return '';
+            }
+
+            document.getElementById('upd-code').value = getKey(['Codigo', 'codigo', 'id']);
+            document.getElementById('upd-name').value = getKey(['Nombre', 'nombre']);
+            document.getElementById('upd-brand').value = getKey(['Marca', 'marca']);
+            document.getElementById('upd-model').value = getKey(['Modelo', 'modelo']);
+            document.getElementById('upd-serie').value = getKey(['Numero de Serie', 'Serie', 'serie']);
+            document.getElementById('upd-dept').value = getKey(['Departamento', 'departamento']);
+            document.getElementById('upd-resp').value = getKey(['Responsable', 'responsable']);
+            document.getElementById('upd-obs').value = getKey(['Observaciones', 'observaciones']);
+
+            // Status requires mapping
+            const status = getKey(['Estado', 'estado']);
+            const statusSelect = document.getElementById('upd-status');
+            let matched = false;
+            for (let opt of statusSelect.options) {
+                if (opt.value.toLowerCase() === status.toLowerCase()) {
+                    statusSelect.value = opt.value;
+                    matched = true;
+                    break;
+                }
+            }
+            if (!matched) {
+                // If status not in list, maybe add it or default to Activo
+                statusSelect.value = 'Activo';
+            }
+
+            // Clear previews
+            document.getElementById('photo-preview').innerHTML = '';
+            document.getElementById('pdf-preview').textContent = '';
+            document.getElementById('qr-display').style.display = 'none';
+        }
+
+        function previewImage(input) {
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    document.getElementById('photo-preview').innerHTML = `<img src="${e.target.result}" style="max-height: 200px; border-radius: 10px;">`;
+                }
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        function previewPdf(input) {
+            if (input.files && input.files[0]) {
+                document.getElementById('pdf-preview').textContent = "Seleccionado: " + input.files[0].name;
+            }
+        }
+
+        function generateQRInternal() {
+            const code = document.getElementById('upd-code').value;
+            if (!code) return;
+
+            const display = document.getElementById('qr-display');
+            const canvas = document.getElementById('qr-canvas');
+            const legend = document.getElementById('qr-legend');
+
+            canvas.innerHTML = '';
+            display.style.display = 'flex';
+
+            // URL that points to the public view of the item
+            const url = `${window.location.origin}/view.html?id=${code}`;
+
+            new QRCode(canvas, {
+                text: url,
+                width: 150,
+                height: 150
+            });
+
+            legend.textContent = code;
+        }
+
+        async function submitUpdate() {
+            const code = document.getElementById('upd-code').value;
+            if (!code) return;
+
+            // Gather all data
+            const data = {
+                codigo: code,
+                nombre: document.getElementById('upd-name').value,
+                marca: document.getElementById('upd-brand').value,
+                modelo: document.getElementById('upd-model').value,
+                serie: document.getElementById('upd-serie').value,
+                estado: document.getElementById('upd-status').value,
+                departamento: document.getElementById('upd-dept').value,
+                responsable: document.getElementById('upd-resp').value,
+                observaciones: document.getElementById('upd-obs').value
+            };
+
+            const btn = event.currentTarget;
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...';
+            btn.disabled = true;
+
+            try {
+                // Here we would handle file uploads if supported by GAS backend
+                // For now, we update text fields
+
+                const res = await API.updateItem(data);
+
+                if (res.success) {
+                    UI.showToast("Artículo actualizado correctamente", "success");
+                    // Refresh data
+                    await API.fetchItems();
+                } else {
+                    UI.showToast("Error al actualizar: " + (res.error || "Desconocido"), "error");
+                }
+            } catch (e) {
+                console.error(e);
+                UI.showToast("Error crítico al actualizar", "error");
+            } finally {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
+        }
+    </script>
+</body>
+
+</html>
