@@ -108,20 +108,36 @@ const Auth = {
     getPermissions(role) {
         const roleLower = String(role || '').toLowerCase();
 
-        // Admin tiene todo
-        if (roleLower === 'admin') return ['*'];
+        // 1. Administrador: Acceso total a todos los repositorios (CRUD, usuarios, etc)
+        if (roleLower === 'admin' || roleLower === 'administrador') return ['*'];
 
-        // Usuarios: dashbord, reportes, etiquetas y movimientos
+        // 2. Usuarios: Pueden ver todos los repositorios sin poder eliminar ni agregar, solo visualizar y exportar reportes
+        // Incluimos todos los repositorios relevantes
         if (roleLower === 'usuarios' || roleLower === 'usuario') {
-            return ['index.html', 'reports.html', 'labels.html', 'movements.html'];
+            return [
+                'index.html',
+                'inventory.html',
+                'qr-repository.html',
+                'labels-repository.html',
+                'scanner.html',
+                'departments.html',
+                'movements.html',
+                'reports.html'
+            ];
         }
 
-        // Capturistas: dashboard, inventario, registrar nuevo articulo (inventory), buscar/update repositorio QR
+        // 3. Capturistas: Dashboard, Inventario (agregar), QR (buscar/update), Etiquetas (imprimir) y Escáner QR
         if (roleLower === 'capturistas' || roleLower === 'capturista') {
-            return ['index.html', 'inventory.html', 'qr-repository.html', 'scanner.html'];
+            return [
+                'index.html',
+                'inventory.html',
+                'qr-repository.html',
+                'labels-repository.html',
+                'scanner.html'
+            ];
         }
 
-        return ['index.html']; // Default basic access
+        return ['index.html']; // Acceso básico por defecto
     },
 
     isPageAllowed(pageName) {

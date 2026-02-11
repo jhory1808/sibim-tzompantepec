@@ -210,7 +210,7 @@
             <span style="font-size: 1.8rem; font-weight: 800; color: #00d2ff; letter-spacing: 2px;">SIBIMTZOMP</span>
         </div>
         <div style="display: flex; align-items: center; gap: 12px;">
-            <button class="btn"
+            <button class="btn btn-add"
                 style="background: #2ecc71; color: white; border-radius: 8px; font-weight: bold; padding: 12px 20px;"
                 onclick="openNewArticleModal()">
                 <i class="fas fa-plus"></i> NUEVO
@@ -255,11 +255,13 @@
 
             <div class="filter-glass" style="background: rgba(0, 210, 255, 0.05);">
                 <div class="search-bar">
-                    <input type="text" id="main-search"
-                        placeholder="Escribe para buscar por código, nombre, departamento o serie..."
-                        style="font-size: 1.1rem; padding: 15px; border-radius: 15px;">
-                    <button class="btn btn-primary" style="padding: 0 35px; border-radius: 15px;"><i
-                            class="fas fa-search"></i></button>
+                    <input type="text" id="main-search" placeholder="Ingrese código, nombre o depto..."
+                        style="font-size: 1.1rem; padding: 15px; border-radius: 15px;"
+                        onkeypress="if(event.key === 'Enter') filterTable(this.value)">
+                    <button id="search-btn" class="btn btn-primary" style="padding: 0 35px; border-radius: 15px;"
+                        onclick="filterTable(document.getElementById('main-search').value)">
+                        <i class="fas fa-search"></i>
+                    </button>
                 </div>
             </div>
 
@@ -469,11 +471,6 @@
             Auth.checkAccess();
             Auth.initTheme();
 
-            // Inicializar búsqueda en tiempo real
-            document.getElementById('main-search').addEventListener('input', (e) => {
-                filterTable(e.target.value);
-            });
-
             loadInventory().finally(() => UI.hideLoader());
         });
 
@@ -492,23 +489,31 @@
         }
 
         function filterTable(query) {
-            const q = query.toLowerCase();
+            const q = query.toLowerCase().trim();
+            if (!q) {
+                renderItems(fullInventory);
+                return;
+            }
             const filtered = fullInventory.filter(item => {
                 const code = (item.Codigo || item.codigo || item.id || '').toString().toLowerCase();
                 const name = (item.Nombre || item.nombre || '').toString().toLowerCase();
                 const dept = (item.Departamento || item.departamento || '').toString().toLowerCase();
-                const serie = (item.Serie || item['Numero de Serie'] || '').toString().toLowerCase();
-                return code.includes(q) || name.includes(q) || dept.includes(q) || serie.includes(q);
+                return code.includes(q) || name.includes(q) || dept.includes(q);
             });
             renderItems(filtered);
         }
 
         function renderItems(items) {
             const tableBody = document.querySelector('tbody');
+            const query = document.getElementById('main-search').value.toLowerCase().trim();
+
             if (!items || items.length === 0) {
-                tableBody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding:50px;"><i class="fas fa-info-circle"></i> No se encontraron resultados.</td></tr>';
+                tableBody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding:50px;"><i class="fas fa-search"></i> No se encontraron resultados que coincidan.</td></tr>';
                 return;
             }
+
+            // Si hay búsqueda, mostrar TODO lo que coincida. Si no, solo los primeros 100.
+            const displayItems = query ? items : items.slice(0, 100);
 
             tableBody.innerHTML = items.map(item => {
                 const code = item.Codigo || item.codigo || item.id || '---';
@@ -535,13 +540,16 @@
                     <td><span class="badge ${badgeClass}">${status.toUpperCase()}</span></td>
                     <td style="text-align:right;">
                         <div style="display: flex; gap: 5px; justify-content: flex-end;">
-                            <button class="action-btn" onclick="window.location.href='management.html?search=${code}'" title="Editar"><i class="fas fa-pencil-alt"></i></button>
-                            <button class="action-btn" onclick="showDetails('${code}')" title="Detalles"><i class="fas fa-eye"></i></button>
-                            <button class="action-btn" onclick="printLabelFromData('${code}', '${name}')" title="Imprimir"><i class="fas fa-print"></i></button>
+                            <button class="action-btn btn-edit" onclick="window.location.href='management.html?search=${code}'" title="Editar"><i class="fas fa-pencil-alt"></i></button>
+                            <button class="action-btn btn-view" onclick="showDetails('${code}')" title="Detalles"><i class="fas fa-eye"></i></button>
+                            <button class="action-btn btn-print" onclick="printLabelFromData('${code}', '${name}')" title="Imprimir"><i class="fas fa-print"></i></button>
                         </div>
                     </td>
                 </tr>
             `}).join('');
+
+            // Re-aplicar permisos a los elementos recién creados
+            if (typeof handleRolePermissions === 'function') handleRolePermissions();
         }
 
         function switchTab(index) {

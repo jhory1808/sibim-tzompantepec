@@ -103,7 +103,13 @@ function handleRolePermissions() {
     const user = Auth.getCurrentUser();
     if (!user) return;
 
-    const navItems = document.querySelectorAll('.nav-item');
+    const role = (user.role || '').toLowerCase();
+
+    // Asegurar que la UI se actualice con los datos del usuario inmediatamente
+    updateUIForUser();
+
+    // 1. Visibilidad de Navegación Basal
+    const navItems = document.querySelectorAll('.nav-item, .dropdown-item');
     navItems.forEach(item => {
         const href = item.getAttribute('href');
         if (href && !Auth.isPageAllowed(href)) {
@@ -111,7 +117,38 @@ function handleRolePermissions() {
         }
     });
 
-    // Hide special items not in nav bar but restricted
+    // 2. Controladores de Acciones según Rol
+    // Si el rol incluye 'usuario' (Solo lectura)
+    if (role.indexOf('usuario') !== -1) {
+        const actionElements = document.querySelectorAll('.btn-delete, .btn-edit, .btn-add, #add-item-btn, .delete-btn, [data-action="admin"], .fa-pencil-alt, .fa-trash-alt, .fa-plus');
+        actionElements.forEach(el => {
+            const container = el.tagName === 'I' ? el.parentElement : el;
+            if (container && (container.tagName === 'BUTTON' || container.tagName === 'A')) {
+                container.style.display = 'none';
+            } else if (el.tagName !== 'I') {
+                el.style.display = 'none';
+            }
+        });
+    }
+
+    // Si el rol incluye 'capturista'
+    if (role.indexOf('capturista') !== -1) {
+        const deleteActions = document.querySelectorAll('.btn-delete, .delete-btn, [data-action="delete"], .fa-trash-alt');
+        deleteActions.forEach(el => {
+            const container = el.tagName === 'I' ? el.parentElement : el;
+            if (container && (container.tagName === 'BUTTON' || container.tagName === 'A')) {
+                container.style.display = 'none';
+            } else if (el.tagName !== 'I') {
+                el.style.display = 'none';
+            }
+        });
+
+        // Esconder herramientas que el capturista no tiene en sus permisos explícitos
+        const adminTools = document.querySelectorAll('[href*="users.html"], [href*="updates.html"], [href*="config.html"], [data-action="admin"]');
+        adminTools.forEach(el => el.style.display = 'none');
+    }
+
+    // 3. Elementos restringidos por data-attribute
     const restrictedElements = document.querySelectorAll('[data-role-restricted]');
     restrictedElements.forEach(el => {
         const allowedPages = el.getAttribute('data-role-restricted').split(',');
@@ -119,10 +156,13 @@ function handleRolePermissions() {
         if (!isAllowed) el.style.display = 'none';
     });
 
-    // Redirect if current page is not allowed
-    const currentPage = window.location.pathname;
-    if (currentPage.includes('.html') && !Auth.isPageAllowed(currentPage)) {
-        console.warn('Acceso denegado a esta página para el rol:', user.role);
+    // Redirección de seguridad
+    const currentPagePath = window.location.pathname;
+    const cleanPage = currentPagePath.split('/').pop().split('?')[0];
+
+    // Si estamos en una página que no está permitida (excepto el index y home)
+    if (cleanPage && cleanPage !== 'index.html' && cleanPage !== 'home.html' && cleanPage !== '' && !Auth.isPageAllowed(cleanPage)) {
+        console.warn('[RBAC] Acceso denegado a:', cleanPage);
         window.location.href = window.location.pathname.includes('/pages/') ? '../index.html' : './index.html';
     }
 }

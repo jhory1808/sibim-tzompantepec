@@ -77,10 +77,13 @@
             <h1><i class="fas fa-qrcode"></i> Galería de Códigos QR</h1>
             <p style="color:var(--text-secondary)">Acceso rápido para visualizar e imprimir códigos identificadores.</p>
 
-            <div style="margin-top: 20px;">
-                <input type="text" id="filter-qr" placeholder="Filtrar por nombre o código..."
-                    style="padding: 10px; width: 100%; max-width: 400px; border-radius: 5px; background: rgba(0,0,0,0.3); color: white; border: 1px solid var(--glass-border);"
-                    onkeyup="filterGrid()">
+            <div style="margin-top: 20px; display: flex; gap: 10px; max-width: 500px;">
+                <input type="text" id="filter-qr" placeholder="Ingrese código o nombre..."
+                    style="flex: 1; padding: 12px; border-radius: 8px; background: rgba(0,0,0,0.3); color: white; border: 1px solid var(--glass-border);"
+                    onkeypress="if(event.key === 'Enter') filterGrid()">
+                <button class="btn btn-primary" onclick="filterGrid()" style="border-radius: 8px; padding: 0 20px;">
+                    <i class="fas fa-search"></i>
+                </button>
             </div>
         </div>
 
@@ -121,11 +124,26 @@
             const container = document.getElementById('qr-container');
             container.innerHTML = '';
 
-            // Limit to first 50 to avoid browser freeze, load more on scroll? 
-            // For now, let's show first 100
-            const limit = items.slice(0, 100);
+            const query = document.getElementById('filter-qr').value.toLowerCase().trim();
 
-            limit.forEach(item => {
+            if (items.length === 0) {
+                container.innerHTML = `
+                <div style="grid-column: 1/-1; text-align: center; padding: 50px;">
+                    <i class="fas fa-search" style="font-size: 3rem; color: rgba(255,255,255,0.1); margin-bottom: 20px; display: block;"></i>
+                    <p style="color: var(--text-secondary);">No se encontraron códigos QR para "${query}"</p>
+                    <button class="btn glass" style="margin-top: 15px;" onclick="document.getElementById('filter-qr').value=''; renderGrid(allItems);">Ver todo el repositorio</button>
+                </div>`;
+                return;
+            }
+
+            // REQUERIMIENTO: Si hay búsqueda, mostrar SOLO resultados. 
+            // Si NO hay búsqueda, limitamos a 50 para rendimiento.
+            let displayItems = items;
+            if (!query) {
+                displayItems = items.slice(0, 50);
+            }
+
+            displayItems.forEach(item => {
                 const code = item.Codigo || item.codigo || item.id || '---';
                 const name = item.Nombre || item.nombre || 'Sin Nombre';
 
@@ -139,7 +157,6 @@
                 const qrDiv = document.createElement('div');
                 qrDiv.className = 'qr-canvas';
 
-                // Button
                 const btn = document.createElement('button');
                 btn.className = 'print-btn';
                 btn.innerHTML = '<i class="fas fa-print"></i> Imprimir';
@@ -150,8 +167,7 @@
                 card.appendChild(btn);
                 container.appendChild(card);
 
-                // Generate QR
-                const url = `${window.location.origin}/view.html?id=${code}`;
+                const url = `${window.location.host.includes('localhost') ? 'https://sibimtzomp.netlify.app' : window.location.origin}/view.html?id=${code}`;
                 new QRCode(qrDiv, {
                     text: url,
                     width: 100,
@@ -159,18 +175,25 @@
                 });
             });
 
-            if (items.length > 100) {
-                const warning = document.createElement('div');
-                warning.style.gridColumn = '1 / -1';
-                warning.style.textAlign = 'center';
-                warning.style.padding = '20px';
-                warning.innerHTML = `<button class="btn btn-outline" onclick="alert('Funcionalidad de paginación pendiente de optimización')">Cargar más resultados (${items.length - 100} restantes)</button>`;
-                container.appendChild(warning);
+            if (!query && items.length > 50) {
+                const more = document.createElement('div');
+                more.style.gridColumn = '1/ -1';
+                more.style.textAlign = 'center';
+                more.style.padding = '20px';
+                more.innerHTML = `<p style="color: var(--text-secondary); font-size: 0.8rem;">Mostrando ráfaga inicial. Use el buscador para encontrar artículos específicos.</p>`;
+                container.appendChild(more);
             }
+
+            if (typeof handleRolePermissions === 'function') handleRolePermissions();
         }
 
         function filterGrid() {
-            const query = document.getElementById('filter-qr').value.toLowerCase();
+            const query = document.getElementById('filter-qr').value.toLowerCase().trim();
+            if (!query) {
+                renderGrid(allItems);
+                return;
+            }
+
             const filtered = allItems.filter(item => {
                 const code = (item.Codigo || item.codigo || item.id || '').toString().toLowerCase();
                 const name = (item.Nombre || item.nombre || '').toString().toLowerCase();

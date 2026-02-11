@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Escáner QR - SIBIMTZOMP</title>
+    <title>Escáner QR/Barcodes - SIBIMTZOMP</title>
     <link rel="stylesheet" href="../css/futuristic.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://unpkg.com/html5-qrcode"></script>
@@ -16,6 +16,7 @@
             border-radius: 20px;
             overflow: hidden;
             border: 2px solid var(--accent-blue) !important;
+            background: #000;
         }
 
         #reader__dashboard_section_csr button {
@@ -40,16 +41,20 @@
 
     <main style="padding: 40px 5%;">
         <div class="glass fade-in" style="padding: 30px; text-align: center;">
-            <h2>Escanear Código QR</h2>
-            <p style="color: var(--text-secondary); margin-bottom: 30px;">Escanea la etiqueta del bien para ver/editar
-                su información.</p>
+            <h2>Escanear QR y Códigos de Barras</h2>
+            <p style="color: var(--text-secondary); margin-bottom: 30px;">Centra el código en el área marcada para
+                identificar el bien.</p>
 
             <div id="reader"></div>
 
             <div id="result" class="glass neon-border-blue" style="display: none; margin-top: 30px; padding: 20px;">
                 <h3>Resultado del Escaneo</h3>
-                <p id="scanned-code" style="font-size: 1.5rem; color: var(--accent-blue); margin: 15px 0;"></p>
-                <button id="view-details-btn" class="btn btn-primary">Ver Detalles</button>
+                <div id="scanned-content">
+                    <p id="scanned-code" style="font-size: 1.5rem; color: var(--accent-blue); margin: 15px 0;"></p>
+                </div>
+                <button id="view-details-btn" class="btn btn-primary" style="margin-top: 20px;">Ver Detalles</button>
+                <button class="btn glass" onclick="location.reload()" style="margin-top: 10px; width: 100%;">Escanear
+                    Otro</button>
             </div>
         </div>
     </main>
@@ -58,41 +63,70 @@
     <script src="../js/api.js"></script>
     <script src="../js/auth.js"></script>
     <script>
+        // Instanciar el escáner directamente para mayor control sobre formatos específicos
+        const html5QrCode = new Html5Qrcode("reader");
+
+        const qrConfig = {
+            fps: 20,
+            qrbox: { width: 320, height: 180 }, // RECTANGULAR para códigos de barras
+            aspectRatio: 1.0,
+            experimentalFeatures: {
+                useBarCodeDetectorIfSupported: true
+            }
+        };
+
+        // Comenzar el escaneo con soporte EXPLÍCITO para formatos de barras
+        html5QrCode.start(
+            { facingMode: "environment" },
+            qrConfig,
+            (decodedText, decodedResult) => {
+                onScanSuccess(decodedText, decodedResult);
+                html5QrCode.stop().catch(err => console.log("Finalización limpia", err));
+            },
+            () => { } // Ignorar fallos continuos de detección
+        ).catch(err => {
+            console.error("Error al iniciar cámara:", err);
+            document.getElementById('reader').innerHTML = `<p style="padding: 20px; color: #ff4d4d;">Error al acceder a la cámara. Asegúrese de dar permisos.</p>`;
+        });
+
         async function onScanSuccess(decodedText, decodedResult) {
-            html5QrcodeScanner.clear();
             const resultDiv = document.getElementById('result');
             const scannedCodeElem = document.getElementById('scanned-code');
 
             resultDiv.style.display = 'block';
             scannedCodeElem.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Buscando artículo...';
 
-            const item = await API.getItemById(decodedText);
+            try {
+                const item = await API.getItemById(decodedText);
 
-            if (item) {
-                scannedCodeElem.innerHTML = `
-                    <div style="text-align: left; font-size: 1rem; color: white; margin-top: 15px;">
-                        <p><strong>Descripción:</strong> ${item.nombre || item.descripcion}</p>
-                        <p><strong>Código:</strong> ${item.codigo || item.id || decodedText}</p>
-                        <p><strong>Departamento:</strong> ${item.departamento || 'N/A'}</p>
-                        <p><strong>Estado:</strong> ${item.estado || 'Activo'}</p>
-                    </div>
-                `;
-                document.getElementById('view-details-btn').innerText = "Editar Artículo";
-                document.getElementById('view-details-btn').onclick = () => {
-                    window.location.href = '../index.html?scan=' + decodedText;
-                };
-            } else {
-                scannedCodeElem.innerHTML = `<p style="color: #ff4d4d;">Artículo no encontrado: ${decodedText}</p>`;
-                document.getElementById('view-details-btn').innerText = "Reintentar";
-                document.getElementById('view-details-btn').onclick = () => location.reload();
+                if (item) {
+                    scannedCodeElem.innerHTML = `
+                        <div style="text-align: left; font-size: 1rem; color: white; margin-top: 15px;">
+                            <p style="border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px; color: var(--accent-blue); font-weight: bold;">ARTÍCULO ENCONTRADO</p>
+                            <p><strong>Descripción:</strong> ${item.nombre || item.Nombre || item.descripcion}</p>
+                            <p><strong>Código:</strong> ${item.codigo || item.Codigo || item.id || decodedText}</p>
+                            <p><strong>Estado:</strong> ${item.estado || item.Estado || 'Activo'}</p>
+                            <p><strong>Depto:</strong> ${item.departamento || item.Departamento || '---'}</p>
+                        </div>
+                    `;
+                    document.getElementById('view-details-btn').innerText = "Abrir en Sistema";
+                    document.getElementById('view-details-btn').style.display = 'block';
+                    document.getElementById('view-details-btn').onclick = () => {
+                        window.location.href = '../index.html?scan=' + encodeURIComponent(decodedText);
+                    };
+                } else {
+                    scannedCodeElem.innerHTML = `
+                        <div style="text-align: center; margin-top: 15px;">
+                            <p style="color: #00d2ff; font-weight: 800; font-size: 1.2rem;">${decodedText}</p>
+                            <p style="color: #ff4d4d; font-size: 0.9rem;">El código no está registrado en el inventario.</p>
+                        </div>
+                    `;
+                    document.getElementById('view-details-btn').style.display = 'none';
+                }
+            } catch (error) {
+                scannedCodeElem.innerHTML = '<p style="color: red;">Error al consultar la base de datos.</p>';
             }
         }
-
-        function onScanFailure(error) { }
-
-        let html5QrcodeScanner = new Html5QrcodeScanner(
-            "reader", { fps: 10, qrbox: { width: 250, height: 250 } }, false);
-        html5QrcodeScanner.render(onScanSuccess, onScanFailure);
     </script>
 </body>
 
