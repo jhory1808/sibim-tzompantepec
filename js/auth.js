@@ -102,7 +102,9 @@ const Auth = {
 
     isAdmin() {
         const user = this.getCurrentUser();
-        return user && user.role === 'Admin';
+        if (!user) return false;
+        const role = String(user.role || '').toLowerCase();
+        return role === 'admin' || role === 'administrador';
     },
 
     getPermissions(role) {
@@ -111,9 +113,8 @@ const Auth = {
         // 1. Administrador: Acceso total a todos los repositorios (CRUD, usuarios, etc)
         if (roleLower === 'admin' || roleLower === 'administrador') return ['*'];
 
-        // 2. Usuarios: Pueden ver todos los repositorios sin poder eliminar ni agregar, solo visualizar y exportar reportes
-        // Incluimos todos los repositorios relevantes
-        if (roleLower === 'usuarios' || roleLower === 'usuario') {
+        // 2. Usuarios: Pueden ver TODOS los repositorios (incluyendo config/usuarios) pero solo lectura
+        if (roleLower.includes('usuario')) {
             return [
                 'index.html',
                 'inventory.html',
@@ -122,12 +123,15 @@ const Auth = {
                 'scanner.html',
                 'departments.html',
                 'movements.html',
-                'reports.html'
+                'reports.html',
+                'users.html',
+                'updates.html',
+                'config.html'
             ];
         }
 
         // 3. Capturistas: Dashboard, Inventario (agregar), QR (buscar/update), Etiquetas (imprimir) y Escáner QR
-        if (roleLower === 'capturistas' || roleLower === 'capturista') {
+        if (roleLower.includes('capturista')) {
             return [
                 'index.html',
                 'inventory.html',

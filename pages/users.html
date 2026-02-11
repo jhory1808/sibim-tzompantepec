@@ -7,6 +7,7 @@
     <title>Usuarios - SIBIMTZOMP</title>
     <link rel="stylesheet" href="../css/futuristic.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.5/xlsx.full.min.js"></script>
 </head>
 
 <body>
@@ -221,7 +222,17 @@
         }
 
         function exportUsersPDF() { alert("Generando PDF..."); window.print(); }
-        function exportUsersExcel() { alert("Exportando a Excel..."); }
+        async function exportUsersExcel() {
+            try {
+                const users = await API.getUsers();
+                const ws = XLSX.utils.json_to_sheet(users);
+                const wb = XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(wb, ws, "Usuarios");
+                XLSX.writeFile(wb, `Usuarios_SIBIM_${new Date().getTime()}.xlsx`);
+            } catch (err) {
+                alert("Error al exportar: " + err.message);
+            }
+        }
     </script>
 </body>
 

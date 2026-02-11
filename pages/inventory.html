@@ -7,6 +7,7 @@
     <title>Inventario SIBIM TZOMP v2.1.0</title>
     <link rel="stylesheet" href="../css/futuristic.css?v=2.1.0">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.5/xlsx.full.min.js"></script>
     <style>
         .filter-glass {
             background: rgba(255, 255, 255, 0.03);
@@ -228,7 +229,7 @@
                 style="background: rgba(44, 62, 80, 0.8); color: white; border-radius: 8px; font-weight: bold; padding: 12px 20px;">
                 <i class="fas fa-qrcode"></i> REPOSITORIO QR
             </a>
-            <button class="btn glass"
+            <button class="btn glass" onclick="exportInventory()"
                 style="background: rgba(44, 62, 80, 0.8); color: white; border-radius: 8px; font-weight: bold; padding: 12px 20px;">
                 <i class="fas fa-file-excel"></i> EXPORTAR
             </button>
@@ -702,6 +703,21 @@
                 </div>
             `;
             document.body.appendChild(modal);
+        }
+        async function exportInventory() {
+            if (!fullInventory || fullInventory.length === 0) {
+                return UI.showToast("No hay datos para exportar", "error");
+            }
+            UI.showToast("Generando archivo Excel...", "info");
+            try {
+                const worksheet = XLSX.utils.json_to_sheet(fullInventory);
+                const workbook = XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(workbook, worksheet, "Inventario");
+                XLSX.writeFile(workbook, `Inventario_SIBIM_${new Date().toISOString().split('T')[0]}.xlsx`);
+            } catch (err) {
+                console.error("Export fail", err);
+                UI.showToast("Error al exportar", "error");
+            }
         }
     </script>
 </body>

@@ -108,8 +108,14 @@ function handleRolePermissions() {
     // Asegurar que la UI se actualice con los datos del usuario inmediatamente
     updateUIForUser();
 
+    // 0. Si es ADMIN, no aplicamos restricciones de ocultamiento ni redirección
+    if (role.indexOf('admin') !== -1 || role.indexOf('administrador') !== -1) {
+        console.log('[RBAC] Admin detectado, acceso total concedido.');
+        return;
+    }
+
     // 1. Visibilidad de Navegación Basal
-    const navItems = document.querySelectorAll('.nav-item, .dropdown-item');
+    const navItems = document.querySelectorAll('.nav-item, .dropdown-item, .fab-item');
     navItems.forEach(item => {
         const href = item.getAttribute('href');
         if (href && !Auth.isPageAllowed(href)) {
@@ -118,9 +124,9 @@ function handleRolePermissions() {
     });
 
     // 2. Controladores de Acciones según Rol
-    // Si el rol incluye 'usuario' (Solo lectura)
-    if (role.includes('usuario')) {
-        const actionElements = document.querySelectorAll('.btn-delete, .btn-edit, .btn-add, #add-item-btn, .delete-btn, [data-action="admin"], .fa-pencil-alt, .fa-trash-alt, .fa-plus');
+    // Si el rol incluye 'usuario' (Solo lectura TOTAL)
+    if (role.indexOf('usuario') !== -1) {
+        const actionElements = document.querySelectorAll('.btn-delete, .btn-edit, .btn-add, #add-item-btn, .delete-btn, [data-action="admin"], .fa-pencil-alt, .fa-trash-alt, .fa-plus, .fa-user-cog, .btn-save');
         actionElements.forEach(el => {
             const container = el.tagName === 'I' ? el.parentElement : el;
             if (container && (container.tagName === 'BUTTON' || container.tagName === 'A')) {

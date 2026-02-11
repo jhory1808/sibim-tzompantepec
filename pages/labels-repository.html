@@ -242,8 +242,9 @@
                 `;
                 container.appendChild(card);
 
+                const qrUrl = `${window.location.host.includes('localhost') ? 'https://sibimtzomp.netlify.app' : window.location.origin}/view.html?id=${code}`;
                 new QRCode(document.getElementById(`qr-${code}`), {
-                    text: `${window.location.origin}/view.html?id=${code}`,
+                    text: qrUrl,
                     width: 50,
                     height: 50,
                     correctLevel: QRCode.CorrectLevel.L
