@@ -15,13 +15,16 @@
             justify-content: center;
             align-items: center;
             background: linear-gradient(135deg, #0a192f 0%, #172a45 100%);
+            margin: 0;
+            min-height: 100vh;
         }
 
         .login-card {
-            width: 100%;
+            width: 90%;
             max-width: 400px;
             padding: 40px;
             text-align: center;
+            z-index: 2;
         }
 
         .form-group {
@@ -49,17 +52,32 @@
         .form-group input:focus {
             border-color: var(--accent-blue);
         }
+
+        .side-logo {
+            height: 180px;
+            width: auto;
+            filter: drop-shadow(0 0 15px rgba(255, 255, 255, 0.1));
+        }
+
+        @media (max-width: 900px) {
+            .side-logo {
+                display: none;
+            }
+
+            .login-container {
+                gap: 0 !important;
+            }
+        }
     </style>
 </head>
 
 <body>
-    <div
-        style="display: flex; align-items: center; justify-content: center; gap: 80px; width: 100%; height: 100vh; padding: 20px;">
-        <img src="assets/images/logo_ofs.png" alt="Logo OFS Izquierda" class="fade-in"
-            style="height: 180px; width: auto; filter: drop-shadow(0 0 15px rgba(255,255,255,0.1));">
+    <div class="login-container"
+        style="display: flex; align-items: center; justify-content: center; gap: 80px; width: 100%; min-height: 100vh; padding: 20px; flex-wrap: wrap;">
+        <img src="assets/images/logo_ofs.png" alt="Logo OFS Izquierda" class="fade-in side-logo">
 
         <div class="login-card glass neon-border-purple fade-in" style="margin: 0; max-width: 450px;">
-            <img src="assets/images/logo_municipio.png" style="width: 250px; margin-bottom: 20px;">
+            <img src="assets/images/logo_municipio.png" style="width: 250px; margin-bottom: 20px; max-width: 100%;">
             <h2 style="margin-bottom: 30px; font-weight: 300; letter-spacing: 2px;">INICIAR SESIÓN</h2>
             <form id="login-form">
                 <div class="form-group">
@@ -79,8 +97,7 @@
             </form>
         </div>
 
-        <img src="assets/images/logo_ofs.png" alt="Logo OFS Derecha" class="fade-in"
-            style="height: 180px; width: auto; filter: drop-shadow(0 0 15px rgba(255,255,255,0.1));">
+        <img src="assets/images/logo_ofs.png" alt="Logo OFS Derecha" class="fade-in side-logo">
     </div>
 
     <script src="./js/config.js?v=2.1.0"></script>
@@ -104,7 +121,9 @@
             const success = await Auth.login(user, pass);
 
             if (success) {
-                window.location.href = 'index.html';
+                const params = new URLSearchParams(window.location.search);
+                const redirect = params.get('redirect');
+                window.location.href = redirect ? decodeURIComponent(redirect) : 'index.html';
             } else {
                 alert("Usuario o contraseña incorrectos");
                 btn.innerHTML = 'Entrar';
