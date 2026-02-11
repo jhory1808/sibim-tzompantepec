@@ -119,7 +119,7 @@ function handleRolePermissions() {
 
     // 2. Controladores de Acciones según Rol
     // Si el rol incluye 'usuario' (Solo lectura)
-    if (role.indexOf('usuario') !== -1) {
+    if (role.includes('usuario')) {
         const actionElements = document.querySelectorAll('.btn-delete, .btn-edit, .btn-add, #add-item-btn, .delete-btn, [data-action="admin"], .fa-pencil-alt, .fa-trash-alt, .fa-plus');
         actionElements.forEach(el => {
             const container = el.tagName === 'I' ? el.parentElement : el;
@@ -132,7 +132,7 @@ function handleRolePermissions() {
     }
 
     // Si el rol incluye 'capturista'
-    if (role.indexOf('capturista') !== -1) {
+    if (role.includes('capturista')) {
         const deleteActions = document.querySelectorAll('.btn-delete, .delete-btn, [data-action="delete"], .fa-trash-alt');
         deleteActions.forEach(el => {
             const container = el.tagName === 'I' ? el.parentElement : el;
@@ -144,7 +144,7 @@ function handleRolePermissions() {
         });
 
         // Esconder herramientas que el capturista no tiene en sus permisos explícitos
-        const adminTools = document.querySelectorAll('[href*="users.html"], [href*="updates.html"], [href*="config.html"], [data-action="admin"]');
+        const adminTools = document.querySelectorAll('[href*="users.html"], [href*="updates.html"], [href*="config.html"], [data-action="admin"], [data-tooltip="Configuración"]');
         adminTools.forEach(el => el.style.display = 'none');
     }
 

@@ -260,8 +260,8 @@
                 return;
             }
             const filtered = allItems.filter(i =>
-                (i.Codigo || i.id || '').toString().toLowerCase().includes(q) ||
-                (i.Nombre || '').toLowerCase().includes(q)
+                String(i.Codigo || i.id || '').toLowerCase().includes(q) ||
+                String(i.Nombre || '').toLowerCase().includes(q)
             );
             renderLabels(filtered);
         }

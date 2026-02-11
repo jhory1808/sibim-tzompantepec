@@ -148,10 +148,15 @@ const Auth = {
         if (permissions.includes('*')) return true;
 
         // Limpiamos el nombre de la página (ej: 'pages/reports.html' -> 'reports.html')
-        const cleanPage = pageName.split('/').pop().split('?')[0];
+        let cleanPage = pageName.split('/').pop().split('?')[0];
 
         // index.html es permitido para todos usualmente
-        if (cleanPage === 'index.html' || cleanPage === '') return true;
+        if (cleanPage === 'index.html' || cleanPage === '' || cleanPage === 'home.html') return true;
+
+        // Normalizamos: si no tiene extensión, asumimos .html (común en despliegues como Netlify/Vercel)
+        if (cleanPage && !cleanPage.includes('.')) {
+            cleanPage += '.html';
+        }
 
         return permissions.includes(cleanPage);
     }

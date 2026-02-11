@@ -72,7 +72,15 @@
             aspectRatio: 1.0,
             experimentalFeatures: {
                 useBarCodeDetectorIfSupported: true
-            }
+            },
+            // Soporte explícito para formatos comunes de códigos de barras
+            formatsToSupport: [
+                Html5QrcodeSupportedFormats.QR_CODE,
+                Html5QrcodeSupportedFormats.CODE_128,
+                Html5QrcodeSupportedFormats.CODE_39,
+                Html5QrcodeSupportedFormats.EAN_13,
+                Html5QrcodeSupportedFormats.EAN_8
+            ]
         };
 
         // Comenzar el escaneo con soporte EXPLÍCITO para formatos de barras
