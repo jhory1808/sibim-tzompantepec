@@ -74,7 +74,7 @@
         }
 
         .footer-left img {
-            height: 35px;
+            height: 45px;
         }
 
         .v-line {
@@ -84,15 +84,15 @@
         }
 
         .footer-text {
-            font-size: 0.55rem;
+            font-size: 0.65rem;
             font-weight: bold;
-            line-height: 1;
+            line-height: 1.1;
             color: #000;
         }
 
         .qr-canvas-small {
-            width: 55px;
-            height: 55px;
+            width: 80px;
+            height: 80px;
         }
 
         .select-all-btn {
@@ -220,11 +220,11 @@
                         <input type="checkbox" class="label-select" value="${code}" style="width: 18px; height: 18px; cursor:pointer;">
                     </div>
                     <div class="label-preview">
-                        <div class="label-heading" style="font-weight: 800; border-bottom: 2px solid #000; padding-bottom: 5px; margin-bottom: 5px; font-size: 0.9rem;">
+                        <div class="label-heading" style="font-weight: 800; border-bottom: 2px solid #000; padding-bottom: 5px; margin-bottom: 5px; font-size: 1.1rem;">
                             ESTADO DE TLAXCALA
                         </div>
-                        <div class="label-top" style="height: 45px; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;">${name}</div>
-                        <div class="label-mid" style="margin-top: 5px;">Código: <strong>${code}</strong></div>
+                        <div class="label-top" style="height: 60px; font-size: 1.1rem; font-weight: bold; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;">${name}</div>
+                        <div class="label-mid" style="margin-top: 5px; font-size:1rem;">Código: <strong>${code}</strong></div>
                         
                         <div class="label-footer">
                             <div class="footer-left">
@@ -245,8 +245,8 @@
                 const qrUrl = `${window.location.host.includes('localhost') ? 'https://sibimtzomp.netlify.app' : window.location.origin}/view.html?id=${code}`;
                 new QRCode(document.getElementById(`qr-${code}`), {
                     text: qrUrl,
-                    width: 50,
-                    height: 50,
+                    width: 75,
+                    height: 75,
                     correctLevel: QRCode.CorrectLevel.L
                 });
             });

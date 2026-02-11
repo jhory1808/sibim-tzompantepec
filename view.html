@@ -39,21 +39,14 @@
 <body class="theme-blue">
     <div class="view-card glass fade-in">
         <img src="assets/images/logo_municipio.png" style="max-width: 250px; margin-bottom: 30px;">
-        <h1 id="item-name">Cargando...</h1>
-        <p id="item-code" style="color: var(--accent-blue); font-weight: bold; font-size: 1.2rem;"></p>
+        <p id="item-code"
+            style="color: var(--accent-blue); font-weight: 800; font-size: 2rem; margin: 20px 0; letter-spacing: 2px;">
+        </p>
 
         <div class="data-grid">
-            <div class="data-item">
-                <label>Marca / Modelo</label>
-                <span id="item-brand">---</span>
-            </div>
-            <div class="data-item">
-                <label>Número de Serie</label>
-                <span id="item-serial">---</span>
-            </div>
-            <div class="data-item">
-                <label>Departamento</label>
-                <span id="item-dept">---</span>
+            <div class="data-item" style="grid-column: span 2;">
+                <label>Nombre del Artículo</label>
+                <span id="item-name" style="color: #fff; font-size: 1.4rem;">Cargando...</span>
             </div>
             <div class="data-item">
                 <label>Responsable</label>
@@ -64,8 +57,12 @@
                 <span id="item-status">---</span>
             </div>
             <div class="data-item">
-                <label>Categoría</label>
-                <span id="item-cat">---</span>
+                <label>Departamento</label>
+                <span id="item-dept">---</span>
+            </div>
+            <div class="data-item">
+                <label>Marca / Modelo</label>
+                <span id="item-brand">---</span>
             </div>
         </div>
 
@@ -95,14 +92,12 @@
 
             const item = await API.getItemById(id);
             if (item) {
-                document.getElementById('item-name').textContent = item.nombre || item.descripcion;
-                document.getElementById('item-code').textContent = item.codigo || id;
-                document.getElementById('item-brand').textContent = `${item.marca || ''} ${item.modelo || ''}`;
-                document.getElementById('item-serial').textContent = item.serie || item.numero_serie || 'N/A';
-                document.getElementById('item-dept').textContent = item.departamento || 'Sin Asignar';
-                document.getElementById('item-resp').textContent = item.responsable || 'No asignado';
-                document.getElementById('item-status').textContent = item.estado || 'Activo';
-                document.getElementById('item-cat').textContent = item.categoria || 'General';
+                document.getElementById('item-name').textContent = item.Nombre || item.nombre || item.descripcion || '---';
+                document.getElementById('item-code').textContent = item.Codigo || item.codigo || id;
+                document.getElementById('item-brand').textContent = `${item.Marca || item.marca || ''} ${item.Modelo || item.modelo || ''}`;
+                document.getElementById('item-dept').textContent = item.Departamento || item.departamento || 'Sin Asignar';
+                document.getElementById('item-resp').textContent = item.Responsable || item.responsable || 'No asignado';
+                document.getElementById('item-status').textContent = item.Estado || item.estado || 'Activo';
             } else {
                 document.getElementById('item-name').textContent = "Activo no encontrado";
             }
