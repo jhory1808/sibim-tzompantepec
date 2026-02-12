@@ -189,18 +189,19 @@ async function loadDashboardData() {
         const { items, stats } = result;
         console.log(`[DASHBOARD] ${items.length} artículos obtenidos.`);
 
-        // Update Stats Cards
-        const totalCount = stats.total || items.length;
-        const deptoCount = stats.departamentos || new Set(items.map(i => i.Departamento || i.departamento)).size;
-        const maintenanceCount = items.filter(i => (i.Estado || i.estado || '').toUpperCase().includes('MANTENIMIENTO')).length;
+        // Update Stats Cards with ID mapping and remove skeleton
+        const updateStat = (id, value) => {
+            const el = document.getElementById(id);
+            if (el) {
+                el.textContent = value;
+                el.classList.remove('skeleton');
+            }
+        };
 
-        const cards = document.querySelectorAll('.stat-card .value');
-        if (cards.length >= 4) {
-            cards[0].textContent = totalCount;
-            cards[1].textContent = deptoCount;
-            cards[2].textContent = stats.movimientos || 0;
-            cards[3].textContent = maintenanceCount;
-        }
+        updateStat('stat-total', stats.total || items.length);
+        updateStat('stat-depts', stats.departamentos || new Set(items.map(i => i.Departamento || i.departamento)).size);
+        updateStat('stat-movements', stats.movimientos || 0);
+        updateStat('stat-maint', items.filter(i => (i.Estado || i.estado || '').toUpperCase().includes('MANTENIMIENTO')).length);
 
         // Build Chart Data from Real Items
         const deptCounts = {};

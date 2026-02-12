@@ -94,9 +94,9 @@
                 style="border-top: 3px solid #00d2ff; box-shadow: 0 0 20px rgba(0, 210, 255, 0.15);">
                 <i class="fas fa-boxes"
                     style="font-size: 2.5rem; color: #00d2ff; margin-bottom: 15px; filter: drop-shadow(0 0 10px rgba(0, 210, 255, 0.5));"></i>
-                <div class="value"
-                    style="font-size: 3.5rem; margin-bottom: 5px; font-weight: 900; background: linear-gradient(135deg, #00d2ff, #0066ff); background-clip: text; -webkit-background-clip: text; -webkit-text-fill-color: transparent; filter: drop-shadow(0 0 5px rgba(0, 210, 255, 0.3));">
-                    0</div>
+                <div id="stat-total" class="value skeleton"
+                    style="font-size: 3.5rem; margin-bottom: 5px; font-weight: 900; background: linear-gradient(135deg, #00d2ff, #0066ff); background-clip: text; -webkit-background-clip: text; -webkit-text-fill-color: transparent; filter: drop-shadow(0 0 5px rgba(0, 210, 255, 0.3)); min-width: 80px; height: 60px;">
+                </div>
                 <div style="font-weight: bold; color: white; font-size: 1.1rem; letter-spacing: 1px;">Artículos Totales
                 </div>
                 <div style="color: #00d2ff; font-size: 0.85rem; margin-top: 5px; opacity: 0.8;">Patrimonio Registrado
@@ -106,9 +106,9 @@
                 style="border-top: 3px solid #9b59b6; box-shadow: 0 0 20px rgba(155, 89, 182, 0.15);">
                 <i class="fas fa-building"
                     style="font-size: 2.5rem; color: #9b59b6; margin-bottom: 15px; filter: drop-shadow(0 0 10px rgba(155, 89, 182, 0.5));"></i>
-                <div class="value"
-                    style="font-size: 3.5rem; margin-bottom: 5px; font-weight: 900; background: linear-gradient(135deg, #9b59b6, #8e44ad); background-clip: text; -webkit-background-clip: text; -webkit-text-fill-color: transparent; filter: drop-shadow(0 0 5px rgba(155, 89, 182, 0.3));">
-                    0</div>
+                <div id="stat-depts" class="value skeleton"
+                    style="font-size: 3.5rem; margin-bottom: 5px; font-weight: 900; background: linear-gradient(135deg, #9b59b6, #8e44ad); background-clip: text; -webkit-background-clip: text; -webkit-text-fill-color: transparent; filter: drop-shadow(0 0 5px rgba(155, 89, 182, 0.3)); min-width: 80px; height: 60px;">
+                </div>
                 <div style="font-weight: bold; color: white; font-size: 1.1rem; letter-spacing: 1px;">Departamentos
                 </div>
                 <div style="color: #9b59b6; font-size: 0.85rem; margin-top: 5px; opacity: 0.8;">Áreas Administrativas
@@ -118,9 +118,9 @@
                 style="border-top: 3px solid #2ecc71; box-shadow: 0 0 20px rgba(46, 204, 113, 0.15);">
                 <i class="fas fa-sync"
                     style="font-size: 2.5rem; color: #2ecc71; margin-bottom: 15px; filter: drop-shadow(0 0 10px rgba(46, 204, 113, 0.5));"></i>
-                <div class="value"
-                    style="font-size: 3.5rem; margin-bottom: 5px; font-weight: 900; background: linear-gradient(135deg, #2ecc71, #27ae60); background-clip: text; -webkit-background-clip: text; -webkit-text-fill-color: transparent; filter: drop-shadow(0 0 5px rgba(46, 204, 113, 0.3));">
-                    0</div>
+                <div id="stat-movements" class="value skeleton"
+                    style="font-size: 3.5rem; margin-bottom: 5px; font-weight: 900; background: linear-gradient(135deg, #2ecc71, #27ae60); background-clip: text; -webkit-background-clip: text; -webkit-text-fill-color: transparent; filter: drop-shadow(0 0 5px rgba(46, 204, 113, 0.3)); min-width: 80px; height: 60px;">
+                </div>
                 <div style="font-weight: bold; color: white; font-size: 1.1rem; letter-spacing: 1px;">Movimientos</div>
                 <div style="color: #2ecc71; font-size: 0.85rem; margin-top: 5px; opacity: 0.8;">Actividad Mensual</div>
             </div>
@@ -128,9 +128,9 @@
                 style="border-top: 3px solid #f1c40f; box-shadow: 0 0 20px rgba(241, 196, 15, 0.15);">
                 <i class="fas fa-exclamation-triangle"
                     style="font-size: 2.5rem; color: #f1c40f; margin-bottom: 15px; filter: drop-shadow(0 0 10px rgba(241, 196, 15, 0.5));"></i>
-                <div class="value"
-                    style="font-size: 3.5rem; margin-bottom: 5px; font-weight: 900; background: linear-gradient(135deg, #f1c40f, #f39c12); background-clip: text; -webkit-background-clip: text; -webkit-text-fill-color: transparent; filter: drop-shadow(0 0 5px rgba(241, 196, 15, 0.3));">
-                    0</div>
+                <div id="stat-maint" class="value skeleton"
+                    style="font-size: 3.5rem; margin-bottom: 5px; font-weight: 900; background: linear-gradient(135deg, #f1c40f, #f39c12); background-clip: text; -webkit-background-clip: text; -webkit-text-fill-color: transparent; filter: drop-shadow(0 0 5px rgba(241, 196, 15, 0.3)); min-width: 80px; height: 60px;">
+                </div>
                 <div style="font-weight: bold; color: white; font-size: 1.1rem; letter-spacing: 1px;">Equipos en Crítico
                 </div>
                 <div style="color: #f1c40f; font-size: 0.85rem; margin-top: 5px; opacity: 0.8;">Requieren Mantenimiento
@@ -238,11 +238,47 @@
     <script src="./js/updates-manager.js?v=2.1.0"></script>
     <script src="./js/app.js?v=2.1.0"></script>
 
-    <!-- Version Indicator -->
-    <div
-        style="position: fixed; bottom: 10px; right: 10px; font-size: 0.6rem; color: rgba(255,255,255,0.2); pointer-events: none;">
-        SIBIM TZOMP v2.1.0
-    </div>
+    <!-- Footer Profesional -->
+    <footer
+        style="margin-top: 50px; padding: 40px 5%; border-top: 1px solid rgba(255,255,255,0.05); text-align: center; color: var(--text-secondary);">
+        <div style="margin-bottom: 20px;">
+            <img src="assets/images/logo_municipio.png" style="height: 40px; opacity: 0.5; filter: grayscale(1);">
+        </div>
+        <p style="font-size: 0.85rem; letter-spacing: 1px;">© 2024 - 2027 MUNICIPIO DE TZOMPANTEPEC | SISTEMA SIBIM
+            v2.1.0</p>
+        <p style="font-size: 0.7rem; margin-top: 10px; opacity: 0.5;">Plataforma desarrollada por Sistemas C2 para la
+            gestión patrimonial de vanguardia.</p>
+        <div style="margin-top: 25px;">
+            <button onclick="location.reload(true)" class="btn glass"
+                style="padding: 8px 15px; font-size: 0.7rem; border-radius: 50px;">
+                <i class="fas fa-sync"></i> ACTUALIZAR SISTEMA
+            </button>
+        </div>
+    </footer>
+
+    <!-- Mobile Bottom Navigation -->
+    <nav class="mobile-bottom-nav">
+        <a href="index.html" class="mobile-nav-item active">
+            <i class="fas fa-th-large"></i>
+            <span>Dashboard</span>
+        </a>
+        <a href="pages/inventory.html" class="mobile-nav-item">
+            <i class="fas fa-boxes"></i>
+            <span>Inven.</span>
+        </a>
+        <a href="pages/scanner.html" class="mobile-nav-item">
+            <i class="fas fa-qrcode"></i>
+            <span>Escáner</span>
+        </a>
+        <a href="pages/transactions.html" class="mobile-nav-item">
+            <i class="fas fa-exchange-alt"></i>
+            <span>Transac.</span>
+        </a>
+        <a href="pages/reports.html" class="mobile-nav-item">
+            <i class="fas fa-file-pdf"></i>
+            <span>Repo.</span>
+        </a>
+    </nav>
 </body>
 
 </html>

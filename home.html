@@ -449,9 +449,21 @@
         </p>
     </section>
 
-    <footer>
+    <footer
+        style="padding: 60px 5%; text-align: center; border-top: 1px solid rgba(255, 255, 255, 0.05); color: var(--text-secondary);">
         <img src="assets/images/logo_municipio.png" class="footer-logo" alt="Logo Municipio">
-        <p class="copyright">© 2024 - 2027 H. Ayuntamiento de Tzompantepec | Depto. de Sistemas C2</p>
+        <p class="copyright" style="font-size: 0.9rem; letter-spacing: 1px; margin-bottom: 20px;">
+            © 2024 - 2027 MUNICIPIO DE TZOMPANTEPEC | SISTEMA SIBIM v2.1.0
+        </p>
+        <div style="display: flex; justify-content: center; gap: 20px; font-size: 0.8rem; margin-bottom: 30px;">
+            <a href="login.html" style="color: var(--text-secondary); text-decoration: none;">Acceso Administrativo</a>
+            <a href="pages/scanner.html" style="color: var(--text-secondary); text-decoration: none;">Consulta QR</a>
+            <a href="#inicio" style="color: var(--text-secondary); text-decoration: none;">Volver Arriba</a>
+        </div>
+        <button onclick="location.reload(true)" class="btn glass"
+            style="padding: 10px 25px; border-radius: 50px; font-size: 0.75rem; opacity: 0.6;">
+            <i class="fas fa-sync"></i> ACTUALIZAR SISTEMA
+        </button>
     </footer>
 
     <script src="js/config.js?v=2.1.0"></script>
