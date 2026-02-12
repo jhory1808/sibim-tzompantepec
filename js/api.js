@@ -281,5 +281,26 @@ const API = {
             console.error("Error creating department:", error);
             return { success: false, error };
         }
+    },
+
+    async registerMovement(movementData) {
+        try {
+            Logger.log('Registrando nuevo movimiento en el sistema...');
+            const response = await fetch(CONFIG.scriptUrl, {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    action: 'registerMovement',
+                    data: movementData
+                })
+            });
+            // Invalidamos el caché de movimientos
+            localStorage.removeItem('sibim_cache_timestamp');
+            return { success: true };
+        } catch (error) {
+            Logger.error('Error al registrar movimiento:', error);
+            return { success: false, error };
+        }
     }
 };

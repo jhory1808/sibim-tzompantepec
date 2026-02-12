@@ -335,7 +335,6 @@
 
                 const user = Auth.getCurrentUser();
                 const movementData = {
-                    action: 'registerMovement',
                     tipo: type,
                     itemId: itemId,
                     usuario: user ? user.username : 'Sistema',
@@ -344,17 +343,15 @@
                     destino: type.includes('TRASLADO') ? dest : '---'
                 };
 
-                // Enviamos al backend vía api.js generic method if exists, or fetch directly
-                // Using a generic approach since we don't have a specific registerMovement in api.js yet
-                const response = await fetch(CONFIG.scriptUrl, {
-                    method: 'POST',
-                    mode: 'no-cors',
-                    body: JSON.stringify(movementData)
-                });
+                const result = await API.registerMovement(movementData);
 
-                UI.showToast("Movimiento registrado con éxito", "success");
-                closeModal();
-                setTimeout(() => location.reload(), 1500);
+                if (result.success) {
+                    UI.showToast("Movimiento registrado con éxito", "success");
+                    closeModal();
+                    setTimeout(() => location.reload(), 1500);
+                } else {
+                    throw new Error("Error en la respuesta del servidor");
+                }
             } catch (err) {
                 console.error("Error registering movement", err);
                 UI.showToast("Error al registrar movimiento", "error");

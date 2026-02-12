@@ -130,11 +130,13 @@
     <header class="no-print"
         style="height: 100px; display: flex; justify-content: space-between; align-items: center; padding: 0 5%;">
         <div class="logo" style="display: flex; align-items: center; gap: 20px;">
-            <img src="../assets/images/logo_municipio.png" style="height: 70px;">
+            <img src="../assets/images/logo_municipio.png" style="height: 70px;"
+                onerror="this.src='/assets/images/logo_municipio.png'">
             <span style="font-size: 1.8rem; font-weight: 800; color: #00d2ff; letter-spacing: 2px;">SIBIMTZOMP</span>
         </div>
         <div style="display: flex; align-items: center; gap: 25px;">
-            <img src="../assets/images/escudo.png" style="height: 60px;" alt="Escudo Tzompantepec">
+            <img id="escudo-header" src="../assets/images/escudo.png" style="height: 60px;" alt="Escudo Tzompantepec"
+                onerror="console.warn('Escudo no encontrado')">
             <a href="../index.html" class="btn btn-outline"
                 style="border-radius: 50px; padding: 10px 30px; font-weight: bold; border-color: #00d2ff; color: #00d2ff;">VOLVER</a>
         </div>
@@ -153,9 +155,19 @@
     <main class="no-print" style="padding: 20px 5%;">
         <!-- Botones de Generación de Reportes -->
         <div class="glass" style="padding: 30px; border-radius: 20px; margin-bottom: 30px;">
-            <h3 style="margin-bottom: 25px; color: #00d2ff; font-size: 1.3rem;">
-                <i class="fas fa-file-alt"></i> GENERAR REPORTES PROFESIONALES
-            </h3>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
+                <h3 style="color: #00d2ff; font-size: 1.3rem;">
+                    <i class="fas fa-file-alt"></i> GENERAR REPORTES PROFESIONALES
+                </h3>
+                <div id="export-controls" style="display: none; gap: 10px;">
+                    <button class="btn" onclick="exportFormat('PDF')" style="background: #e74c3c; color: white;">
+                        <i class="fas fa-file-pdf"></i> DESCARGAR PDF
+                    </button>
+                    <button class="btn" onclick="exportFormat('Excel')" style="background: #27ae60; color: white;">
+                        <i class="fas fa-file-excel"></i> DESCARGAR EXCEL
+                    </button>
+                </div>
+            </div>
             <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px;">
                 <button class="btn" style="background: #3498db; color: white; padding: 15px; font-weight: bold;"
                     onclick="generateProfessionalReport('Inventario')">
@@ -182,14 +194,6 @@
                     <i class="fas fa-chart-pie"></i> RESUMEN EJECUTIVO
                 </button>
             </div>
-            <div style="margin-top: 20px; display: flex; gap: 10px; justify-content: center;">
-                <button class="btn glass" onclick="exportFormat('PDF')" style="padding: 10px 20px;">
-                    <i class="fas fa-file-pdf"></i> EXPORTAR PDF
-                </button>
-                <button class="btn glass" onclick="exportFormat('Excel')" style="padding: 10px 20px;">
-                    <i class="fas fa-file-excel"></i> EXPORTAR EXCEL
-                </button>
-            </div>
         </div>
     </main>
 
@@ -204,7 +208,7 @@
                     2024 - 2027</div>
                 <div style="font-size: 0.7rem; color: #666; margin-top: 5px;">"Tzompantepec: Lugar de los Arcos"</div>
             </div>
-            <img src="../assets/images/escudo.png" style="height: 90px;">
+            <img src="../assets/images/escudo.png" style="height: 90px;" onerror="this.style.display='none'">
         </div>
 
         <h2 class="report-title" id="report-title-text">Cargando Reporte...</h2>
@@ -324,6 +328,9 @@
 
                 // Renderizar tabla
                 renderProfessionalTable(data, type);
+
+                // Mostrar controles de exportación
+                document.getElementById('export-controls').style.display = 'flex';
 
                 window.scrollTo({ top: printable.offsetTop, behavior: 'smooth' });
                 UI.showToast(`Reporte profesional de ${type} generado exitosamente`, "success");
