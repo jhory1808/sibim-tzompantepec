@@ -234,10 +234,34 @@
             </table>
         </div>
 
+        <!-- Seccion de Firmas -->
+        <div id="signature-section"
+            style="margin-top: 80px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 40px; text-align: center;">
+            <div style="border-top: 1px solid #333; padding-top: 10px;">
+                <p style="margin:0; font-weight: bold; font-size: 0.8rem;">ELABORÓ</p>
+                <div style="height: 60px;"></div>
+                <p style="margin:0; font-size: 0.75rem;"><span id="elaboro-name">__________________________</span></p>
+                <p style="margin:0; font-size: 0.65rem; color: #666;">Encargado de Inventarios</p>
+            </div>
+            <div style="border-top: 1px solid #333; padding-top: 10px;">
+                <p style="margin:0; font-weight: bold; font-size: 0.8rem;">REVISÓ</p>
+                <div style="height: 60px;"></div>
+                <p style="margin:0; font-size: 0.75rem;">__________________________</p>
+                <p style="margin:0; font-size: 0.65rem; color: #666;">Director de Área</p>
+            </div>
+            <div style="border-top: 1px solid #333; padding-top: 10px;">
+                <p style="margin:0; font-weight: bold; font-size: 0.8rem;">AUTORIZÓ</p>
+                <div style="height: 60px;"></div>
+                <p style="margin:0; font-size: 0.75rem;">__________________________</p>
+                <p style="margin:0; font-size: 0.65rem; color: #666;">Secretario del Ayuntamiento</p>
+            </div>
+        </div>
+
         <div
-            style="text-align: center; margin-top: 50px; font-size: 0.75rem; color: #666; border-top: 1px solid #eee; padding-top: 20px;">
+            style="text-align: center; margin-top: 50px; font-size: 0.7rem; color: #666; border-top: 1px solid #eee; padding-top: 20px;">
             <p>Av. Zaragoza no. 1, San Salvador Tzompantepec, Col. Centro, C.P. 90490 | Tel: 241-4152315</p>
-            <p><strong>DOCUMENTO GENERADO POR SISTEMA SIBIM</strong></p>
+            <p><strong>SIBIM v2.1.0 - SISTEMA INTEGRAL DE BIENES INMUEBLES Y MUEBLES</strong></p>
+            <p style="margin-top: 5px; opacity: 0.5;">ID de Validación: <span id="verification-code">---</span></p>
         </div>
     </div>
 
@@ -258,7 +282,11 @@
                 day: 'numeric'
             });
             const user = Auth.getCurrentUser();
-            if (user) document.getElementById('report-user').textContent = user.username;
+            if (user) {
+                document.getElementById('report-user').textContent = user.username.toUpperCase();
+                document.getElementById('elaboro-name').textContent = user.username.toUpperCase();
+            }
+            document.getElementById('verification-code').textContent = Math.random().toString(36).substr(2, 9).toUpperCase();
         });
 
         async function generateProfessionalReport(type) {
