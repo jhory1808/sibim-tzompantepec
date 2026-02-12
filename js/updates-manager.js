@@ -7,18 +7,29 @@ const UpdatesManager = {
     },
 
     async searchItem() {
-        const id = document.getElementById('inventory-id-search').value;
-        if (!id) return alert('Por favor ingrese un ID');
+        const query = document.getElementById('inventory-id-search').value.trim().toLowerCase();
+        if (!query) return UI.showToast('Por favor ingrese un término de búsqueda', 'warning');
 
         // Show loading state
         const resultsArea = document.getElementById('search-results');
-        resultsArea.innerHTML = '<div class="loader">Buscando...</div>';
+        resultsArea.innerHTML = '<div style="padding:20px; text-align:center;"><i class="fas fa-spinner fa-spin"></i> Buscando...</div>';
 
-        const item = await API.getItemById(id);
-        if (item) {
-            this.renderEditForm(item);
-        } else {
-            resultsArea.innerHTML = '<p>No se encontró el artículo.</p>';
+        try {
+            const items = await API.fetchItems();
+            const found = items.find(i => {
+                const code = (i.id || i.ID || i.codigo || i.Codigo || '').toString().toLowerCase();
+                const name = (i.descripcion || i.nombre || i.Articulo || '').toString().toLowerCase();
+                const serial = (i.serie || i.Numero_Serie || '').toString().toLowerCase();
+                return code === query || code.includes(query) || name.includes(query) || serial.includes(query);
+            });
+
+            if (found) {
+                this.renderEditForm(found);
+            } else {
+                resultsArea.innerHTML = '<p style="color:var(--text-secondary); padding:20px;">No se encontró el artículo que coincida con la búsqueda.</p>';
+            }
+        } catch (e) {
+            resultsArea.innerHTML = '<p style="color:#e74c3c;">Error al conectar con la base de datos.</p>';
         }
     },
 
@@ -50,10 +61,12 @@ const UpdatesManager = {
             e.preventDefault();
             const formData = new FormData(e.target);
             const updatedData = {
-                id: item.id || item.codigo,
+                id: item.id || item.codigo || item.Codigo,
                 descripcion: formData.get('descripcion'),
                 estado: formData.get('estado'),
-                departamento: formData.get('departamento')
+                departamento: formData.get('departamento'),
+                "Codigo QR": `${window.location.host.includes('localhost') ? 'https://sibimtzomp.netlify.app' : window.location.origin}/view.html?id=${item.id || item.codigo || item.Codigo}`,
+                "Observaciones": formData.get('descripcion') // Use description as fallbak if no obs field
             };
 
             const result = await API.updateItem(updatedData);
