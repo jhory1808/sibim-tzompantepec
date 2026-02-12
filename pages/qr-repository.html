@@ -167,7 +167,7 @@
                 card.appendChild(btn);
                 container.appendChild(card);
 
-                const url = `${window.location.host.includes('localhost') ? 'https://sibimtzomp.netlify.app' : window.location.origin}/view.html?id=${code}`;
+                const url = `${window.location.origin}/view.html?id=${code}`;
                 new QRCode(qrDiv, {
                     text: url,
                     width: 100,

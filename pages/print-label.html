@@ -181,7 +181,7 @@
         document.getElementById('label-desc').textContent = desc || "SIN DESCRIPCIÓN";
         document.getElementById('label-code').textContent = "Código: " + (code || "0000");
 
-        const qrContent = `${window.location.host.includes('localhost') ? 'https://sibimtzomp.netlify.app' : window.location.origin}/view.html?id=${code || "0000"}`;
+        const qrContent = `${window.location.origin}/view.html?id=${code || "0000"}`;
 
         new QRCode(document.getElementById("label-qr"), {
             text: qrContent,
