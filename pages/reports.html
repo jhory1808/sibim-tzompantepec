@@ -450,71 +450,196 @@
 
             printable.style.display = 'block';
             titleElem.textContent = `REPORTE DE ${type.toUpperCase()}`;
-            tableBody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:20px;"><i class="fas fa-spinner fa-spin"></i> Cargando datos...</td></tr>';
+            tableBody.innerHTML = '<tr><td colspan="10" style="text-align:center; padding:20px;"><i class="fas fa-spinner fa-spin"></i> Cargando datos...</td></tr>';
 
             try {
-                const allData = await API.fetchItems();
-                let filtered = [...allData];
+                let allData, filtered;
 
-                // Aplicar filtros específicos según el tipo de reporte
-                if (type === 'Mantenimiento') {
-                    filtered = filtered.filter(i => (i.Estado || i.estado || '').toUpperCase().includes('MANTENIMIENTO'));
-                } else if (type === 'Estado') {
-                    const statusFilter = document.getElementById('filter-status').value;
-                    if (statusFilter && statusFilter !== 'Todos los estados') {
-                        filtered = filtered.filter(i => (i.Estado || i.estado || '').toUpperCase() === statusFilter.toUpperCase());
-                    }
-                } else if (type === 'Departamentos') {
-                    const deptFilter = document.getElementById('filter-dept').value;
-                    if (deptFilter && deptFilter !== 'Todos los departamentos') {
-                        filtered = filtered.filter(i => (i.Departamento || i.departamento || '') === deptFilter);
+                // Cargar datos según el tipo de reporte
+                if (type === 'Movimientos') {
+                    allData = await API.getMovements();
+                    filtered = [...allData];
+                } else {
+                    allData = await API.fetchItems();
+                    filtered = [...allData];
+
+                    // Aplicar filtros específicos según el tipo de reporte
+                    if (type === 'Mantenimiento') {
+                        filtered = filtered.filter(i => (i.Estado || i.estado || '').toUpperCase().includes('MANTENIMIENTO'));
+                    } else if (type === 'Estado') {
+                        const statusFilter = document.getElementById('filter-status').value;
+                        if (statusFilter && statusFilter !== 'Todos los estados') {
+                            filtered = filtered.filter(i => (i.Estado || i.estado || '').toUpperCase() === statusFilter.toUpperCase());
+                        }
+                    } else if (type === 'Departamentos') {
+                        const deptFilter = document.getElementById('filter-dept').value;
+                        if (deptFilter && deptFilter !== 'Todos los departamentos') {
+                            filtered = filtered.filter(i => (i.Departamento || i.departamento || '') === deptFilter);
+                        }
                     }
                 }
 
                 currentReportData = filtered;
-                renderReportTable(filtered);
+                renderReportTable(filtered, type);
                 window.scrollTo({ top: printable.offsetTop, behavior: 'smooth' });
                 UI.showToast(`Reporte de ${type} generado (${filtered.length} registros)`, "success");
             } catch (err) {
                 Logger.error('Error al generar reporte:', err);
-                tableBody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:red; padding:20px;">Error: ${err.message}</td></tr>`;
+                tableBody.innerHTML = `<tr><td colspan="10" style="text-align:center; color:red; padding:20px;">Error: ${err.message}</td></tr>`;
                 UI.showToast("Error al generar reporte", "error");
             }
         }
 
-        function renderReportTable(data) {
+        function renderReportTable(data, type) {
             const tableHead = document.getElementById('table-head');
             const tableBody = document.getElementById('table-body');
 
-            const headers = ['Código', 'Descripción', 'Marca/Modelo', 'Serie', 'Departamento', 'Estado'];
-            tableHead.innerHTML = `<tr>${headers.map(h => `<th>${h}</th>`).join('')}</tr>`;
+            let headers, rows;
 
-            if (data.length === 0) {
-                tableBody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:20px;">No se encontraron artículos con los filtros seleccionados.</td></tr>';
-                return;
+            // Definir columnas y contenido según el tipo de reporte
+            switch (type) {
+                case 'Movimientos':
+                    headers = ['ID', 'Fecha', 'Usuario', 'Acción', 'Tipo', 'Detalles'];
+                    tableHead.innerHTML = `<tr>${headers.map(h => `<th>${h}</th>`).join('')}</tr>`;
+
+                    if (data.length === 0) {
+                        tableBody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:20px;">No se encontraron movimientos.</td></tr>';
+                        return;
+                    }
+
+                    tableBody.innerHTML = data.map(m => `
+                        <tr>
+                            <td style="font-weight:bold;">${m.ID || m.id || '---'}</td>
+                            <td>${m.Fecha || m.fecha || '---'}</td>
+                            <td>${m.Usuario || m.usuario || '---'}</td>
+                            <td>${m.Accion || m.accion || '---'}</td>
+                            <td><span style="padding:3px 8px; border-radius:4px; background:#f0f0f0; font-size:0.7rem; font-weight:bold;">${m.Tipo || m.tipo || '---'}</span></td>
+                            <td style="font-size:0.75rem;">${m.Detalles || m.detalles || '---'}</td>
+                        </tr>
+                    `).join('');
+                    break;
+
+                case 'Departamentos':
+                    headers = ['Departamento', 'Código', 'Artículo', 'Responsable', 'Estado', 'Valor'];
+                    tableHead.innerHTML = `<tr>${headers.map(h => `<th>${h}</th>`).join('')}</tr>`;
+
+                    if (data.length === 0) {
+                        tableBody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:20px;">No se encontraron artículos.</td></tr>';
+                        return;
+                    }
+
+                    tableBody.innerHTML = data.map(item => {
+                        const dept = item.Departamento || item.departamento || 'S/A';
+                        const code = item.Codigo || item.codigo || item.id || item.ID || 'S/C';
+                        const desc = item.Nombre || item.nombre || item.Descripción || item.descripcion || item.Articulo || '---';
+                        const resp = item.Responsable || item.responsable || 'S/R';
+                        const status = (item.Estado || item.estado || 'ACTIVO').toUpperCase();
+                        const value = item.Valor || item.valor || '0';
+
+                        return `
+                            <tr>
+                                <td style="color:#2ecc71; font-weight:bold;">${dept}</td>
+                                <td style="font-weight:bold; color:#0066cc;">${code}</td>
+                                <td style="text-transform:uppercase;">${desc}</td>
+                                <td>${resp}</td>
+                                <td><span style="padding:3px 8px; border-radius:4px; background:#f0f0f0; font-size:0.7rem; font-weight:bold;">${status}</span></td>
+                                <td style="text-align:right;">$${parseFloat(value).toLocaleString()}</td>
+                            </tr>
+                        `;
+                    }).join('');
+                    break;
+
+                case 'Estado':
+                    headers = ['Estado', 'Código', 'Artículo', 'Departamento', 'Fecha Adquisición', 'Observaciones'];
+                    tableHead.innerHTML = `<tr>${headers.map(h => `<th>${h}</th>`).join('')}</tr>`;
+
+                    if (data.length === 0) {
+                        tableBody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:20px;">No se encontraron artículos con este estado.</td></tr>';
+                        return;
+                    }
+
+                    tableBody.innerHTML = data.map(item => {
+                        const status = (item.Estado || item.estado || 'ACTIVO').toUpperCase();
+                        const code = item.Codigo || item.codigo || item.id || item.ID || 'S/C';
+                        const desc = item.Nombre || item.nombre || item.Descripción || item.descripcion || item.Articulo || '---';
+                        const dept = item.Departamento || item.departamento || 'S/A';
+                        const fecha = item.Fecha_Adquisicion || item.fecha_adquisicion || item.Fecha || '---';
+                        const obs = item.Observaciones || item.observaciones || '---';
+
+                        return `
+                            <tr>
+                                <td><span style="padding:3px 8px; border-radius:4px; background:#f0f0f0; font-size:0.7rem; font-weight:bold;">${status}</span></td>
+                                <td style="font-weight:bold; color:#0066cc;">${code}</td>
+                                <td style="text-transform:uppercase;">${desc}</td>
+                                <td style="color:#2ecc71;">${dept}</td>
+                                <td>${fecha}</td>
+                                <td style="font-size:0.75rem;">${obs}</td>
+                            </tr>
+                        `;
+                    }).join('');
+                    break;
+
+                case 'Mantenimiento':
+                    headers = ['Código', 'Artículo', 'Departamento', 'Estado', 'Responsable', 'Observaciones'];
+                    tableHead.innerHTML = `<tr>${headers.map(h => `<th>${h}</th>`).join('')}</tr>`;
+
+                    if (data.length === 0) {
+                        tableBody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:20px;">No hay artículos en mantenimiento.</td></tr>';
+                        return;
+                    }
+
+                    tableBody.innerHTML = data.map(item => {
+                        const code = item.Codigo || item.codigo || item.id || item.ID || 'S/C';
+                        const desc = item.Nombre || item.nombre || item.Descripción || item.descripcion || item.Articulo || '---';
+                        const dept = item.Departamento || item.departamento || 'S/A';
+                        const status = (item.Estado || item.estado || 'MANTENIMIENTO').toUpperCase();
+                        const resp = item.Responsable || item.responsable || 'S/R';
+                        const obs = item.Observaciones || item.observaciones || 'Requiere revisión';
+
+                        return `
+                            <tr>
+                                <td style="font-weight:bold; color:#0066cc;">${code}</td>
+                                <td style="text-transform:uppercase;">${desc}</td>
+                                <td style="color:#2ecc71;">${dept}</td>
+                                <td><span style="padding:3px 8px; border-radius:4px; background:#f39c12; color:white; font-size:0.7rem; font-weight:bold;">${status}</span></td>
+                                <td>${resp}</td>
+                                <td style="font-size:0.75rem; color:#e74c3c;">${obs}</td>
+                            </tr>
+                        `;
+                    }).join('');
+                    break;
+
+                default: // 'Inventario'
+                    headers = ['Código', 'Descripción', 'Marca/Modelo', 'Serie', 'Departamento', 'Estado'];
+                    tableHead.innerHTML = `<tr>${headers.map(h => `<th>${h}</th>`).join('')}</tr>`;
+
+                    if (data.length === 0) {
+                        tableBody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:20px;">No se encontraron artículos con los filtros seleccionados.</td></tr>';
+                        return;
+                    }
+
+                    tableBody.innerHTML = data.map(item => {
+                        const code = item.Codigo || item.codigo || item.id || item.ID || 'S/C';
+                        const desc = item.Nombre || item.nombre || item.Descripción || item.descripcion || item.Articulo || '---';
+                        const marca = item.Marca || item.marca || 'S/D';
+                        const modelo = item.Modelo || item.modelo || 'S/D';
+                        const brandModel = `${marca} ${modelo}`.trim();
+                        const serial = item.Serie || item.serie || item['Numero de Serie'] || item.Numero_Serie || 'S/N';
+                        const dept = item.Departamento || item.departamento || 'S/A';
+                        const status = (item.Estado || item.estado || 'ACTIVO').toUpperCase();
+
+                        return `
+                            <tr>
+                                <td style="font-weight:bold; color:#0066cc;">${code}</td>
+                                <td style="text-transform:uppercase;">${desc}</td>
+                                <td>${brandModel}</td>
+                                <td>${serial}</td>
+                                <td style="color:#2ecc71;">${dept}</td>
+                                <td><span style="padding:3px 8px; border-radius:4px; background:#f0f0f0; font-size:0.7rem; font-weight:bold;">${status}</span></td>
+                            </tr>
+                        `;
+                    }).join('');
             }
-
-            tableBody.innerHTML = data.map(item => {
-                const code = item.Codigo || item.codigo || item.id || item.ID || 'S/C';
-                const desc = item.Nombre || item.nombre || item.Descripción || item.descripcion || item.Articulo || '---';
-                const marca = item.Marca || item.marca || 'S/D';
-                const modelo = item.Modelo || item.modelo || 'S/D';
-                const brandModel = `${marca} ${modelo}`.trim();
-                const serial = item.Serie || item.serie || item['Numero de Serie'] || item.Numero_Serie || 'S/N';
-                const dept = item.Departamento || item.departamento || 'S/A';
-                const status = (item.Estado || item.estado || 'ACTIVO').toUpperCase();
-
-                return `
-                    <tr>
-                        <td style="font-weight:bold; color:#0066cc;">${code}</td>
-                        <td style="text-transform:uppercase;">${desc}</td>
-                        <td>${brandModel}</td>
-                        <td>${serial}</td>
-                        <td style="color:#2ecc71;">${dept}</td>
-                        <td><span style="padding:3px 8px; border-radius:4px; background:#f0f0f0; font-size:0.7rem; font-weight:bold;">${status}</span></td>
-                    </tr>
-                `;
-            }).join('');
         }
 
         function exportFormat(format) {
@@ -572,8 +697,8 @@
                 }
 
                 currentReportData = filtered;
-                renderReportTable(filtered);
-                document.getElementById('report-title-text').textContent = `REPORTE PERSONALIZADO (${currentReportType.toUpperCase()})`;
+                renderReportTable(filtered, currentReportType || 'Inventario');
+                document.getElementById('report-title-text').textContent = `REPORTE PERSONALIZADO (${(currentReportType || 'Inventario').toUpperCase()})`;
                 document.getElementById('printable-report').style.display = 'block';
                 UI.showToast(`Filtros aplicados: ${filtered.length} artículos encontrados`, "success");
             } catch (err) {

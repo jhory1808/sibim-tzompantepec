@@ -7,6 +7,7 @@
     <title>Movimientos - SIBIMTZOMP</title>
     <link rel="stylesheet" href="../css/futuristic.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.5/xlsx.full.min.js"></script>
     <style>
         .timeline {
             position: relative;
@@ -262,6 +263,7 @@
             });
 
             renderMovements(filtered);
+            UI.showToast(`${filtered.length} movimientos encontrados`, "info");
         }
 
         function clearHistory() {
@@ -271,8 +273,19 @@
             }
         }
 
-        function exportToPDF() { window.print(); }
+        function exportToPDF() {
+            if (allMovements.length === 0) {
+                alert('No hay datos para exportar');
+                return;
+            }
+            window.print();
+        }
+
         function exportToExcel() {
+            if (typeof XLSX === 'undefined') {
+                alert('Librería XLSX no cargada. Por favor recarga la página.');
+                return;
+            }
             const table = document.querySelector('table');
             const wb = XLSX.utils.table_to_book(table, { sheet: "Movimientos" });
             XLSX.writeFile(wb, `SIBIM_Movimientos_${new Date().toISOString().slice(0, 10)}.xlsx`);
