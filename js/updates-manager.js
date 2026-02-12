@@ -60,20 +60,23 @@ const UpdatesManager = {
         document.getElementById('edit-item-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             const formData = new FormData(e.target);
+            const currentUser = Auth.getCurrentUser();
             const updatedData = {
                 id: item.id || item.codigo || item.Codigo,
                 descripcion: formData.get('descripcion'),
                 estado: formData.get('estado'),
                 departamento: formData.get('departamento'),
+                usuario: currentUser ? currentUser.username : 'Desconocido',
                 "Codigo QR": `${window.location.host.includes('localhost') ? 'https://sibimtzomp.netlify.app' : window.location.origin}/view.html?id=${item.id || item.codigo || item.Codigo}`,
                 "Observaciones": formData.get('descripcion') // Use description as fallbak if no obs field
             };
 
             const result = await API.updateItem(updatedData);
             if (result.success) {
-                alert('Actualizado con éxito (Sincronización enviada)');
+                UI.showToast('Actualizado con éxito (Sincronización enviada)', 'success');
+                localStorage.removeItem('sibim_cache_timestamp'); // Clear cache
             } else {
-                alert('Error al actualizar');
+                UI.showToast('Error al actualizar', 'error');
             }
         });
     }
