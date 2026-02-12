@@ -134,11 +134,13 @@
                 onerror="this.src='/assets/images/logo_municipio.png'">
             <span style="font-size: 1.8rem; font-weight: 800; color: #00d2ff; letter-spacing: 2px;">SIBIMTZOMP</span>
         </div>
-        <div style="display: flex; align-items: center; gap: 25px;">
+        <div style="display: flex; align-items: center; gap: 20px;">
             <img id="escudo-header" src="../assets/images/escudo.png" style="height: 60px;" alt="Escudo Tzompantepec"
                 onerror="console.warn('Escudo no encontrado')">
             <a href="../index.html" class="btn btn-outline"
                 style="border-radius: 50px; padding: 10px 30px; font-weight: bold; border-color: #00d2ff; color: #00d2ff;">VOLVER</a>
+            <button onclick="Auth.logout()" class="btn"
+                style="background: rgba(231, 76, 60, 0.2); color: #e74c3c; border-radius: 50px; padding: 10px 30px; font-weight: bold;">SALIR</button>
         </div>
     </header>
 

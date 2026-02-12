@@ -32,10 +32,15 @@
 </head>
 
 <body>
-    <header>
-        <div class="logo">SIBIMTZOMP</div>
+    <header style="display: flex; justify-content: space-between; align-items: center; padding: 10px 5%; height: 80px;">
+        <div class="logo" style="display: flex; align-items: center; gap: 15px;">
+            <img src="../assets/images/logo_municipio.png" style="height: 60px;">
+            <span style="font-weight: 800; color: #00d2ff;">SIBIMTZOMP</span>
+        </div>
         <div style="display: flex; align-items: center; gap: 20px;">
-            <a href="../index.html" class="btn btn-outline" style="padding: 8px 15px;">Volver</a>
+            <a href="../index.html" class="btn btn-outline" style="padding: 8px 20px; border-radius: 50px;">Volver</a>
+            <button onclick="Auth.logout()" class="btn"
+                style="background: rgba(231, 76, 60, 0.2); color: #e74c3c; padding: 8px 20px; border-radius: 50px;">Salir</button>
         </div>
     </header>
 

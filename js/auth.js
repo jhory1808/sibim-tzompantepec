@@ -113,24 +113,33 @@ const Auth = {
         // 1. Administrador: Acceso total a todos los repositorios (CRUD, usuarios, etc)
         if (roleLower === 'admin' || roleLower === 'administrador') return ['*'];
 
-        // 2. Usuarios: Pueden ver TODOS los repositorios (incluyendo config/usuarios) pero solo lectura
-        if (roleLower.includes('usuario')) {
+        // 2. Auditor: Puede ver todo lo relacionado con auditoría, reportes e inventario (Lectura)
+        if (roleLower.includes('auditor')) {
             return [
                 'index.html',
                 'inventory.html',
-                'qr-repository.html',
-                'labels-repository.html',
                 'scanner.html',
                 'departments.html',
                 'movements.html',
                 'reports.html',
-                'users.html',
                 'updates.html',
-                'config.html'
+                'transactions.html'
             ];
         }
 
-        // 3. Capturistas: Dashboard, Inventario (agregar), QR (buscar/update), Etiquetas (imprimir) y Escáner QR
+        // 3. Usuarios: Vista estándar de consulta
+        if (roleLower.includes('usuario')) {
+            return [
+                'index.html',
+                'inventory.html',
+                'scanner.html',
+                'departments.html',
+                'movements.html',
+                'reports.html'
+            ];
+        }
+
+        // 4. Capturistas: Operación diaria (Dashboard, Inventario, Etiquetas, Escáner, Movimientos)
         if (roleLower.includes('capturista')) {
             return [
                 'index.html',
@@ -138,7 +147,8 @@ const Auth = {
                 'qr-repository.html',
                 'labels-repository.html',
                 'scanner.html',
-                'print-label.html'
+                'print-label.html',
+                'transactions.html'
             ];
         }
 

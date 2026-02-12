@@ -124,14 +124,17 @@ function handleRolePermissions() {
     });
 
     // 2. Controladores de Acciones según Rol
-    // Si el rol incluye 'usuario' (Solo lectura TOTAL)
-    if (role.indexOf('usuario') !== -1) {
+    // Si el rol incluye 'usuario' o 'auditor' (Solo lectura TOTAL)
+    if (role.indexOf('usuario') !== -1 || role.indexOf('auditor') !== -1) {
         const actionElements = document.querySelectorAll('.btn-delete, .btn-edit, .btn-add, #add-item-btn, .delete-btn, [data-action="admin"], .fa-pencil-alt, .fa-trash-alt, .fa-plus, .fa-user-cog, .btn-save');
         actionElements.forEach(el => {
             const container = el.tagName === 'I' ? el.parentElement : el;
             if (container && (container.tagName === 'BUTTON' || container.tagName === 'A')) {
-                container.style.display = 'none';
-            } else if (el.tagName !== 'I') {
+                // No ocultamos el botón si es para volver o navegación básica
+                if (!container.className.includes('btn-outline')) {
+                    container.style.display = 'none';
+                }
+            } else if (el.tagName !== 'I' && !el.className.includes('nav-item')) {
                 el.style.display = 'none';
             }
         });
@@ -151,7 +154,11 @@ function handleRolePermissions() {
 
         // Esconder herramientas que el capturista no tiene en sus permisos explícitos
         const adminTools = document.querySelectorAll('[href*="users.html"], [href*="updates.html"], [href*="config.html"], [data-action="admin"], [data-tooltip="Configuración"]');
-        adminTools.forEach(el => el.style.display = 'none');
+        adminTools.forEach(el => {
+            if (!el.className.includes('nav-item') || !Auth.isPageAllowed(el.getAttribute('href'))) {
+                el.style.display = 'none';
+            }
+        });
     }
 
     // 3. Elementos restringidos por data-attribute
