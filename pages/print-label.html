@@ -96,17 +96,18 @@
         .label-footer {
             display: flex;
             align-items: center;
-            gap: 5px;
-            margin-top: 10px;
-            border-top: 1px solid #000;
-            padding-top: 5px;
+            gap: 8px;
+            margin-top: 5px;
+            border-top: 1.5px solid #000;
+            padding-top: 4px;
             width: 100%;
         }
 
         .label-footer img {
-            height: 10mm;
-            max-width: 25mm;
+            height: 12mm;
+            max-width: 30mm;
             object-fit: contain;
+            flex-shrink: 0;
         }
 
         .label-footer span {
@@ -161,9 +162,11 @@
                 <div id="label-code" class="label-sub" style="font-weight: bold; margin-top: 5px;">Código: ---</div>
             </div>
             <div class="label-footer">
-                <img src="../assets/images/logo_municipio.png" style="height: 12mm; margin-right: 10px;">
-                <div style="border-left: 1px solid #000; padding-left: 10px;">
-                    <span style="font-size: 0.7em; letter-spacing: 0.5px;">GOBIERNO<br>MUNICIPAL<br>2024-2027</span>
+                <img src="../assets/images/logo_municipio.png"
+                    style="height: 12mm; margin-right: 15px; flex-shrink: 0; object-fit: contain;">
+                <div style="border-left: 2px solid #000; padding-left: 10px; flex-shrink: 0;">
+                    <span
+                        style="font-size: 0.8em; letter-spacing: 0.5px; font-weight: 900; color: #000;">GOBIERNO<br>MUNICIPAL<br>2024-2027</span>
                 </div>
             </div>
         </div>
