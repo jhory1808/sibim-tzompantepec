@@ -438,53 +438,159 @@
             });
         }
 
+        let currentReportType = 'Inventario';
+        let currentReportData = [];
+
         async function generateReport(type) {
+            currentReportType = type;
             const printable = document.getElementById('printable-report');
             const titleElem = document.getElementById('report-title-text');
             const tableHead = document.getElementById('table-head');
             const tableBody = document.getElementById('table-body');
 
             printable.style.display = 'block';
-            titleElem.textContent = `Reporte de ${type}`;
-            tableBody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:20px;">Cargando datos...</td></tr>';
+            titleElem.textContent = `REPORTE DE ${type.toUpperCase()}`;
+            tableBody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:20px;"><i class="fas fa-spinner fa-spin"></i> Cargando datos...</td></tr>';
 
             try {
-                let data = await API.fetchItems();
+                const allData = await API.fetchItems();
+                let filtered = [...allData];
+
+                // Aplicar filtros específicos según el tipo de reporte
                 if (type === 'Mantenimiento') {
-                    data = data.filter(i => (i.Estado || '').toUpperCase().includes('MANTENIMIENTO'));
+                    filtered = filtered.filter(i => (i.Estado || i.estado || '').toUpperCase().includes('MANTENIMIENTO'));
+                } else if (type === 'Estado') {
+                    const statusFilter = document.getElementById('filter-status').value;
+                    if (statusFilter && statusFilter !== 'Todos los estados') {
+                        filtered = filtered.filter(i => (i.Estado || i.estado || '').toUpperCase() === statusFilter.toUpperCase());
+                    }
+                } else if (type === 'Departamentos') {
+                    const deptFilter = document.getElementById('filter-dept').value;
+                    if (deptFilter && deptFilter !== 'Todos los departamentos') {
+                        filtered = filtered.filter(i => (i.Departamento || i.departamento || '') === deptFilter);
+                    }
                 }
 
-                const headers = ['Código', 'Descripción', 'Marca/Modelo', 'Serie', 'Departamento', 'Estado'];
-                tableHead.innerHTML = `<tr>${headers.map(h => `<th>${h}</th>`).join('')}</tr>`;
-                tableBody.innerHTML = data.map(item => `
-                    <tr>
-                        <td>${item.Codigo || item.id}</td>
-                        <td>${item.Nombre}</td>
-                        <td>${item.Marca || ''} ${item.Modelo || ''}</td>
-                        <td>${item['Numero de Serie'] || 'N/A'}</td>
-                        <td>${item.Departamento || 'S/A'}</td>
-                        <td>${item.Estado || 'Activo'}</td>
-                    </tr>
-                `).join('');
-
+                currentReportData = filtered;
+                renderReportTable(filtered);
                 window.scrollTo({ top: printable.offsetTop, behavior: 'smooth' });
+                UI.showToast(`Reporte de ${type} generado (${filtered.length} registros)`, "success");
             } catch (err) {
+                Logger.error('Error al generar reporte:', err);
                 tableBody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:red; padding:20px;">Error: ${err.message}</td></tr>`;
+                UI.showToast("Error al generar reporte", "error");
             }
+        }
+
+        function renderReportTable(data) {
+            const tableHead = document.getElementById('table-head');
+            const tableBody = document.getElementById('table-body');
+
+            const headers = ['Código', 'Descripción', 'Marca/Modelo', 'Serie', 'Departamento', 'Estado'];
+            tableHead.innerHTML = `<tr>${headers.map(h => `<th>${h}</th>`).join('')}</tr>`;
+
+            if (data.length === 0) {
+                tableBody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:20px;">No se encontraron artículos con los filtros seleccionados.</td></tr>';
+                return;
+            }
+
+            tableBody.innerHTML = data.map(item => {
+                const code = item.Codigo || item.codigo || item.id || item.ID || 'S/C';
+                const desc = item.Nombre || item.nombre || item.Descripción || item.descripcion || item.Articulo || '---';
+                const marca = item.Marca || item.marca || 'S/D';
+                const modelo = item.Modelo || item.modelo || 'S/D';
+                const brandModel = `${marca} ${modelo}`.trim();
+                const serial = item.Serie || item.serie || item['Numero de Serie'] || item.Numero_Serie || 'S/N';
+                const dept = item.Departamento || item.departamento || 'S/A';
+                const status = (item.Estado || item.estado || 'ACTIVO').toUpperCase();
+
+                return `
+                    <tr>
+                        <td style="font-weight:bold; color:#0066cc;">${code}</td>
+                        <td style="text-transform:uppercase;">${desc}</td>
+                        <td>${brandModel}</td>
+                        <td>${serial}</td>
+                        <td style="color:#2ecc71;">${dept}</td>
+                        <td><span style="padding:3px 8px; border-radius:4px; background:#f0f0f0; font-size:0.7rem; font-weight:bold;">${status}</span></td>
+                    </tr>
+                `;
+            }).join('');
         }
 
         function exportFormat(format) {
             UI.showToast(`Generando ${format}...`, "info");
-            if (format === 'PDF') window.print();
-            if (format === 'Excel') {
+            if (format === 'PDF') {
+                window.print();
+            } else if (format === 'Excel') {
                 const table = document.getElementById('data-table');
                 const wb = XLSX.utils.table_to_book(table, { sheet: "Reporte" });
-                XLSX.writeFile(wb, `Reporte_SIBIM_${new Date().getTime()}.xlsx`);
+                XLSX.writeFile(wb, `Reporte_SIBIM_${currentReportType}_${new Date().getTime()}.xlsx`);
+            } else if (format === 'CSV') {
+                const table = document.getElementById('data-table');
+                const wb = XLSX.utils.table_to_book(table);
+                XLSX.writeFile(wb, `Reporte_SIBIM_${currentReportType}_${new Date().getTime()}.csv`, { bookType: 'csv' });
             }
         }
 
-        function applyFilters() { UI.showToast("Filtros aplicados (Demostración)", "success"); }
-        function clearFilters() { window.location.reload(); }
+        async function applyFilters() {
+            UI.showToast("Aplicando filtros personalizados...", "info");
+            const dateStart = document.getElementById('filter-date-start').value;
+            const dateEnd = document.getElementById('filter-date-end').value;
+            const dept = document.getElementById('filter-dept').value;
+            const status = document.getElementById('filter-status').value;
+            const typeFilter = document.getElementById('filter-type').value;
+
+            try {
+                let filtered = await API.fetchItems();
+
+                if (dept && dept !== 'Todos los departamentos') {
+                    filtered = filtered.filter(i => (i.Departamento || i.departamento || '') === dept);
+                }
+                if (status && status !== 'Todos los estados') {
+                    filtered = filtered.filter(i => (i.Estado || i.estado || '').toUpperCase() === status.toUpperCase());
+                }
+                if (typeFilter && typeFilter !== 'Todos los tipos') {
+                    filtered = filtered.filter(i => (i.Tipo || i.Categoria || i.tipo || i.categoria || '') === typeFilter);
+                }
+
+                // Filtro de fechas (requiere campo de fecha en los datos)
+                if (dateStart) {
+                    const start = new Date(dateStart);
+                    filtered = filtered.filter(i => {
+                        const dateStr = i.Fecha || i.fecha || i.Fecha_Adquisicion || i.fecha_adquisicion;
+                        if (!dateStr) return true;
+                        return new Date(dateStr) >= start;
+                    });
+                }
+                if (dateEnd) {
+                    const end = new Date(dateEnd);
+                    filtered = filtered.filter(i => {
+                        const dateStr = i.Fecha || i.fecha || i.Fecha_Adquisicion || i.fecha_adquisicion;
+                        if (!dateStr) return true;
+                        return new Date(dateStr) <= end;
+                    });
+                }
+
+                currentReportData = filtered;
+                renderReportTable(filtered);
+                document.getElementById('report-title-text').textContent = `REPORTE PERSONALIZADO (${currentReportType.toUpperCase()})`;
+                document.getElementById('printable-report').style.display = 'block';
+                UI.showToast(`Filtros aplicados: ${filtered.length} artículos encontrados`, "success");
+            } catch (err) {
+                UI.showToast("Error al aplicar filtros", "error");
+                Logger.error('Error en filtros:', err);
+            }
+        }
+
+        function clearFilters() {
+            UI.showToast("Limpiando filtros...", "info");
+            document.getElementById('filter-date-start').value = '';
+            document.getElementById('filter-date-end').value = '';
+            document.getElementById('filter-dept').selectedIndex = 0;
+            document.getElementById('filter-status').selectedIndex = 0;
+            document.getElementById('filter-type').selectedIndex = 0;
+            setTimeout(() => generateReport('Inventario'), 300);
+        }
     </script>
 </body>
 

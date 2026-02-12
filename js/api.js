@@ -111,9 +111,25 @@ const API = {
     },
 
     async getItemById(id) {
+        if (!id) return null;
         try {
+            // 1. Intentar obtención directa (Rápido si el backend lo soporta bien)
             const data = await this.gasFetch('getItemById', { id: id });
-            return data ? (data.item || data.items || data) : null;
+            let item = data ? (data.item || data.items || data) : null;
+
+            // Si el backend retornó un objeto vacío o error, seguimos al fallback
+            if (item && (item.id || item.codigo || item.Codigo)) return item;
+
+            // 2. Fallback: Buscar en la lista completa (Más robusto ante variaciones de IDs/Códigos)
+            Logger.warn(`Búsqueda directa falló para ID: ${id}. Intentando búsqueda local en inventario...`);
+            const allItems = await this.fetchItems();
+            item = allItems.find(i => {
+                const iId = String(i.id || i.ID || i.codigo || i.Codigo || '').toLowerCase();
+                const searchId = String(id).toLowerCase();
+                return iId === searchId || iId.includes(searchId);
+            });
+
+            return item || null;
         } catch (error) {
             Logger.error('Error fetching item by ID:', error);
             return null;

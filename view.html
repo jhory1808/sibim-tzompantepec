@@ -87,19 +87,48 @@
 
             if (!id) {
                 document.getElementById('item-name').textContent = "ID de activo no proporcionado";
+                document.getElementById('item-code').textContent = "ERROR";
                 return;
             }
 
-            const item = await API.getItemById(id);
-            if (item) {
-                document.getElementById('item-name').textContent = item.Nombre || item.nombre || item.Descripción || item.descripcion || item.Articulo || item.articulo || item.Descripcion || item.descripcion || '---';
-                document.getElementById('item-code').textContent = item.Codigo || item.codigo || item.Código || item.id || item.ID || id;
-                document.getElementById('item-brand').textContent = `${item.Marca || item.marca || ''} ${item.Modelo || item.modelo || ''}`;
-                document.getElementById('item-dept').textContent = item.Departamento || item.departamento || item.Area || item.Área || item.Ubicacion || item.Ubicación || 'Sin Asignar';
-                document.getElementById('item-resp').textContent = item.Responsable || item.responsable || item.Usuario || item.Encargado || 'No asignado';
-                document.getElementById('item-status').textContent = item.Estado || item.estado || item.Estatus || 'Activo';
-            } else {
-                document.getElementById('item-name').textContent = "Activo no encontrado";
+            // Mostrar el código inmediatamente
+            document.getElementById('item-code').textContent = id;
+            document.getElementById('item-name').innerHTML = '<i class="fas fa-spinner fa-spin"></i> Cargando...';
+
+            try {
+                const item = await API.getItemById(id);
+
+                if (!item) {
+                    document.getElementById('item-name').textContent = "Activo no encontrado";
+                    document.getElementById('item-code').textContent = id;
+                    console.error('No se encontró el item con ID:', id);
+                    return;
+                }
+
+                console.log('Item encontrado:', item);
+
+                // Extraer datos con múltiples fallbacks para diferentes formatos de columnas
+                const nombre = item.Nombre || item.nombre || item.Descripción || item.descripcion || item.Articulo || item.articulo || 'Sin Nombre';
+                const codigo = item.Codigo || item.codigo || item.Código || item.id || item.ID || id;
+                const marca = item.Marca || item.marca || '';
+                const modelo = item.Modelo || item.modelo || '';
+                const brandModel = `${marca} ${modelo}`.trim() || '---';
+                const departamento = item.Departamento || item.departamento || item.Area || item.Área || item.area || item.Ubicacion || item.Ubicación || item.ubicacion || 'Sin Asignar';
+                const responsable = item.Responsable || item.responsable || item.Usuario || item.usuario || item.Encargado || item.encargado || 'No asignado';
+                const estado = item.Estado || item.estado || item.Estatus || item.estatus || 'ACTIVO';
+
+                // Actualizar la interfaz
+                document.getElementById('item-name').textContent = nombre;
+                document.getElementById('item-code').textContent = codigo;
+                document.getElementById('item-brand').textContent = brandModel;
+                document.getElementById('item-dept').textContent = departamento;
+                document.getElementById('item-resp').textContent = responsable;
+                document.getElementById('item-status').textContent = estado;
+
+            } catch (error) {
+                console.error('Error al cargar el activo:', error);
+                document.getElementById('item-name').textContent = "Error al cargar datos";
+                document.getElementById('item-code').textContent = id;
             }
         });
     </script>
