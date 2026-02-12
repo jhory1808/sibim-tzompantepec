@@ -137,7 +137,8 @@ const Auth = {
                 'inventory.html',
                 'qr-repository.html',
                 'labels-repository.html',
-                'scanner.html'
+                'scanner.html',
+                'print-label.html'
             ];
         }
 

@@ -31,38 +31,56 @@
             align-items: center;
             font-family: Arial, sans-serif;
             page-break-after: always;
+            box-sizing: border-box;
         }
 
-        /* "Chico" - 29mm x 62mm approx */
+        /* P-TOUCH Editor - 40mm x 62mm */
+        .size-ptouch {
+            width: 62mm;
+            height: 40mm;
+            font-size: 11pt;
+            padding: 5mm;
+        }
+
+        .size-ptouch .qr-box img {
+            width: 25mm !important;
+            height: 25mm !important;
+        }
+
+        /* "Chico" - 29mm x 62mm */
         .size-chico {
             width: 62mm;
             height: 29mm;
-            font-size: 10pt;
+            font-size: 9pt;
+            padding: 3mm;
         }
 
         .size-chico .qr-box img {
-            width: 20mm;
-            height: 20mm;
+            width: 20mm !important;
+            height: 20mm !important;
         }
 
-        /* "Mediano" - 38mm x 90mm approx */
+        /* "Mediano" - 38mm x 90mm */
         .size-mediano {
             width: 90mm;
             height: 38mm;
-            font-size: 13pt;
+            font-size: 12pt;
+            padding: 5mm;
         }
 
         .size-mediano .qr-box img {
-            width: 32mm;
-            height: 32mm;
+            width: 30mm !important;
+            height: 30mm !important;
         }
 
         .label-content {
             display: flex;
             flex-direction: column;
-            justify-content: space-between;
+            justify-content: flex-start;
             height: 100%;
             text-align: left;
+            overflow: hidden;
+            padding-right: 5px;
         }
 
         .label-header {
@@ -79,17 +97,23 @@
             display: flex;
             align-items: center;
             gap: 5px;
-            margin-top: auto;
+            margin-top: 10px;
+            border-top: 1px solid #000;
+            padding-top: 5px;
+            width: 100%;
         }
 
         .label-footer img {
-            height: 12mm;
+            height: 10mm;
+            max-width: 25mm;
+            object-fit: contain;
         }
 
         .label-footer span {
-            font-size: 0.6em;
+            font-size: 0.55em;
             font-weight: bold;
-            line-height: 1;
+            line-height: 1.1;
+            color: #000;
         }
 
         @media print {
@@ -114,8 +138,9 @@
     <div class="controls no-print">
         <h2 style="color: white; margin-bottom: 15px;">Impresora Brother QL-800</h2>
         <div style="display: flex; gap: 10px; justify-content: center;">
-            <button class="btn btn-primary" onclick="setLabelSize('chico')">Tamaño Chico (29mm)</button>
-            <button class="btn btn-primary" onclick="setLabelSize('mediano')">Tamaño Mediano (38mm)</button>
+            <button class="btn btn-primary" onclick="setLabelSize('ptouch')">P-TOUCH (40mm x 62mm)</button>
+            <button class="btn btn-primary" onclick="setLabelSize('mediano')">Mediano (38mm x 90mm)</button>
+            <button class="btn btn-primary" onclick="setLabelSize('chico')">Chico (29mm x 62mm)</button>
             <button class="btn btn-outline" style="background:#00d2ff; color:black;" onclick="window.print()">
                 <i class="fas fa-print"></i> Imprimir en Brother
             </button>
@@ -129,7 +154,7 @@
         </p>
     </div>
 
-    <div id="label-container" class="label-preview size-mediano">
+    <div id="label-container" class="label-preview size-ptouch">
         <div class="label-content">
             <div style="flex: 1;">
                 <div id="label-desc" class="label-header">NOMBRE DEL PRODUCTO</div>

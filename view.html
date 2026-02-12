@@ -92,12 +92,12 @@
 
             const item = await API.getItemById(id);
             if (item) {
-                document.getElementById('item-name').textContent = item.Nombre || item.nombre || item.descripcion || '---';
-                document.getElementById('item-code').textContent = item.Codigo || item.codigo || id;
+                document.getElementById('item-name').textContent = item.Nombre || item.nombre || item.Descripción || item.descripcion || item.Articulo || item.articulo || item.Descripcion || item.descripcion || '---';
+                document.getElementById('item-code').textContent = item.Codigo || item.codigo || item.Código || item.id || item.ID || id;
                 document.getElementById('item-brand').textContent = `${item.Marca || item.marca || ''} ${item.Modelo || item.modelo || ''}`;
-                document.getElementById('item-dept').textContent = item.Departamento || item.departamento || 'Sin Asignar';
-                document.getElementById('item-resp').textContent = item.Responsable || item.responsable || 'No asignado';
-                document.getElementById('item-status').textContent = item.Estado || item.estado || 'Activo';
+                document.getElementById('item-dept').textContent = item.Departamento || item.departamento || item.Area || item.Área || item.Ubicacion || item.Ubicación || 'Sin Asignar';
+                document.getElementById('item-resp').textContent = item.Responsable || item.responsable || item.Usuario || item.Encargado || 'No asignado';
+                document.getElementById('item-status').textContent = item.Estado || item.estado || item.Estatus || 'Activo';
             } else {
                 document.getElementById('item-name').textContent = "Activo no encontrado";
             }

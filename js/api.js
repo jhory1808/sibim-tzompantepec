@@ -112,8 +112,8 @@ const API = {
 
     async getItemById(id) {
         try {
-            const response = await fetch(`${CONFIG.scriptUrl}?action=getItemById&id=${id}`);
-            return await response.json();
+            const data = await this.gasFetch('getItemById', { id: id });
+            return data ? (data.item || data.items || data) : null;
         } catch (error) {
             Logger.error('Error fetching item by ID:', error);
             return null;
