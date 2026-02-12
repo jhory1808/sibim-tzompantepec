@@ -247,5 +247,23 @@ const API = {
         } catch (error) {
             return { items: [], stats: { total: 0, departamentos: 0, bajas: 0, movimientos: 0 } };
         }
+    },
+
+    async addDepartment(deptData) {
+        try {
+            const response = await fetch(CONFIG.scriptUrl, {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    action: 'addDepartment',
+                    data: deptData
+                })
+            });
+            return { success: true };
+        } catch (error) {
+            console.error("Error creating department:", error);
+            return { success: false, error };
+        }
     }
 };

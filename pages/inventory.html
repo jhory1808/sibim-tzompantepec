@@ -380,6 +380,11 @@
                                     <input type="text" id="art-responsable" class="form-control"
                                         placeholder="Nombre completo">
                                 </div>
+                                <div class="filter-group" style="grid-column: span 2;">
+                                    <label>Observaciones</label>
+                                    <textarea id="art-obs" class="form-control"
+                                        placeholder="Notas u observaciones del bien" style="height: 80px;"></textarea>
+                                </div>
                             </div>
                         </div>
 
@@ -499,7 +504,10 @@
                 const code = (item.Codigo || item.codigo || item.id || '').toString().toLowerCase();
                 const name = (item.Nombre || item.nombre || '').toString().toLowerCase();
                 const dept = (item.Departamento || item.departamento || '').toString().toLowerCase();
-                return code.includes(q) || name.includes(q) || dept.includes(q);
+                const resp = (item.Responsable || item.responsable || '').toString().toLowerCase();
+                const serie = (item.Serie || item.serie || item['Numero de Serie'] || '').toString().toLowerCase();
+
+                return code.includes(q) || name.includes(q) || dept.includes(q) || resp.includes(q) || serie.includes(q);
             });
             renderItems(filtered);
         }
@@ -636,7 +644,9 @@
                 serie: document.getElementById('art-serie').value,
                 estado: document.getElementById('art-estado').value,
                 departamento: document.getElementById('art-depto').value,
-                responsable: document.getElementById('art-responsable').value
+                responsable: document.getElementById('art-responsable').value,
+                "Codigo QR": `${window.location.host.includes('localhost') ? 'https://sibimtzomp.netlify.app' : window.location.origin}/view.html?id=${code}`,
+                "Observaciones": document.getElementById('art-obs').value
             };
 
             const res = await API.addItem(data);
