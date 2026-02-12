@@ -281,15 +281,5 @@ const API = {
             console.error("Error creating department:", error);
             return { success: false, error };
         }
-    },
-
-    async getUpdates() {
-        try {
-            const data = await this.gasFetch('getUpdates');
-            return data ? (data.updates || data) : [];
-        } catch (error) {
-            Logger.error('Error fetching updates:', error);
-            return [];
-        }
     }
 };
