@@ -93,28 +93,35 @@
             color: #333;
         }
 
-        /* Estilos para el scroll horizontal */
-        .horizontal-layout {
-            display: flex;
-            gap: 25px;
+        .stats-summary {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin: 30px 0;
             padding: 20px;
-            overflow-x: auto;
-            align-items: stretch;
+            background: #f8f9fa;
+            border-radius: 10px;
         }
 
-        .horizontal-section {
-            min-width: 350px;
-            display: flex;
-            flex-direction: column;
+        .stat-box {
+            text-align: center;
+            padding: 15px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
         }
 
-        .stats-section {
-            min-width: 600px;
+        .stat-box .number {
+            font-size: 2rem;
+            font-weight: 800;
+            color: #00d2ff;
         }
 
-        .escudo-header {
-            height: 60px;
-            filter: drop-shadow(0 0 5px rgba(0, 210, 255, 0.3));
+        .stat-box .label {
+            font-size: 0.75rem;
+            color: #666;
+            margin-top: 5px;
+            text-transform: uppercase;
         }
     </style>
 </head>
@@ -127,7 +134,7 @@
             <span style="font-size: 1.8rem; font-weight: 800; color: #00d2ff; letter-spacing: 2px;">SIBIMTZOMP</span>
         </div>
         <div style="display: flex; align-items: center; gap: 25px;">
-            <img src="../assets/images/escudo.png" class="escudo-header" alt="Escudo Tzompantepec">
+            <img src="../assets/images/escudo.png" style="height: 60px;" alt="Escudo Tzompantepec">
             <a href="../index.html" class="btn btn-outline"
                 style="border-radius: 50px; padding: 10px 30px; font-weight: bold; border-color: #00d2ff; color: #00d2ff;">VOLVER</a>
         </div>
@@ -143,177 +150,46 @@
             institucionales y análisis patrimonial.</p>
     </div>
 
-    <main class="no-print" style="padding: 20px; overflow-x: auto;">
-        <div class="horizontal-layout"
-            style="min-width: 1600px; display: flex; gap: 30px; align-items: stretch; justify-content: center;">
-
-            <!-- Section 1: Generar Reportes -->
-            <div class="glass" style="min-width: 350px; padding: 30px; border-radius: 25px;">
-                <h3
-                    style="margin-bottom: 25px; color: #00d2ff; display: flex; align-items: center; gap: 12px; font-size: 1.2rem; font-weight: 700;">
-                    <i class="fas fa-edit"></i> GENERAR REPORTES
-                </h3>
-                <div style="display: flex; flex-direction: column; gap: 12px;">
-                    <button class="btn"
-                        style="background: #3498db; color: white; border-radius: 12px; padding: 12px; font-weight: bold; text-align: center;"
-                        onclick="generateReport('Inventario')">
-                        <i class="fas fa-boxes"></i> REPORTE DE INVENTARIO
-                    </button>
-                    <button class="btn"
-                        style="background: #2ecc71; color: white; border-radius: 12px; padding: 12px; font-weight: bold;"
-                        onclick="generateReport('Movimientos')">
-                        <i class="fas fa-history"></i> REPORTE DE MOVIMIENTOS
-                    </button>
-                    <button class="btn"
-                        style="background: #f39c12; color: white; border-radius: 12px; padding: 12px; font-weight: bold;"
-                        onclick="generateReport('Departamentos')">
-                        <i class="fas fa-building"></i> REPORTE POR DEPTOS.
-                    </button>
-                    <button class="btn"
-                        style="background: #9b59b6; color: white; border-radius: 12px; padding: 12px; font-weight: bold;"
-                        onclick="generateReport('Estado')">
-                        <i class="fas fa-tasks"></i> REPORTE POR ESTADO
-                    </button>
-                    <button class="btn"
-                        style="background: #e74c3c; color: white; border-radius: 12px; padding: 12px; font-weight: bold;"
-                        onclick="generateReport('Mantenimiento')">
-                        <i class="fas fa-tools"></i> REPORTE MANTENIMIENTO
-                    </button>
-                </div>
-                <div style="margin-top: 25px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.05);">
-                    <p
-                        style="font-size: 0.75rem; color: var(--text-secondary); margin-bottom: 12px; font-weight: bold;">
-                        Exportar a Formato:</p>
-                    <div style="display: flex; gap: 8px;">
-                        <button class="btn glass" onclick="exportFormat('PDF')"
-                            style="flex: 1; padding: 8px; font-size: 0.8rem;"><i class="fas fa-file-pdf"></i>
-                            PDF</button>
-                        <button class="btn glass" onclick="exportFormat('Excel')"
-                            style="flex: 1; padding: 8px; font-size: 0.8rem;"><i class="fas fa-file-excel"></i>
-                            XLSX</button>
-                        <button class="btn glass" onclick="exportFormat('CSV')"
-                            style="flex: 1; padding: 8px; font-size: 0.8rem;"><i class="fas fa-file-csv"></i>
-                            CSV</button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Section 3: Filtros -->
-            <div class="glass" style="min-width: 380px; padding: 25px; border-radius: 25px;">
-                <h3
-                    style="margin-bottom: 25px; color: #00d2ff; display: flex; align-items: center; gap: 10px; font-size: 1.1rem;">
-                    <i class="fas fa-filter"></i> Filtros del Reporte
-                </h3>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
-                    <div class="form-group">
-                        <label style="font-size: 0.75rem;">Fecha Inicio</label>
-                        <input type="date" id="filter-date-start" class="form-control glass"
-                            style="font-size: 0.85rem; padding: 8px;">
-                    </div>
-                    <div class="form-group">
-                        <label style="font-size: 0.75rem;">Fecha Fin</label>
-                        <input type="date" id="filter-date-end" class="form-control glass"
-                            style="font-size: 0.85rem; padding: 8px;">
-                    </div>
-                    <div class="form-group" style="grid-column: span 2;">
-                        <label style="font-size: 0.75rem;">Departamento Responsable</label>
-                        <select id="filter-dept" class="form-control glass" style="font-size: 0.85rem; padding: 8px;">
-                            <option>Todos los departamentos</option>
-                        </select>
-                    </div>
-                    <div class="form-group" style="grid-column: span 2;">
-                        <label style="font-size: 0.75rem;">Estado del Bien</label>
-                        <select id="filter-status" class="form-control glass" style="font-size: 0.85rem; padding: 8px;">
-                            <option>Todos los estados</option>
-                            <option>ACTIVO</option>
-                            <option>MANTENIMIENTO</option>
-                            <option>BAJA</option>
-                        </select>
-                    </div>
-                    <div class="form-group" style="grid-column: span 2; margin-bottom: 5px;">
-                        <label style="font-size: 0.75rem;">Categoría / Tipo</label>
-                        <select id="filter-type" class="form-control glass" style="font-size: 0.85rem; padding: 8px;">
-                            <option>Todos los tipos</option>
-                        </select>
-                    </div>
-                </div>
-                <div style="display: flex; gap: 12px; margin-top: 15px;">
-                    <button class="btn btn-primary"
-                        style="flex: 2; height: 45px; border-radius: 10px; font-size: 0.9rem;" onclick="applyFilters()">
-                        <i class="fas fa-check"></i> APLICAR FILTROS
-                    </button>
-                    <button class="btn btn-outline" style="flex: 1; border-radius: 10px; font-size: 0.9rem;"
-                        onclick="clearFilters()">
-                        <i class="fas fa-redo"></i> LIMPIAR
-                    </button>
-                </div>
-            </div>
-
-            <!-- Section 4: Estadísticas -->
-            <div class="glass" style="min-width: 550px; padding: 25px; border-radius: 25px;">
-                <h3
-                    style="margin-bottom: 25px; color: #00d2ff; display: flex; align-items: center; gap: 10px; font-size: 1.1rem;">
-                    <i class="fas fa-chart-bar"></i> Estadísticas Generales
-                </h3>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
-                    <div class="glass"
-                        style="padding: 25px; text-align: center; border-radius: 20px; border-bottom: 6px solid #9b59b6;">
-                        <div id="stat-total"
-                            style="font-size: 3.5rem; font-weight: 800; color: #9b59b6; line-height: 1;">0</div>
-                        <div
-                            style="color: var(--text-secondary); font-size: 0.7rem; font-weight: 800; margin-top: 5px; text-transform: uppercase;">
-                            Artículos Totales</div>
-                    </div>
-                    <div class="glass"
-                        style="padding: 25px; text-align: center; border-radius: 20px; border-bottom: 6px solid #3498db;">
-                        <div id="stat-value"
-                            style="font-size: 3.5rem; font-weight: 800; color: #3498db; line-height: 1;">$0</div>
-                        <div
-                            style="color: var(--text-secondary); font-size: 0.7rem; font-weight: 800; margin-top: 5px; text-transform: uppercase;">
-                            Valor Estimado</div>
-                    </div>
-                    <div class="glass"
-                        style="padding: 25px; text-align: center; border-radius: 20px; border-bottom: 6px solid #2ecc71;">
-                        <div id="stat-active"
-                            style="font-size: 3.5rem; font-weight: 800; color: #2ecc71; line-height: 1;">0</div>
-                        <div
-                            style="color: var(--text-secondary); font-size: 0.7rem; font-weight: 800; margin-top: 5px; text-transform: uppercase;">
-                            Bienes Activos</div>
-                    </div>
-                    <div class="glass"
-                        style="padding: 25px; text-align: center; border-radius: 20px; border-bottom: 6px solid #e74c3c;">
-                        <div id="stat-maint"
-                            style="font-size: 3.5rem; font-weight: 800; color: #e74c3c; line-height: 1;">0</div>
-                        <div
-                            style="color: var(--text-secondary); font-size: 0.7rem; font-weight: 800; margin-top: 5px; text-transform: uppercase;">
-                            En Mantenimiento</div>
-                    </div>
-                </div>
-            </div>
-
-        </div>
-
-        <!-- Section 5: Top Depts -->
-        <div class="glass horizontal-section" style="padding: 30px; border-radius: 20px; min-width: 320px;">
-            <h3
-                style="margin-bottom: 25px; color: white; font-size: 1.1rem; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px;">
-                Top Departamentos
+    <main class="no-print" style="padding: 20px 5%;">
+        <!-- Botones de Generación de Reportes -->
+        <div class="glass" style="padding: 30px; border-radius: 20px; margin-bottom: 30px;">
+            <h3 style="margin-bottom: 25px; color: #00d2ff; font-size: 1.3rem;">
+                <i class="fas fa-file-alt"></i> GENERAR REPORTES PROFESIONALES
             </h3>
-            <div id="top-depts-list" style="display: flex; flex-direction: column; gap: 15px;">
-                <!-- JS populated -->
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px;">
+                <button class="btn" style="background: #3498db; color: white; padding: 15px; font-weight: bold;"
+                    onclick="generateProfessionalReport('Inventario')">
+                    <i class="fas fa-boxes"></i> INVENTARIO GENERAL
+                </button>
+                <button class="btn" style="background: #2ecc71; color: white; padding: 15px; font-weight: bold;"
+                    onclick="generateProfessionalReport('Movimientos')">
+                    <i class="fas fa-history"></i> MOVIMIENTOS
+                </button>
+                <button class="btn" style="background: #f39c12; color: white; padding: 15px; font-weight: bold;"
+                    onclick="generateProfessionalReport('Departamentos')">
+                    <i class="fas fa-building"></i> POR DEPARTAMENTOS
+                </button>
+                <button class="btn" style="background: #9b59b6; color: white; padding: 15px; font-weight: bold;"
+                    onclick="generateProfessionalReport('Estado')">
+                    <i class="fas fa-tasks"></i> POR ESTADO
+                </button>
+                <button class="btn" style="background: #e74c3c; color: white; padding: 15px; font-weight: bold;"
+                    onclick="generateProfessionalReport('Mantenimiento')">
+                    <i class="fas fa-tools"></i> MANTENIMIENTO
+                </button>
+                <button class="btn" style="background: #1abc9c; color: white; padding: 15px; font-weight: bold;"
+                    onclick="generateProfessionalReport('Resumen')">
+                    <i class="fas fa-chart-pie"></i> RESUMEN EJECUTIVO
+                </button>
             </div>
-        </div>
-
-        <!-- Section 6: Distribución -->
-        <div class="glass horizontal-section"
-            style="padding: 30px; border-radius: 20px; min-width: 400px; text-align: center;">
-            <h3 style="margin-bottom: 25px; color: white; text-align: left; font-size: 1.1rem;">Distribución por
-                Estado</h3>
-            <div style="height: 300px; width: 100%;">
-                <canvas id="statusDistChart"></canvas>
+            <div style="margin-top: 20px; display: flex; gap: 10px; justify-content: center;">
+                <button class="btn glass" onclick="exportFormat('PDF')" style="padding: 10px 20px;">
+                    <i class="fas fa-file-pdf"></i> EXPORTAR PDF
+                </button>
+                <button class="btn glass" onclick="exportFormat('Excel')" style="padding: 10px 20px;">
+                    <i class="fas fa-file-excel"></i> EXPORTAR EXCEL
+                </button>
             </div>
-        </div>
-
         </div>
     </main>
 
@@ -333,15 +209,21 @@
 
         <h2 class="report-title" id="report-title-text">Cargando Reporte...</h2>
 
+        <!-- Resumen Estadístico -->
+        <div id="stats-summary" class="stats-summary" style="display: none;"></div>
+
         <div id="report-meta"
-            style="margin-bottom: 25px; padding: 15px; background: #f9f9f9; border-left: 4px solid var(--accent-blue); display: flex; justify-content: space-between;">
+            style="margin-bottom: 25px; padding: 15px; background: #f9f9f9; border-left: 4px solid #00d2ff; display: flex; justify-content: space-between;">
             <div>
                 <p style="margin: 0;"><strong>Fecha Emisión:</strong> <span id="current-date">--/--/----</span></p>
                 <p style="margin: 5px 0 0 0;"><strong>Responsable:</strong> <span id="report-user">Sistemas C2</span>
                 </p>
+                <p style="margin: 5px 0 0 0;"><strong>Período:</strong> <span id="report-period">Todos los
+                        registros</span></p>
             </div>
             <div style="text-align: right;">
                 <p style="margin: 0;"><small>SIBIM v2.1.0</small></p>
+                <p style="margin: 5px 0 0 0;"><small id="report-count">0 registros</small></p>
             </div>
         </div>
 
@@ -364,125 +246,59 @@
     <script src="../js/auth.js?v=2.1.0"></script>
     <script src="../js/app.js?v=2.1.0"></script>
     <script>
+        let currentReportData = [];
+        let currentReportType = '';
+
         document.addEventListener('DOMContentLoaded', async () => {
             Auth.checkAccess();
             Auth.initTheme();
-            document.getElementById('current-date').textContent = new Date().toLocaleDateString();
+            document.getElementById('current-date').textContent = new Date().toLocaleDateString('es-MX', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
             const user = Auth.getCurrentUser();
             if (user) document.getElementById('report-user').textContent = user.username;
-
-            await loadReportStats();
         });
 
-        async function loadReportStats() {
-            const { items } = await API.getStats();
-
-            document.getElementById('stat-total').textContent = items.length;
-            const activeCount = items.filter(i => (i.Estado || '').toUpperCase() === 'ACTIVO').length;
-            const maintCount = items.filter(i => (i.Estado || '').toUpperCase().includes('MANTENIMIENTO')).length;
-            document.getElementById('stat-active').textContent = activeCount;
-            document.getElementById('stat-maint').textContent = maintCount;
-
-            const totalValue = items.reduce((acc, i) => acc + (parseFloat(i.Valor) || 0), 0) || 60000;
-            document.getElementById('stat-value').textContent = `$${totalValue.toLocaleString()}`;
-
-            populateDropdown('filter-dept', [...new Set(items.map(i => i.Departamento).filter(Boolean))]);
-            populateDropdown('filter-type', [...new Set(items.map(i => i.Tipo || i.Categoria).filter(Boolean))]);
-
-            const deptCounts = {};
-            items.forEach(i => {
-                const d = i.Departamento || 'Sin Asignar';
-                deptCounts[d] = (deptCounts[d] || 0) + 1;
-            });
-            const topDepts = Object.entries(deptCounts).sort((a, b) => b[1] - a[1]).slice(0, 5);
-            document.getElementById('top-depts-list').innerHTML = topDepts.map(([name, count]) => `
-                <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.05);">
-                    <span style="font-size: 0.9rem;">${name}</span>
-                    <span class="badge" style="background: rgba(0, 210, 255, 0.1); color: var(--accent-blue); padding: 4px 10px; border-radius: 5px; font-weight: bold;">${count}</span>
-                </div>
-            `).join('');
-
-            initStatusDistChart(activeCount, maintCount, items.length - activeCount - maintCount);
-        }
-
-        function populateDropdown(id, items) {
-            const select = document.getElementById(id);
-            if (!select) return;
-            items.sort().forEach(item => {
-                const opt = document.createElement('option');
-                opt.value = item;
-                opt.textContent = item;
-                select.appendChild(opt);
-            });
-        }
-
-        function initStatusDistChart(active, maint, other) {
-            const ctx = document.getElementById('statusDistChart');
-            new Chart(ctx, {
-                type: 'doughnut',
-                data: {
-                    labels: ['Activo', 'Mantenimiento', 'Otros'],
-                    datasets: [{
-                        data: [active, maint, other],
-                        backgroundColor: ['#2ecc71', '#f39c12', '#95a5a6'],
-                        borderWidth: 0
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { position: 'bottom', labels: { color: 'white' } }
-                    }
-                }
-            });
-        }
-
-        let currentReportType = 'Inventario';
-        let currentReportData = [];
-
-        async function generateReport(type) {
+        async function generateProfessionalReport(type) {
             currentReportType = type;
             const printable = document.getElementById('printable-report');
             const titleElem = document.getElementById('report-title-text');
-            const tableHead = document.getElementById('table-head');
             const tableBody = document.getElementById('table-body');
+            const statsContainer = document.getElementById('stats-summary');
 
             printable.style.display = 'block';
-            titleElem.textContent = `REPORTE DE ${type.toUpperCase()}`;
-            tableBody.innerHTML = '<tr><td colspan="10" style="text-align:center; padding:20px;"><i class="fas fa-spinner fa-spin"></i> Cargando datos...</td></tr>';
+            titleElem.textContent = `REPORTE PROFESIONAL DE ${type.toUpperCase()}`;
+            tableBody.innerHTML = '<tr><td colspan="10" style="text-align:center; padding:20px;"><i class="fas fa-spinner fa-spin"></i> Generando reporte profesional...</td></tr>';
 
             try {
-                let allData, filtered;
+                let data, stats;
 
-                // Cargar datos según el tipo de reporte
                 if (type === 'Movimientos') {
-                    allData = await API.getMovements();
-                    filtered = [...allData];
+                    data = await API.getMovements();
+                    stats = generateMovementsStats(data);
+                } else if (type === 'Resumen') {
+                    const allData = await API.getStats();
+                    data = allData.items;
+                    stats = generateExecutiveSummary(allData);
                 } else {
-                    allData = await API.fetchItems();
-                    filtered = [...allData];
-
-                    // Aplicar filtros específicos según el tipo de reporte
-                    if (type === 'Mantenimiento') {
-                        filtered = filtered.filter(i => (i.Estado || i.estado || '').toUpperCase().includes('MANTENIMIENTO'));
-                    } else if (type === 'Estado') {
-                        const statusFilter = document.getElementById('filter-status').value;
-                        if (statusFilter && statusFilter !== 'Todos los estados') {
-                            filtered = filtered.filter(i => (i.Estado || i.estado || '').toUpperCase() === statusFilter.toUpperCase());
-                        }
-                    } else if (type === 'Departamentos') {
-                        const deptFilter = document.getElementById('filter-dept').value;
-                        if (deptFilter && deptFilter !== 'Todos los departamentos') {
-                            filtered = filtered.filter(i => (i.Departamento || i.departamento || '') === deptFilter);
-                        }
-                    }
+                    const allData = await API.fetchItems();
+                    data = filterDataByType(allData, type);
+                    stats = generateInventoryStats(data, type);
                 }
 
-                currentReportData = filtered;
-                renderReportTable(filtered, type);
+                currentReportData = data;
+                document.getElementById('report-count').textContent = `${data.length} registros`;
+
+                // Mostrar estadísticas
+                renderStats(stats, statsContainer);
+
+                // Renderizar tabla
+                renderProfessionalTable(data, type);
+
                 window.scrollTo({ top: printable.offsetTop, behavior: 'smooth' });
-                UI.showToast(`Reporte de ${type} generado (${filtered.length} registros)`, "success");
+                UI.showToast(`Reporte profesional de ${type} generado exitosamente`, "success");
             } catch (err) {
                 Logger.error('Error al generar reporte:', err);
                 tableBody.innerHTML = `<tr><td colspan="10" style="text-align:center; color:red; padding:20px;">Error: ${err.message}</td></tr>`;
@@ -490,159 +306,215 @@
             }
         }
 
-        function renderReportTable(data, type) {
+        function filterDataByType(data, type) {
+            switch (type) {
+                case 'Mantenimiento':
+                    return data.filter(i => (i.Estado || '').toUpperCase().includes('MANTENIMIENTO'));
+                case 'Estado':
+                    return data; // Mostrar todos, agrupados por estado
+                case 'Departamentos':
+                    return data.sort((a, b) => {
+                        const deptA = a.Departamento || '';
+                        const deptB = b.Departamento || '';
+                        return deptA.localeCompare(deptB);
+                    });
+                default:
+                    return data;
+            }
+        }
+
+        function generateInventoryStats(data, type) {
+            const total = data.length;
+            const activos = data.filter(i => (i.Estado || '').toUpperCase() === 'ACTIVO').length;
+            const mantenimiento = data.filter(i => (i.Estado || '').toUpperCase().includes('MANTENIMIENTO')).length;
+            const valorTotal = data.reduce((sum, i) => sum + (parseFloat(i.Valor) || 0), 0);
+
+            const depts = {};
+            data.forEach(i => {
+                const dept = i.Departamento || 'Sin Asignar';
+                depts[dept] = (depts[dept] || 0) + 1;
+            });
+            const departamentos = Object.keys(depts).length;
+
+            return {
+                'Total de Artículos': total,
+                'Artículos Activos': activos,
+                'En Mantenimiento': mantenimiento,
+                'Departamentos': departamentos,
+                'Valor Total': `$${valorTotal.toLocaleString('es-MX', { minimumFractionDigits: 2 })}`
+            };
+        }
+
+        function generateMovementsStats(data) {
+            const total = data.length;
+            const hoy = new Date();
+            const hace7dias = new Date(hoy.getTime() - 7 * 24 * 60 * 60 * 1000);
+            const hace30dias = new Date(hoy.getTime() - 30 * 24 * 60 * 60 * 1000);
+
+            const ultimos7dias = data.filter(m => {
+                const fecha = new Date(m.Fecha || m.fecha);
+                return fecha >= hace7dias;
+            }).length;
+
+            const ultimos30dias = data.filter(m => {
+                const fecha = new Date(m.Fecha || m.fecha);
+                return fecha >= hace30dias;
+            }).length;
+
+            const usuarios = new Set(data.map(m => m.Usuario || m.usuario)).size;
+
+            return {
+                'Total Movimientos': total,
+                'Últimos 7 Días': ultimos7dias,
+                'Últimos 30 Días': ultimos30dias,
+                'Usuarios Activos': usuarios
+            };
+        }
+
+        function generateExecutiveSummary(allData) {
+            const items = allData.items;
+            const stats = allData.stats;
+
+            return {
+                'Total Patrimonio': items.length,
+                'Departamentos': stats.departamentos,
+                'Movimientos Totales': stats.movimientos,
+                'Valor Estimado': `$${items.reduce((sum, i) => sum + (parseFloat(i.Valor) || 0), 0).toLocaleString('es-MX')}`
+            };
+        }
+
+        function renderStats(stats, container) {
+            container.style.display = 'grid';
+            container.innerHTML = Object.entries(stats).map(([label, value]) => `
+                <div class="stat-box">
+                    <div class="number">${value}</div>
+                    <div class="label">${label}</div>
+                </div>
+            `).join('');
+        }
+
+        function renderProfessionalTable(data, type) {
             const tableHead = document.getElementById('table-head');
             const tableBody = document.getElementById('table-body');
 
-            let headers, rows;
+            let headers, renderRow;
 
-            // Definir columnas y contenido según el tipo de reporte
             switch (type) {
                 case 'Movimientos':
-                    headers = ['ID', 'Fecha', 'Usuario', 'Acción', 'Tipo', 'Detalles'];
-                    tableHead.innerHTML = `<tr>${headers.map(h => `<th>${h}</th>`).join('')}</tr>`;
-
-                    if (data.length === 0) {
-                        tableBody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:20px;">No se encontraron movimientos.</td></tr>';
-                        return;
-                    }
-
-                    tableBody.innerHTML = data.map(m => `
+                    headers = ['#', 'Fecha/Hora', 'Usuario', 'Acción', 'Tipo', 'Artículo/ID', 'Detalles'];
+                    renderRow = (m, index) => `
                         <tr>
-                            <td style="font-weight:bold;">${m.ID || m.id || '---'}</td>
+                            <td style="font-weight:bold;">${index + 1}</td>
                             <td>${m.Fecha || m.fecha || '---'}</td>
                             <td>${m.Usuario || m.usuario || '---'}</td>
                             <td>${m.Accion || m.accion || '---'}</td>
-                            <td><span style="padding:3px 8px; border-radius:4px; background:#f0f0f0; font-size:0.7rem; font-weight:bold;">${m.Tipo || m.tipo || '---'}</span></td>
+                            <td><span style="padding:3px 8px; border-radius:4px; background:#e8f4f8; font-size:0.7rem; font-weight:bold;">${m.Tipo || m.tipo || '---'}</span></td>
+                            <td>${m['ID Registro'] || m.id || '---'}</td>
                             <td style="font-size:0.75rem;">${m.Detalles || m.detalles || '---'}</td>
                         </tr>
-                    `).join('');
+                    `;
                     break;
 
                 case 'Departamentos':
-                    headers = ['Departamento', 'Código', 'Artículo', 'Responsable', 'Estado', 'Valor'];
-                    tableHead.innerHTML = `<tr>${headers.map(h => `<th>${h}</th>`).join('')}</tr>`;
-
-                    if (data.length === 0) {
-                        tableBody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:20px;">No se encontraron artículos.</td></tr>';
-                        return;
-                    }
-
-                    tableBody.innerHTML = data.map(item => {
-                        const dept = item.Departamento || item.departamento || 'S/A';
-                        const code = item.Codigo || item.codigo || item.id || item.ID || 'S/C';
-                        const desc = item.Nombre || item.nombre || item.Descripción || item.descripcion || item.Articulo || '---';
-                        const resp = item.Responsable || item.responsable || 'S/R';
-                        const status = (item.Estado || item.estado || 'ACTIVO').toUpperCase();
-                        const value = item.Valor || item.valor || '0';
-
-                        return `
-                            <tr>
-                                <td style="color:#2ecc71; font-weight:bold;">${dept}</td>
-                                <td style="font-weight:bold; color:#0066cc;">${code}</td>
-                                <td style="text-transform:uppercase;">${desc}</td>
-                                <td>${resp}</td>
-                                <td><span style="padding:3px 8px; border-radius:4px; background:#f0f0f0; font-size:0.7rem; font-weight:bold;">${status}</span></td>
-                                <td style="text-align:right;">$${parseFloat(value).toLocaleString()}</td>
-                            </tr>
-                        `;
-                    }).join('');
+                    headers = ['Departamento', 'Código', 'Artículo', 'Responsable', 'Estado', 'Valor (MXN)'];
+                    renderRow = (item, index) => `
+                        <tr>
+                            <td style="font-weight:bold;">${item.Departamento || 'S/A'}</td>
+                            <td>${item.Codigo || item.codigo || item.ID || 'S/C'}</td>
+                            <td style="text-transform:uppercase;">${item.Nombre || item.nombre || '---'}</td>
+                            <td>${item.Responsable || item.responsable || 'S/R'}</td>
+                            <td><span style="padding:3px 8px; border-radius:4px; background:#e8f4f8; font-size:0.7rem; font-weight:bold;">${(item.Estado || 'ACTIVO').toUpperCase()}</span></td>
+                            <td style="text-align:right;">$${(parseFloat(item.Valor) || 0).toLocaleString('es-MX', { minimumFractionDigits: 2 })}</td>
+                        </tr>
+                    `;
                     break;
 
                 case 'Estado':
-                    headers = ['Estado', 'Código', 'Artículo', 'Departamento', 'Fecha Adquisición', 'Observaciones'];
-                    tableHead.innerHTML = `<tr>${headers.map(h => `<th>${h}</th>`).join('')}</tr>`;
-
-                    if (data.length === 0) {
-                        tableBody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:20px;">No se encontraron artículos con este estado.</td></tr>';
-                        return;
-                    }
-
-                    tableBody.innerHTML = data.map(item => {
-                        const status = (item.Estado || item.estado || 'ACTIVO').toUpperCase();
-                        const code = item.Codigo || item.codigo || item.id || item.ID || 'S/C';
-                        const desc = item.Nombre || item.nombre || item.Descripción || item.descripcion || item.Articulo || '---';
-                        const dept = item.Departamento || item.departamento || 'S/A';
-                        const fecha = item.Fecha_Adquisicion || item.fecha_adquisicion || item.Fecha || '---';
-                        const obs = item.Observaciones || item.observaciones || '---';
-
-                        return `
-                            <tr>
-                                <td><span style="padding:3px 8px; border-radius:4px; background:#f0f0f0; font-size:0.7rem; font-weight:bold;">${status}</span></td>
-                                <td style="font-weight:bold; color:#0066cc;">${code}</td>
-                                <td style="text-transform:uppercase;">${desc}</td>
-                                <td style="color:#2ecc71;">${dept}</td>
-                                <td>${fecha}</td>
-                                <td style="font-size:0.75rem;">${obs}</td>
-                            </tr>
-                        `;
-                    }).join('');
+                    headers = ['Estado', 'Código', 'Artículo', 'Departamento', 'Fecha Adquisición', 'Valor (MXN)'];
+                    renderRow = (item, index) => `
+                        <tr>
+                            <td><span style="padding:3px 8px; border-radius:4px; background:#e8f4f8; font-size:0.7rem; font-weight:bold;">${(item.Estado || 'ACTIVO').toUpperCase()}</span></td>
+                            <td>${item.Codigo || item.codigo || item.ID || 'S/C'}</td>
+                            <td style="text-transform:uppercase;">${item.Nombre || item.nombre || '---'}</td>
+                            <td>${item.Departamento || 'S/A'}</td>
+                            <td>${item.Fecha_Adquisicion || item.fecha_adquisicion || '---'}</td>
+                            <td style="text-align:right;">$${(parseFloat(item.Valor) || 0).toLocaleString('es-MX', { minimumFractionDigits: 2 })}</td>
+                        </tr>
+                    `;
                     break;
 
                 case 'Mantenimiento':
                     headers = ['Código', 'Artículo', 'Departamento', 'Estado', 'Responsable', 'Observaciones'];
-                    tableHead.innerHTML = `<tr>${headers.map(h => `<th>${h}</th>`).join('')}</tr>`;
-
-                    if (data.length === 0) {
-                        tableBody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:20px;">No hay artículos en mantenimiento.</td></tr>';
-                        return;
-                    }
-
-                    tableBody.innerHTML = data.map(item => {
-                        const code = item.Codigo || item.codigo || item.id || item.ID || 'S/C';
-                        const desc = item.Nombre || item.nombre || item.Descripción || item.descripcion || item.Articulo || '---';
-                        const dept = item.Departamento || item.departamento || 'S/A';
-                        const status = (item.Estado || item.estado || 'MANTENIMIENTO').toUpperCase();
-                        const resp = item.Responsable || item.responsable || 'S/R';
-                        const obs = item.Observaciones || item.observaciones || 'Requiere revisión';
-
-                        return `
-                            <tr>
-                                <td style="font-weight:bold; color:#0066cc;">${code}</td>
-                                <td style="text-transform:uppercase;">${desc}</td>
-                                <td style="color:#2ecc71;">${dept}</td>
-                                <td><span style="padding:3px 8px; border-radius:4px; background:#f39c12; color:white; font-size:0.7rem; font-weight:bold;">${status}</span></td>
-                                <td>${resp}</td>
-                                <td style="font-size:0.75rem; color:#e74c3c;">${obs}</td>
-                            </tr>
-                        `;
-                    }).join('');
+                    renderRow = (item, index) => `
+                        <tr>
+                            <td style="font-weight:bold;">${item.Codigo || item.codigo || item.ID || 'S/C'}</td>
+                            <td style="text-transform:uppercase;">${item.Nombre || item.nombre || '---'}</td>
+                            <td>${item.Departamento || 'S/A'}</td>
+                            <td><span style="padding:3px 8px; border-radius:4px; background:#fff3cd; color:#856404; font-size:0.7rem; font-weight:bold;">${(item.Estado || 'MANTENIMIENTO').toUpperCase()}</span></td>
+                            <td>${item.Responsable || 'S/R'}</td>
+                            <td style="font-size:0.75rem;">${item.Observaciones || 'Requiere revisión'}</td>
+                        </tr>
+                    `;
                     break;
 
-                default: // 'Inventario'
-                    headers = ['Código', 'Descripción', 'Marca/Modelo', 'Serie', 'Departamento', 'Estado'];
-                    tableHead.innerHTML = `<tr>${headers.map(h => `<th>${h}</th>`).join('')}</tr>`;
+                case 'Resumen':
+                    headers = ['Categoría', 'Cantidad', 'Valor Total (MXN)', 'Porcentaje'];
+                    const summary = {};
+                    data.forEach(item => {
+                        const cat = item.Categoria || item.categoria || item.Tipo || 'Sin Categoría';
+                        if (!summary[cat]) summary[cat] = { count: 0, value: 0 };
+                        summary[cat].count++;
+                        summary[cat].value += parseFloat(item.Valor) || 0;
+                    });
+                    const totalValue = Object.values(summary).reduce((sum, s) => sum + s.value, 0);
+                    data = Object.entries(summary).map(([cat, stats]) => ({
+                        categoria: cat,
+                        cantidad: stats.count,
+                        valor: stats.value,
+                        porcentaje: ((stats.value / totalValue) * 100).toFixed(2)
+                    }));
+                    renderRow = (item, index) => `
+                        <tr>
+                            <td style="font-weight:bold;">${item.categoria}</td>
+                            <td style="text-align:center;">${item.cantidad}</td>
+                            <td style="text-align:right;">$${item.valor.toLocaleString('es-MX', { minimumFractionDigits: 2 })}</td>
+                            <td style="text-align:center;">${item.porcentaje}%</td>
+                        </tr>
+                    `;
+                    break;
 
-                    if (data.length === 0) {
-                        tableBody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:20px;">No se encontraron artículos con los filtros seleccionados.</td></tr>';
-                        return;
-                    }
-
-                    tableBody.innerHTML = data.map(item => {
-                        const code = item.Codigo || item.codigo || item.id || item.ID || 'S/C';
-                        const desc = item.Nombre || item.nombre || item.Descripción || item.descripcion || item.Articulo || '---';
-                        const marca = item.Marca || item.marca || 'S/D';
-                        const modelo = item.Modelo || item.modelo || 'S/D';
-                        const brandModel = `${marca} ${modelo}`.trim();
-                        const serial = item.Serie || item.serie || item['Numero de Serie'] || item.Numero_Serie || 'S/N';
-                        const dept = item.Departamento || item.departamento || 'S/A';
-                        const status = (item.Estado || item.estado || 'ACTIVO').toUpperCase();
-
-                        return `
-                            <tr>
-                                <td style="font-weight:bold; color:#0066cc;">${code}</td>
-                                <td style="text-transform:uppercase;">${desc}</td>
-                                <td>${brandModel}</td>
-                                <td>${serial}</td>
-                                <td style="color:#2ecc71;">${dept}</td>
-                                <td><span style="padding:3px 8px; border-radius:4px; background:#f0f0f0; font-size:0.7rem; font-weight:bold;">${status}</span></td>
-                            </tr>
-                        `;
-                    }).join('');
+                default: // Inventario
+                    headers = ['#', 'Código', 'Descripción', 'Marca/Modelo', 'Serie', 'Departamento', 'Estado', 'Valor (MXN)'];
+                    renderRow = (item, index) => `
+                        <tr>
+                            <td style="font-weight:bold;">${index + 1}</td>
+                            <td>${item.Codigo || item.codigo || item.ID || 'S/C'}</td>
+                            <td style="text-transform:uppercase;">${item.Nombre || item.nombre || '---'}</td>
+                            <td>${(item.Marca || '') + ' ' + (item.Modelo || '')}</td>
+                            <td>${item.Serie || item.serie || 'S/N'}</td>
+                            <td>${item.Departamento || 'S/A'}</td>
+                            <td><span style="padding:3px 8px; border-radius:4px; background:#e8f4f8; font-size:0.7rem; font-weight:bold;">${(item.Estado || 'ACTIVO').toUpperCase()}</span></td>
+                            <td style="text-align:right;">$${(parseFloat(item.Valor) || 0).toLocaleString('es-MX', { minimumFractionDigits: 2 })}</td>
+                        </tr>
+                    `;
             }
+
+            tableHead.innerHTML = `<tr>${headers.map(h => `<th>${h}</th>`).join('')}</tr>`;
+
+            if (data.length === 0) {
+                tableBody.innerHTML = `<tr><td colspan="${headers.length}" style="text-align:center; padding:20px;">No se encontraron registros.</td></tr>`;
+                return;
+            }
+
+            tableBody.innerHTML = data.map((item, index) => renderRow(item, index)).join('');
         }
 
         function exportFormat(format) {
+            if (currentReportData.length === 0) {
+                alert('Primero genera un reporte');
+                return;
+            }
+
             UI.showToast(`Generando ${format}...`, "info");
             if (format === 'PDF') {
                 window.print();
@@ -650,71 +522,7 @@
                 const table = document.getElementById('data-table');
                 const wb = XLSX.utils.table_to_book(table, { sheet: "Reporte" });
                 XLSX.writeFile(wb, `Reporte_SIBIM_${currentReportType}_${new Date().getTime()}.xlsx`);
-            } else if (format === 'CSV') {
-                const table = document.getElementById('data-table');
-                const wb = XLSX.utils.table_to_book(table);
-                XLSX.writeFile(wb, `Reporte_SIBIM_${currentReportType}_${new Date().getTime()}.csv`, { bookType: 'csv' });
             }
-        }
-
-        async function applyFilters() {
-            UI.showToast("Aplicando filtros personalizados...", "info");
-            const dateStart = document.getElementById('filter-date-start').value;
-            const dateEnd = document.getElementById('filter-date-end').value;
-            const dept = document.getElementById('filter-dept').value;
-            const status = document.getElementById('filter-status').value;
-            const typeFilter = document.getElementById('filter-type').value;
-
-            try {
-                let filtered = await API.fetchItems();
-
-                if (dept && dept !== 'Todos los departamentos') {
-                    filtered = filtered.filter(i => (i.Departamento || i.departamento || '') === dept);
-                }
-                if (status && status !== 'Todos los estados') {
-                    filtered = filtered.filter(i => (i.Estado || i.estado || '').toUpperCase() === status.toUpperCase());
-                }
-                if (typeFilter && typeFilter !== 'Todos los tipos') {
-                    filtered = filtered.filter(i => (i.Tipo || i.Categoria || i.tipo || i.categoria || '') === typeFilter);
-                }
-
-                // Filtro de fechas (requiere campo de fecha en los datos)
-                if (dateStart) {
-                    const start = new Date(dateStart);
-                    filtered = filtered.filter(i => {
-                        const dateStr = i.Fecha || i.fecha || i.Fecha_Adquisicion || i.fecha_adquisicion;
-                        if (!dateStr) return true;
-                        return new Date(dateStr) >= start;
-                    });
-                }
-                if (dateEnd) {
-                    const end = new Date(dateEnd);
-                    filtered = filtered.filter(i => {
-                        const dateStr = i.Fecha || i.fecha || i.Fecha_Adquisicion || i.fecha_adquisicion;
-                        if (!dateStr) return true;
-                        return new Date(dateStr) <= end;
-                    });
-                }
-
-                currentReportData = filtered;
-                renderReportTable(filtered, currentReportType || 'Inventario');
-                document.getElementById('report-title-text').textContent = `REPORTE PERSONALIZADO (${(currentReportType || 'Inventario').toUpperCase()})`;
-                document.getElementById('printable-report').style.display = 'block';
-                UI.showToast(`Filtros aplicados: ${filtered.length} artículos encontrados`, "success");
-            } catch (err) {
-                UI.showToast("Error al aplicar filtros", "error");
-                Logger.error('Error en filtros:', err);
-            }
-        }
-
-        function clearFilters() {
-            UI.showToast("Limpiando filtros...", "info");
-            document.getElementById('filter-date-start').value = '';
-            document.getElementById('filter-date-end').value = '';
-            document.getElementById('filter-dept').selectedIndex = 0;
-            document.getElementById('filter-status').selectedIndex = 0;
-            document.getElementById('filter-type').selectedIndex = 0;
-            setTimeout(() => generateReport('Inventario'), 300);
         }
     </script>
 </body>

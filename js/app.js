@@ -216,28 +216,110 @@ async function loadDashboardData() {
 function initDispersionChart(items) {
     const ctx = document.getElementById('dispersionChart');
     if (ctx && typeof Chart !== 'undefined') {
-        // Scatter chart needs {x, y} data
-        const scatterData = items.slice(0, 50).map((item, index) => ({
-            x: index + 1,
-            y: parseFloat(item.Valor || item.valor || Math.random() * 500)
+        const scatterData = items.map((item, index) => ({
+            x: index,
+            y: parseFloat(item.Valor) || Math.random() * 10000,
+            label: item.Nombre || item.nombre || 'Sin nombre',
+            dept: item.Departamento || 'S/A'
         }));
 
         new Chart(ctx, {
             type: 'scatter',
             data: {
                 datasets: [{
-                    label: 'Valor vs Índice',
+                    label: 'Valor de Artículos',
                     data: scatterData,
-                    backgroundColor: 'rgba(0, 210, 255, 0.6)',
-                    borderColor: '#00d2ff',
+                    backgroundColor: function (context) {
+                        const value = context.parsed.y;
+                        if (value > 50000) return 'rgba(231, 76, 60, 0.7)';
+                        if (value > 20000) return 'rgba(241, 196, 15, 0.7)';
+                        if (value > 10000) return 'rgba(52, 152, 219, 0.7)';
+                        return 'rgba(46, 204, 113, 0.7)';
+                    },
+                    borderColor: function (context) {
+                        const value = context.parsed.y;
+                        if (value > 50000) return '#e74c3c';
+                        if (value > 20000) return '#f1c40f';
+                        if (value > 10000) return '#3498db';
+                        return '#2ecc71';
+                    },
+                    borderWidth: 2,
+                    pointRadius: 6,
+                    pointHoverRadius: 10,
+                    pointHoverBorderWidth: 3
                 }]
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
                 scales: {
-                    x: { ticks: { color: '#8892b0' }, grid: { color: 'rgba(255,255,255,0.05)' } },
-                    y: { ticks: { color: '#8892b0' }, grid: { color: 'rgba(255,255,255,0.05)' } }
+                    x: {
+                        type: 'linear',
+                        position: 'bottom',
+                        grid: {
+                            color: 'rgba(255, 255, 255, 0.05)',
+                            lineWidth: 1
+                        },
+                        ticks: {
+                            color: '#8892b0',
+                            font: { size: 10, weight: '600' }
+                        },
+                        title: {
+                            display: true,
+                            text: 'Índice de Artículo',
+                            color: '#8892b0',
+                            font: { size: 11, weight: '700' }
+                        }
+                    },
+                    y: {
+                        beginAtZero: true,
+                        grid: {
+                            color: 'rgba(0, 210, 255, 0.1)',
+                            lineWidth: 1
+                        },
+                        ticks: {
+                            color: '#8892b0',
+                            font: { size: 10, weight: '600' },
+                            callback: function (value) {
+                                return '$' + value.toLocaleString('es-MX');
+                            }
+                        },
+                        title: {
+                            display: true,
+                            text: 'Valor (MXN)',
+                            color: '#8892b0',
+                            font: { size: 11, weight: '700' }
+                        }
+                    }
+                },
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        backgroundColor: 'rgba(0, 0, 0, 0.9)',
+                        titleColor: '#00d2ff',
+                        bodyColor: '#fff',
+                        borderColor: '#00d2ff',
+                        borderWidth: 2,
+                        padding: 15,
+                        displayColors: false,
+                        callbacks: {
+                            title: function (context) {
+                                const item = context[0].raw;
+                                return item.label || 'Artículo';
+                            },
+                            label: function (context) {
+                                const item = context.raw;
+                                return [
+                                    `Departamento: ${item.dept}`,
+                                    `Valor: $${context.parsed.y.toLocaleString('es-MX', { minimumFractionDigits: 2 })}`
+                                ];
+                            }
+                        }
+                    }
+                },
+                animation: {
+                    duration: 2000,
+                    easing: 'easeInOutQuart'
                 }
             }
         });
@@ -288,16 +370,65 @@ function initDeptChart(labels, data) {
                 datasets: [{
                     data: data.length ? data : [1],
                     backgroundColor: [
-                        '#00d2ff', '#9b59b6', '#2ecc71', '#f1c40f', '#e74c3c', '#e67e22', '#1abc9c'
+                        'rgba(0, 210, 255, 0.8)',
+                        'rgba(155, 89, 182, 0.8)',
+                        'rgba(46, 204, 113, 0.8)',
+                        'rgba(241, 196, 15, 0.8)',
+                        'rgba(231, 76, 60, 0.8)',
+                        'rgba(230, 126, 34, 0.8)',
+                        'rgba(26, 188, 156, 0.8)'
                     ],
-                    borderWidth: 0
+                    borderColor: [
+                        '#00d2ff',
+                        '#9b59b6',
+                        '#2ecc71',
+                        '#f1c40f',
+                        '#e74c3c',
+                        '#e67e22',
+                        '#1abc9c'
+                    ],
+                    borderWidth: 3,
+                    hoverOffset: 15
                 }]
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
                 plugins: {
-                    legend: { position: 'right', labels: { color: '#e6f1ff', padding: 20 } }
+                    legend: {
+                        position: 'right',
+                        labels: {
+                            color: '#e6f1ff',
+                            padding: 15,
+                            font: { size: 11, weight: '600' },
+                            usePointStyle: true,
+                            pointStyle: 'circle'
+                        }
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(0, 0, 0, 0.9)',
+                        titleColor: '#00d2ff',
+                        bodyColor: '#fff',
+                        borderColor: '#00d2ff',
+                        borderWidth: 2,
+                        padding: 15,
+                        displayColors: true,
+                        callbacks: {
+                            label: function (context) {
+                                const label = context.label || '';
+                                const value = context.parsed || 0;
+                                const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                const percentage = ((value / total) * 100).toFixed(1);
+                                return `${label}: ${value} (${percentage}%)`;
+                            }
+                        }
+                    }
+                },
+                animation: {
+                    animateRotate: true,
+                    animateScale: true,
+                    duration: 2000,
+                    easing: 'easeInOutQuart'
                 }
             }
         });
@@ -312,22 +443,73 @@ function initStatusChart(labels, data) {
             data: {
                 labels: labels.length ? labels : ['Sin Datos'],
                 datasets: [{
-                    label: 'Cantidad',
+                    label: 'Cantidad de Artículos',
                     data: data.length ? data : [0],
-                    backgroundColor: 'rgba(0, 210, 255, 0.6)',
+                    backgroundColor: function (context) {
+                        const chart = context.chart;
+                        const { ctx, chartArea } = chart;
+                        if (!chartArea) return 'rgba(0, 210, 255, 0.6)';
+
+                        const gradient = ctx.createLinearGradient(0, chartArea.bottom, 0, chartArea.top);
+                        gradient.addColorStop(0, 'rgba(0, 210, 255, 0.3)');
+                        gradient.addColorStop(1, 'rgba(0, 210, 255, 0.9)');
+                        return gradient;
+                    },
                     borderColor: '#00d2ff',
-                    borderWidth: 1
+                    borderWidth: 2,
+                    borderRadius: 8,
+                    barThickness: 40,
+                    hoverBackgroundColor: 'rgba(0, 210, 255, 1)',
+                    hoverBorderWidth: 3
                 }]
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
                 scales: {
-                    y: { beginAtZero: true, grid: { color: 'rgba(255, 255, 255, 0.1)' }, ticks: { color: '#8892b0' } },
-                    x: { ticks: { color: '#8892b0' } }
+                    y: {
+                        beginAtZero: true,
+                        grid: {
+                            color: 'rgba(0, 210, 255, 0.1)',
+                            lineWidth: 1
+                        },
+                        ticks: {
+                            color: '#8892b0',
+                            font: { size: 11, weight: '600' },
+                            padding: 10
+                        }
+                    },
+                    x: {
+                        grid: { display: false },
+                        ticks: {
+                            color: '#8892b0',
+                            font: { size: 11, weight: '600' }
+                        }
+                    }
                 },
                 plugins: {
-                    legend: { display: false }
+                    legend: { display: false },
+                    tooltip: {
+                        backgroundColor: 'rgba(0, 0, 0, 0.9)',
+                        titleColor: '#00d2ff',
+                        bodyColor: '#fff',
+                        borderColor: '#00d2ff',
+                        borderWidth: 2,
+                        padding: 15,
+                        displayColors: false,
+                        callbacks: {
+                            title: function (context) {
+                                return `Estado: ${context[0].label}`;
+                            },
+                            label: function (context) {
+                                return `Total: ${context.parsed.y} artículos`;
+                            }
+                        }
+                    }
+                },
+                animation: {
+                    duration: 1800,
+                    easing: 'easeInOutCubic'
                 }
             }
         });
