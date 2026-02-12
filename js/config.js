@@ -1,6 +1,6 @@
 const CONFIG = {
     // URL del Web App de Google Apps Script (Backend v2.1 con Sistema de Auditoria)
-    scriptUrl: 'https://script.google.com/macros/s/AKfycbxl8txHNu-4QVHm6vVX4o5mJe6UCbZh2xLVK5dHREGrzs9kvk577mCCy_z6fDqCR2yVFg/exec',
+    scriptUrl: 'https://script.google.com/macros/s/AKfycbwSOK2EMuUyDTIODz10rwqknq8kRFyXo_i82f7Dvs2A_9u87EiFjhKmWqvElfio7x8mGg/exec',
 
     // ID de la hoja de cálculo de Google
     spreadsheetId: '1sNOZaDhhkCMRcY2u038tlKHQXS02dSQD3jdTwcQD22Q',
