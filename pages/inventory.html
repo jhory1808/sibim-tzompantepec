@@ -717,12 +717,25 @@
             document.body.appendChild(modal);
         }
         async function exportInventory() {
-            if (!fullInventory || fullInventory.length === 0) {
+            const query = document.getElementById('main-search').value.toLowerCase().trim();
+            let dataToExport = fullInventory;
+
+            if (query) {
+                dataToExport = fullInventory.filter(item => {
+                    const code = (item.Codigo || item.codigo || item.id || '').toString().toLowerCase();
+                    const name = (item.Nombre || item.nombre || '').toString().toLowerCase();
+                    const dept = (item.Departamento || item.departamento || '').toString().toLowerCase();
+                    return code.includes(query) || name.includes(query) || dept.includes(query);
+                });
+            }
+
+            if (!dataToExport || dataToExport.length === 0) {
                 return UI.showToast("No hay datos para exportar", "error");
             }
-            UI.showToast("Generando archivo Excel...", "info");
+
+            UI.showToast(`Exportando ${dataToExport.length} registros...`, "info");
             try {
-                const worksheet = XLSX.utils.json_to_sheet(fullInventory);
+                const worksheet = XLSX.utils.json_to_sheet(dataToExport);
                 const workbook = XLSX.utils.book_new();
                 XLSX.utils.book_append_sheet(workbook, worksheet, "Inventario");
                 XLSX.writeFile(workbook, `Inventario_SIBIM_${new Date().toISOString().split('T')[0]}.xlsx`);

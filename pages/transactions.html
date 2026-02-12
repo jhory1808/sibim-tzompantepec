@@ -122,7 +122,7 @@
 
     <main style="padding: 20px 5%;">
         <!-- Action Buttons Section -->
-        <div style="display: flex; gap: 15px; margin-bottom: 30px;">
+        <div style="display: flex; gap: 15px; margin-bottom: 30px; align-items: center; flex-wrap: wrap;">
             <button class="btn-action btn-asignacion" onclick="openMovementModal('ASIGNACIÓN DE RESPONSABLE')">
                 <i class="fas fa-user-check"></i> Asignación
             </button>
@@ -134,6 +134,20 @@
             </button>
             <button class="btn-action btn-traslado" onclick="openMovementModal('TRASLADO ENTRE DEPARTAMENTOS')">
                 <i class="fas fa-truck"></i> Traslado
+            </button>
+
+            <div style="flex: 1; min-width: 250px; position: relative; margin-left: 20px;">
+                <input type="text" id="transaction-search" class="glass"
+                    placeholder="Buscar transacción (Código, Tipo, Usuario)..."
+                    style="width: 100%; padding: 12px 15px 12px 45px; border-radius: 12px; color: white;"
+                    onkeyup="filterTransactions()">
+                <i class="fas fa-search"
+                    style="position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: var(--accent-blue);"></i>
+            </div>
+
+            <button class="btn" onclick="exportTransactions()"
+                style="background: #27ae60; color: white; padding: 12px 25px; border-radius: 12px; font-weight: bold;">
+                <i class="fas fa-file-excel"></i> EXPORTAR
             </button>
         </div>
 
@@ -221,6 +235,7 @@
         </div>
     </div>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.5/xlsx.full.min.js"></script>
     <script src="../js/config.js?v=2.1.0"></script>
     <script src="../js/api.js?v=2.1.0"></script>
     <script src="../js/auth.js?v=2.1.0"></script>
@@ -233,33 +248,75 @@
             populateSelectors();
         });
 
+        let allMovements = [];
+
         async function loadTransactions() {
             const tbody = document.getElementById('transaction-body');
             try {
-                const movements = await API.getMovements();
-                if (!movements || movements.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 40px;">No hay movimientos registrados.</td></tr>';
-                    return;
-                }
-
-                tbody.innerHTML = movements.map(m => `
-                    <tr>
-                        <td style="font-weight: bold; color: #5dade2;">${m.ID || m.id || '---'}</td>
-                        <td style="font-family: monospace;">${m.CodigoArticulo || m['ID Registro'] || 'TZ-000'}</td>
-                        <td>${m.Articulo || m.Detalles || 'Sin Nombre'}</td>
-                        <td>
-                            <span class="badge-type ${getBadgeClass(m.Tipo || m.tipo)}">
-                                <i class="${getIcon(m.Tipo || m.tipo)}"></i> ${m.Tipo || m.tipo || 'MOV'}
-                            </span>
-                        </td>
-                        <td>${m.Origen || '---'}</td>
-                        <td>${m.Destino || '---'}</td>
-                        <td>${m.Fecha || m.fecha || '---'}</td>
-                    </tr>
-                `).reverse().join('');
+                allMovements = await API.getMovements();
+                renderTransactions(allMovements);
             } catch (err) {
                 tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 40px; color: #e74c3c;">Error al cargar datos.</td></tr>';
             }
+        }
+
+        function renderTransactions(data) {
+            const tbody = document.getElementById('transaction-body');
+            if (!data || data.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 40px;">No hay movimientos registrados.</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = data.map(m => `
+                <tr>
+                    <td style="font-weight: bold; color: #5dade2;">${m.ID || m.id || '---'}</td>
+                    <td style="font-family: monospace;">${m.CodigoArticulo || m['ID Registro'] || 'TZ-000'}</td>
+                    <td>${m.Articulo || m.Detalles || 'Sin Nombre'}</td>
+                    <td>
+                        <span class="badge-type ${getBadgeClass(m.Tipo || m.tipo)}">
+                            <i class="${getIcon(m.Tipo || m.tipo)}"></i> ${m.Tipo || m.tipo || 'MOV'}
+                        </span>
+                    </td>
+                    <td>${m.Origen || '---'}</td>
+                    <td>${m.Destino || '---'}</td>
+                    <td>${m.Fecha || m.fecha || '---'}</td>
+                </tr>
+            `).reverse().join('');
+        }
+
+        function filterTransactions() {
+            const query = document.getElementById('transaction-search').value.toLowerCase().trim();
+            if (!query) {
+                renderTransactions(allMovements);
+                return;
+            }
+
+            const filtered = allMovements.filter(m => {
+                const code = String(m.CodigoArticulo || m['ID Registro'] || '').toLowerCase();
+                const art = String(m.Articulo || m.Detalles || '').toLowerCase();
+                const type = String(m.Tipo || m.tipo || '').toLowerCase();
+                const user = String(m.Usuario || m.usuario || '').toLowerCase();
+
+                return code.includes(query) || art.includes(query) || type.includes(query) || user.includes(query);
+            });
+
+            renderTransactions(filtered);
+        }
+
+        function exportTransactions() {
+            const query = document.getElementById('transaction-search').value.toLowerCase().trim();
+            const dataToExport = query ? allMovements.filter(m => {
+                const code = String(m.CodigoArticulo || m['ID Registro'] || '').toLowerCase();
+                const art = String(m.Articulo || m.Detalles || '').toLowerCase();
+                return code.includes(query) || art.includes(query);
+            }) : allMovements;
+
+            if (dataToExport.length === 0) return UI.showToast("No hay registros para exportar", "warning");
+
+            const worksheet = XLSX.utils.json_to_sheet(dataToExport);
+            const workbook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(workbook, worksheet, "Transacciones");
+            XLSX.writeFile(workbook, `Transacciones_SIBIM_${new Date().toISOString().slice(0, 10)}.xlsx`);
         }
 
         function getBadgeClass(type) {
