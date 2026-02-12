@@ -174,42 +174,59 @@ function handleRolePermissions() {
 }
 
 async function loadDashboardData() {
-    const { items, stats } = await API.getStats();
+    try {
+        console.log("[DASHBOARD] Iniciando carga de datos...");
+        const result = await API.getStats();
+        if (!result) throw new Error("No se obtuvieron datos de la API");
 
-    // Update Stats Cards
-    const totalCount = stats.total || items.length;
-    const deptoCount = stats.departamentos || new Set(items.map(i => i.Departamento || i.departamento)).size;
-    const maintenanceCount = items.filter(i => (i.Estado || i.estado || '').toUpperCase().includes('MANTENIMIENTO')).length;
+        const { items, stats } = result;
+        console.log(`[DASHBOARD] ${items.length} artículos obtenidos.`);
 
-    const cards = document.querySelectorAll('.stat-card .value');
-    if (cards.length >= 4) {
-        cards[0].textContent = totalCount;
-        cards[1].textContent = deptoCount;
-        cards[2].textContent = stats.movimientos || 0;
-        cards[3].textContent = maintenanceCount;
-    }
+        // Update Stats Cards
+        const totalCount = stats.total || items.length;
+        const deptoCount = stats.departamentos || new Set(items.map(i => i.Departamento || i.departamento)).size;
+        const maintenanceCount = items.filter(i => (i.Estado || i.estado || '').toUpperCase().includes('MANTENIMIENTO')).length;
 
-    // Build Chart Data from Real Items
-    const deptCounts = {};
-    const statusCounts = {};
+        const cards = document.querySelectorAll('.stat-card .value');
+        if (cards.length >= 4) {
+            cards[0].textContent = totalCount;
+            cards[1].textContent = deptoCount;
+            cards[2].textContent = stats.movimientos || 0;
+            cards[3].textContent = maintenanceCount;
+        }
 
-    items.forEach(item => {
-        const dept = item.Departamento || item.departamento || 'Sin Asignar';
-        deptCounts[dept] = (deptCounts[dept] || 0) + 1;
+        // Build Chart Data from Real Items
+        const deptCounts = {};
+        const statusCounts = {};
 
-        const status = (item.Estado || item.estado || 'ACTIVO').toUpperCase();
-        statusCounts[status] = (statusCounts[status] || 0) + 1;
-    });
+        items.forEach(item => {
+            const dept = item.Departamento || item.departamento || 'Sin Asignar';
+            deptCounts[dept] = (deptCounts[dept] || 0) + 1;
 
-    initDeptChart(Object.keys(deptCounts), Object.values(deptCounts));
-    initStatusChart(Object.keys(statusCounts), Object.values(statusCounts));
-    initDispersionChart(items);
-    initTrendChart(items);
-    initRadarChart(Object.keys(deptCounts).slice(0, 5), Object.values(deptCounts).slice(0, 5));
-    initCategoryChart(items);
+            const status = (item.Estado || item.estado || 'ACTIVO').toUpperCase();
+            statusCounts[status] = (statusCounts[status] || 0) + 1;
+        });
 
-    if (items.length === 0) {
-        UI.showToast("No se detectaron bienes. Si tienes datos en tu Excel, limpia el caché (Ctrl+F5) o verifica los permisos del Script de Google.", "warning");
+        console.log("[DASHBOARD] Inicializando gráficas...");
+
+        // Verificación de existencia de canvas antes de inicializar
+        if (document.getElementById('deptChart')) initDeptChart(Object.keys(deptCounts), Object.values(deptCounts));
+        if (document.getElementById('statusChart')) initStatusChart(Object.keys(statusCounts), Object.values(statusCounts));
+        if (document.getElementById('dispersionChart')) initDispersionChart(items);
+        if (document.getElementById('trendChart')) initTrendChart(items);
+        if (document.getElementById('radarChart')) {
+            const radarLabels = Object.keys(deptCounts).slice(0, 5);
+            const radarData = Object.values(deptCounts).slice(0, 5);
+            initRadarChart(radarLabels, radarData);
+        }
+        if (document.getElementById('categoryChart')) initCategoryChart(items);
+
+        if (items.length === 0) {
+            UI.showToast("No se detectaron bienes. Verifica la conexión con Google Sheets.", "warning");
+        }
+    } catch (error) {
+        console.error("[DASHBOARD] Error crítico:", error);
+        UI.showToast("Error al cargar datos del dashboard", "error");
     }
 }
 
