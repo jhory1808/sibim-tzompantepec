@@ -1,19 +1,18 @@
-const CACHE_NAME = 'sibim-v2.1.0';
+const CACHE_NAME = 'sibim-v2.1.0-pwa';
 const ASSETS = [
     '/',
+    '/index.html',
     '/home.html',
     '/login.html',
-    '/index.html',
+    '/manifest.json',
     '/css/futuristic.css',
     '/js/config.js',
     '/js/api.js',
     '/js/auth.js',
-    '/js/updates-manager.js',
     '/js/app.js',
-    '/pages/management.html',
-    '/pages/qr-repository.html',
     '/assets/images/logo_municipio.png',
-    '/assets/images/logo_ofs.png',
+    '/assets/images/favicon.png',
+    '/assets/images/escudo.png',
     'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css',
     'https://cdn.jsdelivr.net/npm/chart.js'
 ];

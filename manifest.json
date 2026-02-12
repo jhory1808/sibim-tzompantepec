@@ -24,32 +24,38 @@
     ],
     "icons": [
         {
-            "src": "assets/images/logo_municipio.png",
-            "sizes": "192x192",
+            "src": "assets/images/favicon.png",
+            "sizes": "96x96",
             "type": "image/png",
             "purpose": "any"
         },
         {
             "src": "assets/images/logo_municipio.png",
-            "sizes": "512x512",
+            "sizes": "1000x1000",
+            "type": "image/png",
+            "purpose": "any"
+        },
+        {
+            "src": "assets/images/logo_municipio.png",
+            "sizes": "1000x1000",
             "type": "image/png",
             "purpose": "maskable"
         }
     ],
     "screenshots": [
         {
-            "src": "assets/images/logo_municipio.png",
-            "sizes": "512x512",
-            "type": "image/png",
-            "form_factor": "wide",
-            "label": "SIBIM Principal"
-        },
-        {
-            "src": "assets/images/logo_municipio.png",
-            "sizes": "512x512",
+            "src": "assets/images/reels/logo_gobierno.png",
+            "sizes": "880x1024",
             "type": "image/png",
             "form_factor": "narrow",
-            "label": "SIBIM Móvil"
+            "label": "SIBIM App Móvil"
+        },
+        {
+            "src": "assets/images/reels/presidencia.png",
+            "sizes": "786x342",
+            "type": "image/png",
+            "form_factor": "wide",
+            "label": "SIBIM Dashboard"
         }
     ],
     "shortcuts": [
@@ -59,7 +65,7 @@
             "url": "/pages/inventory.html",
             "icons": [
                 {
-                    "src": "assets/images/logo_municipio.png",
+                    "src": "assets/images/favicon.png",
                     "sizes": "96x96"
                 }
             ]
@@ -70,7 +76,7 @@
             "url": "/pages/scanner.html",
             "icons": [
                 {
-                    "src": "assets/images/logo_municipio.png",
+                    "src": "assets/images/favicon.png",
                     "sizes": "96x96"
                 }
             ]
