@@ -175,8 +175,10 @@ function handleRolePermissions() {
 
     // Si estamos en una página que no está permitida (excepto el index y home)
     if (cleanPage && cleanPage !== 'index.html' && cleanPage !== 'home.html' && cleanPage !== '' && !Auth.isPageAllowed(cleanPage)) {
-        console.warn('[RBAC] Acceso denegado a:', cleanPage);
+        console.warn(`[RBAC] Acceso denegado a '${cleanPage}' para el rol '${role}'. Redirigiendo...`);
         window.location.href = window.location.pathname.includes('/pages/') ? '../index.html' : './index.html';
+    } else {
+        console.log(`[RBAC] Acceso verificado para '${cleanPage}' (${role})`);
     }
 }
 
@@ -353,20 +355,24 @@ function initDispersionChart(items) {
 
 function updateUIForUser() {
     const user = Auth.getCurrentUser();
+    const userNameElem = document.getElementById('user-name-display');
+    const userRoleElem = document.getElementById('user-role-display');
+    const avatar = document.getElementById('user-avatar');
+    const adminTools = document.getElementById('admin-only-tools');
+
     if (user) {
-        const userNameElem = document.getElementById('user-name-display');
         if (userNameElem) userNameElem.textContent = user.username;
-
-        const userRoleElem = document.getElementById('user-role-display');
         if (userRoleElem) userRoleElem.textContent = user.role;
-
-        const avatar = document.getElementById('user-avatar');
         if (avatar) avatar.textContent = user.username.charAt(0).toUpperCase();
-
-        const adminTools = document.getElementById('admin-only-tools');
         if (adminTools) {
             adminTools.style.display = Auth.isAdmin() ? 'block' : 'none';
         }
+    } else {
+        // Limpiar UI si no hay usuario (prevenir que se vea 'Admin' o valores previos)
+        if (userNameElem) userNameElem.textContent = 'Invitado';
+        if (userRoleElem) userRoleElem.textContent = 'Sin Sesión';
+        if (avatar) avatar.textContent = '?';
+        if (adminTools) adminTools.style.display = 'none';
     }
 }
 

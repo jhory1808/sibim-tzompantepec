@@ -35,7 +35,7 @@ const Auth = {
             if (user) {
                 console.log('Login exitoso para:', user.Usuario);
                 const sessionUser = {
-                    username: user.Usuario || user.Nombre || username,
+                    username: (user.Usuario || user.Nombre || username).trim(),
                     role: user.Rol || user.role || 'User',
                     loginTime: new Date()
                 };
@@ -147,6 +147,8 @@ const Auth = {
                 'qr-repository.html',
                 'labels-repository.html',
                 'scanner.html',
+                'management.html',
+                'movements.html',
                 'print-label.html',
                 'transactions.html'
             ];
@@ -165,8 +167,8 @@ const Auth = {
         // Limpiamos el nombre de la página (ej: 'pages/reports.html' -> 'reports.html')
         let cleanPage = pageName.split('/').pop().split('?')[0];
 
-        // index.html es permitido para todos usualmente
-        if (cleanPage === 'index.html' || cleanPage === '' || cleanPage === 'home.html') return true;
+        // index.html es permitido para todos usualmente. También permitimos '#' para menús/dropdowns.
+        if (cleanPage === 'index.html' || cleanPage === '' || cleanPage === 'home.html' || cleanPage === '#') return true;
 
         // Normalizamos: si no tiene extensión, asumimos .html (común en despliegues como Netlify/Vercel)
         if (cleanPage && !cleanPage.includes('.')) {
