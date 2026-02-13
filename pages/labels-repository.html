@@ -33,72 +33,86 @@
         .label-preview {
             background: white;
             color: black;
-            padding: 20px;
-            border-radius: 8px;
-            margin: 12px 0;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: space-between;
-            border: 2px solid #000;
-            height: 380px;
-            text-align: center;
+            width: 62mm;
+            height: 27mm;
+            border: 1px solid #000;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            grid-template-rows: auto 1fr;
+            padding: 1.5mm !important;
+            border-radius: 2px;
+            margin: 12px auto;
+            font-family: Arial, sans-serif;
+            box-sizing: border-box;
+            overflow: hidden;
+            gap: 1mm;
+            text-align: left;
         }
 
         .label-top {
-            font-size: 1.1rem;
-            font-weight: 800;
+            grid-area: 1 / 1 / 2 / 2;
+            font-size: 7.5pt !important;
+            font-weight: bold !important;
             text-transform: uppercase;
-            line-height: 1.2;
-            width: 100%;
-            border-bottom: 2px solid #000;
-            padding-bottom: 8px;
-            height: 45px;
-            overflow: hidden;
+            line-height: 1.1;
+            height: auto !important;
+            border-bottom: none !important;
+            padding-bottom: 0 !important;
             display: -webkit-box;
             -webkit-line-clamp: 2;
             line-clamp: 2;
             -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .label-code-side {
+            grid-area: 1 / 2 / 2 / 3;
+            text-align: center;
+            font-size: 7pt;
+            font-weight: bold;
+            line-height: 1.1;
+            color: black;
         }
 
         .label-logo-box {
-            margin: 10px 0;
+            grid-area: 2 / 1 / 3 / 2;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            margin: 0 !important;
         }
 
         .label-logo-box img {
-            height: 100px;
+            height: 11mm !important;
             width: auto;
         }
 
+        .label-admin-text {
+            font-size: 4.5pt;
+            font-weight: bold;
+            margin-top: 0.5mm;
+            text-align: center;
+            line-height: 1;
+            color: black;
+        }
+
         .qr-canvas-small {
-            width: 110px;
-            height: 110px;
-            border: 2px solid #000;
-            padding: 4px;
+            grid-area: 2 / 2 / 3 / 3;
+            width: 14mm !important;
+            height: 14mm !important;
+            border: none !important;
+            padding: 0 !important;
             background: white;
             display: flex;
             align-items: center;
             justify-content: center;
-        }
-
-        .label-footer-box {
-            width: 100%;
-            border-top: 2px solid #000;
-            padding-top: 8px;
-            margin-top: 5px;
-        }
-
-        .footer-text {
-            font-size: 0.85rem;
-            font-weight: 800;
-            line-height: 1.2;
-            color: #000;
+            margin: 0 auto;
         }
 
         .label-code-small {
-            font-size: 1.1rem;
-            font-weight: 800;
-            margin: 5px 0;
+            display: none;
+            /* We use the side code now */
         }
 
         .select-all-btn {
@@ -232,16 +246,15 @@
                     </div>
                     <div class="label-preview">
                         <div class="label-top">${name}</div>
+                        <div class="label-code-side">
+                            CODIGO:<br>
+                            <span style="font-size: 7.5pt;">${code}</span>
+                        </div>
                         <div class="label-logo-box">
                             <img src="../assets/images/logo_municipio.png">
+                            <div class="label-admin-text">GOBIERNO MUNICIPAL<br>2024-2027</div>
                         </div>
                         <div id="qr-${code}" class="qr-canvas-small"></div>
-                        <div class="label-code-small">CÓDIGO: ${code}</div>
-                        <div class="label-footer-box">
-                            <div class="footer-text">
-                                GOBIERNO MUNICIPAL<br>2024 - 2027
-                            </div>
-                        </div>
                     </div>
                     <button class="btn glass" style="width: 100%; font-size: 0.8rem; padding: 10px; border-radius: 10px; margin-top: 10px;" 
                         onclick="window.open('print-label.html?id=${code}&desc=${encodeURIComponent(name)}', '_blank')">
