@@ -78,7 +78,11 @@ document.addEventListener('DOMContentLoaded', () => {
         handleRolePermissions();
 
         // Show Welcome Greeting and Init Notifications
-        if (window.location.pathname.includes('index.html')) {
+        const isDashboard = window.location.pathname.endsWith('/') ||
+            window.location.pathname.includes('index.html') ||
+            window.location.pathname === '';
+
+        if (isDashboard) {
             showGreeting();
             initNotifications();
         }
@@ -397,7 +401,8 @@ function showGreeting() {
     // Only show if it's the first time in the session
     if (!sessionStorage.getItem('greeting_shown')) {
         setTimeout(() => {
-            UI.showToast(`${greeting} ${user.username.toUpperCase()}`, "success");
+            const name = user.username || user.Nombre || "USUARIO";
+            UI.showToast(`${greeting} ${name.toUpperCase()}`, "success");
             sessionStorage.setItem('greeting_shown', 'true');
         }, 1500);
     }

@@ -231,7 +231,9 @@ const API = {
     async getUpdates() {
         try {
             const data = await this.gasFetch('getUpdates');
-            return data ? (data.updates || data) : [];
+            if (data && data.updates && Array.isArray(data.updates)) return data.updates;
+            if (Array.isArray(data)) return data;
+            return [];
         } catch (error) {
             return [];
         }

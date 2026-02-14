@@ -14,42 +14,52 @@
             background: white;
             color: black;
             width: 62mm;
+            /* 234px */
             height: 33mm;
+            /* 125px */
             border: 1px solid #000;
             display: grid;
-            grid-template-columns: 1fr 1fr;
+            grid-template-columns: 1.2fr 0.8fr;
             grid-template-rows: 1fr 1fr;
-            padding: 3mm;
+            padding: 2mm;
             border-radius: 0;
             margin: 20px auto;
-            font-family: Arial, sans-serif;
+            font-family: 'Arial Black', Gadget, sans-serif;
             box-sizing: border-box;
             overflow: hidden;
-            gap: 2mm;
+            gap: 1mm;
         }
 
         .label-desc-box {
             grid-area: 1 / 1 / 2 / 2;
-            font-size: 8.5pt;
-            font-weight: bold;
+            font-size: 9pt;
+            font-weight: 900;
             text-align: center;
-            line-height: 1.2;
+            line-height: 1.1;
             text-transform: uppercase;
             display: flex;
             align-items: center;
             justify-content: center;
+            border-bottom: 1px solid #eee;
+            padding-right: 5px;
         }
 
         .label-code-side {
             grid-area: 1 / 2 / 2 / 3;
             text-align: center;
-            font-size: 8.5pt;
-            font-weight: bold;
+            font-size: 8pt;
+            font-weight: 900;
             line-height: 1.2;
             display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
-            white-space: normal;
+            border-bottom: 1px solid #eee;
+        }
+
+        .label-code-side span {
+            font-size: 9pt;
+            display: block;
         }
 
         .label-logo-side {
@@ -58,21 +68,23 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            gap: 1mm;
+            padding-top: 2mm;
         }
 
         .label-logo-side img {
-            height: 12mm;
+            height: 10mm;
             width: auto;
             object-fit: contain;
+            margin-bottom: 1mm;
         }
 
         .label-admin-text {
-            font-size: 7.5pt;
-            font-weight: bold;
+            font-size: 6.5pt;
+            font-weight: 800;
             text-align: center;
-            line-height: 1.1;
+            line-height: 1;
             color: black;
+            text-transform: uppercase;
         }
 
         .label-qr-side {
@@ -80,11 +92,12 @@
             display: flex;
             justify-content: center;
             align-items: center;
+            padding-top: 1mm;
         }
 
         .qr-box-small {
-            width: 15mm;
-            height: 15mm;
+            width: 18mm;
+            height: 18mm;
             display: flex;
             align-items: center;
             justify-content: center;

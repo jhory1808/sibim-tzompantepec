@@ -163,30 +163,33 @@
                 });
 
                 // Process logs for stats and presence
-                logs.forEach(log => {
-                    const user = log.Usuario || log.usuario;
-                    if (!stats[user]) return;
+                // Process logs for stats and presence
+                if (Array.isArray(logs)) {
+                    logs.forEach(log => {
+                        const user = log.Usuario || log.usuario;
+                        if (!stats[user]) return;
 
-                    const logDate = new Date(log.Fecha || log.fecha);
-                    const diffMinutes = (now - logDate) / (1000 * 60);
+                        const logDate = new Date(log.Fecha || log.fecha);
+                        const diffMinutes = (now - logDate) / (1000 * 60);
 
-                    // Presence check (15 minutes window for more stability)
-                    if (diffMinutes <= 15) stats[user].online = true;
+                        // Presence check (15 minutes window for more stability)
+                        if (diffMinutes <= 15) stats[user].online = true;
 
-                    if (!stats[user].lastSeen || logDate > stats[user].lastSeen) {
-                        stats[user].lastSeen = logDate;
-                    }
+                        if (!stats[user].lastSeen || logDate > stats[user].lastSeen) {
+                            stats[user].lastSeen = logDate;
+                        }
 
-                    // Activity aggregation (Action types depend on your naming convention)
-                    const action = (log.Accion || log.accion || '').toUpperCase();
-                    if (action.includes('NUEVO') || action.includes('ADD') || action.includes('ALTA')) {
-                        stats[user].records++;
-                    } else if (action.includes('ACTUALIZA') || action.includes('EDIT')) {
-                        stats[user].updates++;
-                    } else if (action.includes('PRINT') || action.includes('ETIQUETA')) {
-                        stats[user].prints++;
-                    }
-                });
+                        // Activity aggregation
+                        const action = (log.Accion || log.accion || '').toUpperCase();
+                        if (action.includes('NUEVO') || action.includes('ADD') || action.includes('ALTA')) {
+                            stats[user].records++;
+                        } else if (action.includes('ACTUALIZA') || action.includes('EDIT')) {
+                            stats[user].updates++;
+                        } else if (action.includes('PRINT') || action.includes('ETIQUETA')) {
+                            stats[user].prints++;
+                        }
+                    });
+                }
 
                 renderUserCards(stats);
                 updateGeneralStats(stats);
