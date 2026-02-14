@@ -298,9 +298,21 @@
         function printSelected() {
             const selected = Array.from(document.querySelectorAll('.label-select:checked')).map(c => c.value);
             if (selected.length === 0) return UI.showToast("Selecciona al menos una etiqueta", "warning");
+
             UI.showToast(`Preparando impresión de ${selected.length} etiquetas...`, "info");
-            // Aquí iría la lógica para mandar n etiquetas a print-label.html
-            window.open(`print-label.html?ids=${selected.join(',')}`, '_blank');
+
+            // Collect full data for selected items
+            const itemsToPrint = allItems.filter(i => selected.includes(String(i.Codigo || i.id)));
+
+            // Encode data for transfer
+            const printData = itemsToPrint.map(i => ({
+                id: i.Codigo || i.id,
+                desc: i.Nombre || i.nombre || 'SIN DESCRIPCIÓN'
+            }));
+
+            // Store in temporary session storage to handle large amounts of data
+            sessionStorage.setItem('print_queue', JSON.stringify(printData));
+            window.open('print-label.html?batch=true', '_blank');
         }
         function exportExcelLabels() {
             const query = document.getElementById('search-labels').value.trim().toLowerCase();

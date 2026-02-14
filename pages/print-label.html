@@ -159,18 +159,57 @@
 
     <script>
         const urlParams = new URLSearchParams(window.location.search);
-        const code = urlParams.get('id');
-        const desc = urlParams.get('desc');
+        const isBatch = urlParams.get('batch');
 
-        document.getElementById('label-desc').textContent = desc || "SIN DESCRIPCIÓN";
-        document.getElementById('label-code').textContent = code || "0000";
+        document.addEventListener('DOMContentLoaded', () => {
+            if (isBatch) {
+                const queueData = sessionStorage.getItem('print_queue');
+                if (queueData) {
+                    const items = JSON.parse(queueData);
+                    document.body.innerHTML = '<div id="print-area"></div>';
+                    const container = document.getElementById('print-area');
 
-        const qrContent = `${window.location.origin}/view.html?id=${code || "0000"}`;
+                    items.forEach((item, index) => {
+                        const labelHtml = `
+                            <div class="label-preview" style="margin-bottom: 5mm; page-break-after: always;">
+                                <div class="label-header">${item.desc}</div>
+                                <div class="label-code-side">CODIGO: ${item.id}</div>
+                                <div class="label-logo-print">
+                                    <img src="../assets/images/logo_municipio.png">
+                                    <div class="label-admin-text">GOBIERNO MUNICIPAL<br>2024-2027</div>
+                                </div>
+                                <div id="qr-${index}" class="qr-box-centered"></div>
+                            </div>
+                        `;
+                        container.insertAdjacentHTML('beforeend', labelHtml);
 
-        new QRCode(document.getElementById("label-qr"), {
-            text: qrContent,
-            width: 100,
-            height: 100
+                        // Generate QR
+                        new QRCode(document.getElementById(`qr-${index}`), {
+                            text: `${window.location.origin}/view.html?id=${item.id}`,
+                            width: 130,
+                            height: 130
+                        });
+                    });
+
+                    // Auto print after a small delay
+                    setTimeout(() => {
+                        window.print();
+                    }, 1000);
+                }
+            } else {
+                // Individual mode
+                const code = urlParams.get('id');
+                const desc = urlParams.get('desc');
+                document.getElementById('label-desc').textContent = desc || "SIN DESCRIPCIÓN";
+                document.getElementById('label-code').textContent = code || "0000";
+
+                const qrContent = `${window.location.origin}/view.html?id=${code || "0000"}`;
+                new QRCode(document.getElementById("label-qr"), {
+                    text: qrContent,
+                    width: 130,
+                    height: 130
+                });
+            }
         });
 
         function setLabelSize(size) {
@@ -186,10 +225,10 @@
                 scale: 3, // Mayor calidad
                 useCORS: true
             });
-            container.style.border = '1px solid #ccc';
+            container.style.border = '1px solid #000';
 
             const link = document.createElement('a');
-            link.download = `Etiqueta_${code || 'SIBIM'}.png`;
+            link.download = `Etiqueta_SIBIM.png`;
             link.href = canvas.toDataURL("image/png");
             link.click();
         }
