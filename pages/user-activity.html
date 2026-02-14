@@ -170,8 +170,8 @@
                     const logDate = new Date(log.Fecha || log.fecha);
                     const diffMinutes = (now - logDate) / (1000 * 60);
 
-                    // Presence check (5 minutes window)
-                    if (diffMinutes <= 5) stats[user].online = true;
+                    // Presence check (15 minutes window for more stability)
+                    if (diffMinutes <= 15) stats[user].online = true;
 
                     if (!stats[user].lastSeen || logDate > stats[user].lastSeen) {
                         stats[user].lastSeen = logDate;
@@ -202,8 +202,19 @@
             const grid = document.getElementById('users-grid');
             grid.innerHTML = '';
 
+            const options = {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            };
+
             Object.values(stats).sort((a, b) => (b.online - a.online)).forEach(u => {
-                const lastSeenText = u.lastSeen ? `Hace ${Math.floor((new Date() - u.lastSeen) / (1000 * 60))} min` : 'Sin actividad';
+                const lastSeenText = u.lastSeen ?
+                    u.lastSeen.toLocaleDateString('es-MX', options) :
+                    'Sin actividad';
 
                 const card = `
                     <div class="user-card glass">

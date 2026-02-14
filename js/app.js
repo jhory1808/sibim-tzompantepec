@@ -76,6 +76,12 @@ document.addEventListener('DOMContentLoaded', () => {
         Auth.trackPresence(); // Start Heartbeat for Online status
         updateUIForUser();
         handleRolePermissions();
+
+        // Show Welcome Greeting and Init Notifications
+        if (window.location.pathname.includes('index.html')) {
+            showGreeting();
+            initNotifications();
+        }
     }
 
     // Load Dashboard Data if on index.html
@@ -369,11 +375,42 @@ function updateUIForUser() {
             adminTools.style.display = Auth.isAdmin() ? 'block' : 'none';
         }
     } else {
-        // Limpiar UI si no hay usuario (prevenir que se vea 'Admin' o valores previos)
         if (userNameElem) userNameElem.textContent = 'Invitado';
         if (userRoleElem) userRoleElem.textContent = 'Sin Sesión';
         if (avatar) avatar.textContent = '?';
         if (adminTools) adminTools.style.display = 'none';
+    }
+}
+
+function showGreeting() {
+    const user = Auth.getCurrentUser();
+    if (!user) return;
+
+    const now = new Date();
+    const hour = now.getHours();
+    let greeting = "";
+
+    if (hour >= 6 && hour < 12) greeting = "¡BUENOS DÍAS!";
+    else if (hour >= 12 && hour < 19) greeting = "¡BUENAS TARDES!";
+    else greeting = "¡BUENAS NOCHES!";
+
+    // Only show if it's the first time in the session
+    if (!sessionStorage.getItem('greeting_shown')) {
+        setTimeout(() => {
+            UI.showToast(`${greeting} ${user.username.toUpperCase()}`, "success");
+            sessionStorage.setItem('greeting_shown', 'true');
+        }, 1500);
+    }
+}
+
+async function initNotifications() {
+    if (!("Notification" in window)) return;
+
+    if (Notification.permission === "default") {
+        const permission = await Notification.requestPermission();
+        if (permission === "granted") {
+            console.log("Notificaciones activadas por el usuario");
+        }
     }
 }
 
