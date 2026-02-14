@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Actividad y Desempeño - SIBIM</title>
+    <link rel="stylesheet" href="../css/futuristic.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .activity-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 25px;
+            margin-top: 30px;
+        }
+
+        .user-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(0, 210, 255, 0.1);
+            border-radius: 20px;
+            padding: 25px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .user-card:hover {
+            transform: translateY(-5px);
+            background: rgba(255, 255, 255, 0.06);
+            border-color: var(--accent-blue);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), 0 0 20px rgba(0, 210, 255, 0.1);
+        }
+
+        .status-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 8px;
+            box-shadow: 0 0 10px currentColor;
+        }
+
+        .status-online {
+            color: #2ecc71;
+            background: #2ecc71;
+        }
+
+        .status-offline {
+            color: #8892b0;
+            background: #8892b0;
+        }
+
+        .stat-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: 15px;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+        }
+
+        .stat-value {
+            font-size: 1.2rem;
+            font-weight: 800;
+            color: var(--accent-blue);
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .user-avatar {
+            width: 60px;
+            height: 60px;
+            background: var(--accent-blue);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #0d1117;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="content-wrapper">
+        <header style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px;">
+            <div>
+                <h1 class="glow-text"><i class="fas fa-users-cog"></i> Actividad y Desempeño</h1>
+                <p style="color: var(--text-secondary);">Monitoreo de usuarios y productividad en tiempo real</p>
+            </div>
+            <button class="btn glass" onclick="location.reload()"><i class="fas fa-sync"></i> Sincronizar</button>
+        </header>
+
+        <div class="stats-row"
+            style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 40px;">
+            <div class="stat-card glass">
+                <p>En Línea</p>
+                <h2 id="total-online">0</h2>
+                <i class="fas fa-satellite"></i>
+            </div>
+            <div class="stat-card glass">
+                <p>Total Capturas</p>
+                <h2 id="total-records">0</h2>
+                <i class="fas fa-plus-circle"></i>
+            </div>
+            <div class="stat-card glass">
+                <p>Total Étiquetas</p>
+                <h2 id="total-prints">0</h2>
+                <i class="fas fa-print"></i>
+            </div>
+        </div>
+
+        <div id="loader" style="text-align: center; padding: 100px;">
+            <i class="fas fa-circle-notch fa-spin fa-3x" style="color: var(--accent-blue);"></i>
+            <p style="margin-top: 20px;">Analizando registros de actividad...</p>
+        </div>
+
+        <div id="users-grid" class="activity-grid" style="display: none;">
+            <!-- User cards will be injected here -->
+        </div>
+    </div>
+
+    <script src="../js/config.js"></script>
+    <script src="../js/api.js"></script>
+    <script src="../js/auth.js"></script>
+    <script>
+        Auth.checkAccess();
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            await loadActivityReport();
+        });
+
+        async function loadActivityReport() {
+            try {
+                const logs = await API.getUpdates();
+                const users = await API.getUsers();
+
+                const stats = {};
+                const now = new Date();
+
+                // Initialize users from the database
+                users.forEach(u => {
+                    const username = u.Usuario || u.Nombre || u.Users;
+                    if (!username) return;
+                    stats[username] = {
+                        name: username,
+                        role: u.Rol || 'Usuario',
+                        lastSeen: null,
+                        records: 0,
+                        updates: 0,
+                        prints: 0,
+                        online: false
+                    };
+                });
+
+                // Process logs for stats and presence
+                logs.forEach(log => {
+                    const user = log.Usuario || log.usuario;
+                    if (!stats[user]) return;
+
+                    const logDate = new Date(log.Fecha || log.fecha);
+                    const diffMinutes = (now - logDate) / (1000 * 60);
+
+                    // Presence check (5 minutes window)
+                    if (diffMinutes <= 5) stats[user].online = true;
+
+                    if (!stats[user].lastSeen || logDate > stats[user].lastSeen) {
+                        stats[user].lastSeen = logDate;
+                    }
+
+                    // Activity aggregation (Action types depend on your naming convention)
+                    const action = (log.Accion || log.accion || '').toUpperCase();
+                    if (action.includes('NUEVO') || action.includes('ADD') || action.includes('ALTA')) {
+                        stats[user].records++;
+                    } else if (action.includes('ACTUALIZA') || action.includes('EDIT')) {
+                        stats[user].updates++;
+                    } else if (action.includes('PRINT') || action.includes('ETIQUETA')) {
+                        stats[user].prints++;
+                    }
+                });
+
+                renderUserCards(stats);
+                updateGeneralStats(stats);
+
+                document.getElementById('loader').style.display = 'none';
+                document.getElementById('users-grid').style.display = 'grid';
+            } catch (error) {
+                console.error('Error loading report:', error);
+            }
+        }
+
+        function renderUserCards(stats) {
+            const grid = document.getElementById('users-grid');
+            grid.innerHTML = '';
+
+            Object.values(stats).sort((a, b) => (b.online - a.online)).forEach(u => {
+                const lastSeenText = u.lastSeen ? `Hace ${Math.floor((new Date() - u.lastSeen) / (1000 * 60))} min` : 'Sin actividad';
+
+                const card = `
+                    <div class="user-card glass">
+                        <div class="user-info">
+                            <div class="user-avatar">${u.name.charAt(0).toUpperCase()}</div>
+                            <div style="text-align: left;">
+                                <h3 style="margin: 0; color: white;">${u.name}</h3>
+                                <p style="margin: 0; font-size: 0.8rem; color: var(--text-secondary);">${u.role}</p>
+                            </div>
+                        </div>
+
+                        <div style="display: flex; align-items: center; margin-bottom: 20px;">
+                            <span class="status-dot ${u.online ? 'status-online' : 'status-offline'}"></span>
+                            <span style="font-size: 0.9rem;">${u.online ? 'EN LÍNEA' : 'DESCONECTADO'}</span>
+                            <span style="margin-left: auto; font-size: 0.75rem; color: var(--text-secondary);">${lastSeenText}</span>
+                        </div>
+
+                        <div class="stat-item">
+                            <span><i class="fas fa-plus-circle"></i> Registros</span>
+                            <span class="stat-value">${u.records}</span>
+                        </div>
+                        <div class="stat-item">
+                            <span><i class="fas fa-pencil-alt"></i> Actualizaciones</span>
+                            <span class="stat-value">${u.updates}</span>
+                        </div>
+                        <div class="stat-item">
+                            <span><i class="fas fa-print"></i> Etiquetas</span>
+                            <span class="stat-value">${u.prints}</span>
+                        </div>
+                    </div>
+                `;
+                grid.insertAdjacentHTML('beforeend', card);
+            });
+        }
+
+        function updateGeneralStats(stats) {
+            let online = 0, records = 0, prints = 0;
+            Object.values(stats).forEach(u => {
+                if (u.online) online++;
+                records += u.records;
+                prints += u.prints;
+            });
+            document.getElementById('total-online').textContent = online;
+            document.getElementById('total-records').textContent = records;
+            document.getElementById('total-prints').textContent = prints;
+        }
+    </script>
+</body>
+
+</html>

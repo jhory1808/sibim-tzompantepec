@@ -73,6 +73,7 @@ document.addEventListener('DOMContentLoaded', () => {
         Auth.checkAccess();
         Auth.initTimeout(); // 10m inactivity logout
         Auth.initTheme();   // Load saved theme
+        Auth.trackPresence(); // Start Heartbeat for Online status
         updateUIForUser();
         handleRolePermissions();
     }

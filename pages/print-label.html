@@ -194,6 +194,7 @@
                     // Auto print after a small delay
                     setTimeout(() => {
                         window.print();
+                        if (typeof Auth !== 'undefined') Auth.logActivity('BATCH_PRINT', 'Impresión masiva ejecutada');
                     }, 1000);
                 }
             } else {

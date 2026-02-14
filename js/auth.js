@@ -40,6 +40,10 @@ const Auth = {
                     loginTime: new Date()
                 };
                 localStorage.setItem('sibim_user', JSON.stringify(sessionUser));
+
+                // Registrar log de inicio de sesión
+                this.logActivity('LOGIN', `Inicio de sesión exitoso desde ${navigator.userAgent}`);
+
                 return true;
             }
             console.warn('Credenciales no encontradas en la nube.');
@@ -48,6 +52,42 @@ const Auth = {
             console.error('Error crítico en el proceso de login:', error);
             return false;
         }
+    },
+
+    async logActivity(action, details = '') {
+        try {
+            const user = this.getCurrentUser();
+            if (!user) return;
+
+            // Usamos el endpoint de actualización existente (si existe) o simulamos una
+            // Para propósitos de este sistema, registramos en el trail de auditoría
+            await fetch(CONFIG.scriptUrl, {
+                method: 'POST',
+                mode: 'no-cors',
+                body: JSON.stringify({
+                    action: 'registerAudit', // Asumimos que este endpoint maneja logs genéricos
+                    data: {
+                        fecha: new Date().toISOString(),
+                        usuario: user.username,
+                        rol: user.role,
+                        accion: action,
+                        detalles: details,
+                        ip: 'Local/PWA'
+                    }
+                })
+            });
+        } catch (e) { console.warn('Activity Log failed', e); }
+    },
+
+    trackPresence() {
+        if (!this.isAuthenticated()) return;
+
+        // Heartbeat cada 3 minutos
+        setInterval(() => {
+            if (document.visibilityState === 'visible') {
+                this.logActivity('PRESENCE', 'Usuario en línea');
+            }
+        }, 3 * 60 * 1000);
     },
 
     logout() {
@@ -111,7 +151,7 @@ const Auth = {
         const roleLower = String(role || '').toLowerCase();
 
         // 1. Administrador: Acceso total a todos los repositorios (CRUD, usuarios, etc)
-        if (roleLower === 'admin' || roleLower === 'administrador') return ['*'];
+        if (roleLower === 'admin' || roleLower === 'administrador') return ['*', 'user-activity.html'];
 
         // 2. Auditor: Puede ver todo lo relacionado con auditoría, reportes e inventario (Lectura)
         if (roleLower.includes('auditor')) {
