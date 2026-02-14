@@ -127,7 +127,7 @@ const Auth = {
             ];
         }
 
-        // 3. Usuarios: Vista estándar de consulta
+        // 3. Usuarios: Consulta total del sistema (Solo Lectura)
         if (roleLower.includes('usuario')) {
             return [
                 'index.html',
@@ -135,7 +135,12 @@ const Auth = {
                 'scanner.html',
                 'departments.html',
                 'movements.html',
-                'reports.html'
+                'reports.html',
+                'management.html',
+                'qr-repository.html',
+                'labels-repository.html',
+                'transactions.html',
+                'updates.html'
             ];
         }
 
