@@ -450,6 +450,15 @@
             legend.textContent = code;
         }
 
+        function toBase64(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = error => reject(error);
+            });
+        }
+
         async function submitUpdate(btn) {
             const code = document.getElementById('upd-code').value;
             if (!code) return;
@@ -467,6 +476,24 @@
                 "Observaciones": document.getElementById('upd-obs').value, "observaciones": document.getElementById('upd-obs').value,
                 "Codigo QR": `${window.location.host.includes('localhost') ? 'https://sibimtzomp.netlify.app' : window.location.origin}/view.html?id=${code}`
             };
+
+            // Capture Files (Photography and Document)
+            const photoInput = document.getElementById('upd-photo');
+            const pdfInput = document.getElementById('upd-pdf');
+
+            try {
+                if (photoInput.files && photoInput.files[0]) {
+                    data["Fotografía"] = await toBase64(photoInput.files[0]);
+                    data["fotografia"] = data["Fotografía"];
+                }
+                if (pdfInput.files && pdfInput.files[0]) {
+                    data["Resguardo"] = await toBase64(pdfInput.files[0]);
+                    data["resguardo"] = data["Resguardo"];
+                }
+            } catch (e) {
+                console.warn("Error al procesar archivos:", e);
+                UI.showToast("Error al procesar archivos multimedia", "warning");
+            }
 
             const originalText = btn.innerHTML;
             btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...';

@@ -617,6 +617,15 @@
             new QRCode(canvasDiv, { text: fullUrl, width: 128, height: 128 });
         }
 
+        function toBase64(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = error => reject(error);
+            });
+        }
+
         async function saveArticle() {
             const btn = event.currentTarget;
             const codeInput = document.getElementById('art-codigo');
@@ -651,6 +660,26 @@
                 "Codigo QR": `${window.location.host.includes('localhost') ? 'https://sibimtzomp.netlify.app' : window.location.origin}/view.html?id=${code}`,
                 "Observaciones": document.getElementById('art-obs').value, "observaciones": document.getElementById('art-obs').value
             };
+
+            // Capture Multimedia Evidence
+            try {
+                const imgInput = document.getElementById('art-img-input');
+                const pdfInput = document.getElementById('art-pdf-input');
+                const actaInput = document.getElementById('art-acta-input');
+
+                if (imgInput.files && imgInput.files[0]) {
+                    data["Fotografía"] = await toBase64(imgInput.files[0]);
+                }
+                if (pdfInput.files && pdfInput.files[0]) {
+                    data["Resguardo"] = await toBase64(pdfInput.files[0]);
+                }
+                if (actaInput.files && actaInput.files[0]) {
+                    data["Acta"] = await toBase64(actaInput.files[0]);
+                }
+            } catch (e) {
+                console.warn("Error processing files:", e);
+                UI.showToast("Dificultad al procesar archivos adjuntos", "warning");
+            }
 
             const res = await API.addItem(data);
             if (res.success) {
