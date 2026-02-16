@@ -69,16 +69,19 @@ const API = {
 
     async addItem(itemData) {
         try {
-            Logger.log('Iniciando registro de nuevo artículo...', itemData);
-            // Usamos gasFetch para tener visibilidad de la respuesta y evitar "no-cors"
-            // GAS procesa los parámetros de URL tanto en doGet como en doPost usualmente
-            const response = await this.gasFetch('addItem', { data: JSON.stringify(itemData) });
+            Logger.log('Iniciando registro de nuevo artículo (POST)...', itemData);
 
-            if (response && (response.success || !response.error)) {
-                localStorage.removeItem('sibim_cache_timestamp');
-                return { success: true };
-            }
-            return { success: false, error: 'Respuesta negativa del servidor' };
+            const response = await fetch(CONFIG.scriptUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'text/plain' },
+                body: JSON.stringify({
+                    action: 'addItem',
+                    data: itemData
+                })
+            });
+
+            localStorage.removeItem('sibim_cache_timestamp');
+            return { success: true };
         } catch (error) {
             Logger.error('Error adding item:', error);
             return { success: false, error };
@@ -87,8 +90,8 @@ const API = {
 
     async updateItem(data) {
         try {
-            Logger.log('Iniciando actualización de artículo...', data);
-            // Estandarización de llaves agresiva para asegurar que caiga en la columna correcta
+            Logger.log('Iniciando actualización de artículo (POST)...', data);
+
             const robustData = {
                 ...data,
                 "Estatus": data.Estado || data.estado,
@@ -101,13 +104,17 @@ const API = {
                 "obs": data.Observaciones || data.observaciones
             };
 
-            const response = await this.gasFetch('updateItem', { data: JSON.stringify(robustData) });
+            const response = await fetch(CONFIG.scriptUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'text/plain' },
+                body: JSON.stringify({
+                    action: 'updateItem',
+                    data: robustData
+                })
+            });
 
-            if (response && (response.success || !response.error)) {
-                localStorage.removeItem('sibim_cache_timestamp');
-                return { success: true };
-            }
-            return { success: false, error: 'Error al procesar actualización en el servidor' };
+            localStorage.removeItem('sibim_cache_timestamp');
+            return { success: true };
         } catch (error) {
             Logger.error('Error updating item:', error);
             return { success: false, error };
