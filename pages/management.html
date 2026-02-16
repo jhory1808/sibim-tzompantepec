@@ -335,7 +335,10 @@
         }
 
         async function performSearch() {
-            const query = document.getElementById('search-input').value.trim().toLowerCase();
+            const inputEl = document.getElementById('search-input');
+            if (!inputEl) return console.error("Error: search-input no existe");
+
+            const query = inputEl.value.trim().toLowerCase();
             if (!query) return UI.showToast("Ingrese un término de búsqueda", "warning");
 
             UI.showToast("Buscando en base de datos...", "info");
@@ -358,61 +361,73 @@
                 });
 
                 if (found) {
-                    currentItem = found; // Guardamos estado actual para comparar
+                    currentItem = found;
                     populateForm(found);
-                    document.getElementById('result-container').style.display = 'block';
+                    const resContainer = document.getElementById('result-container');
+                    if (resContainer) resContainer.style.display = 'block';
                     UI.showToast("Artículo encontrado", "success");
                 } else {
-                    document.getElementById('result-container').style.display = 'none';
+                    const resContainer = document.getElementById('result-container');
+                    if (resContainer) resContainer.style.display = 'none';
                     UI.showToast("No se encontró ningún artículo con esos datos", "error");
                 }
             } catch (e) {
-                console.error(e);
+                console.error("Critical Failure in performSearch:", e);
                 UI.showToast("Error al procesar la búsqueda", "error");
             }
         }
 
         function populateForm(item) {
-            // Map keys loosely to handle casing variations
-            const getKey = (keys) => {
+            const setVal = (id, keys) => {
+                const el = document.getElementById(id);
+                if (!el) return;
                 for (let k of keys) {
-                    if (item[k] !== undefined && item[k] !== null) return item[k];
+                    if (item[k] !== undefined && item[k] !== null) {
+                        el.value = item[k];
+                        return;
+                    }
                 }
-                return '';
-            }
+                el.value = '';
+            };
 
-            document.getElementById('upd-code').value = getKey(['Codigo', 'codigo', 'id']);
-            document.getElementById('upd-name').value = getKey(['Nombre', 'nombre']);
-            document.getElementById('upd-brand').value = getKey(['Marca', 'marca']);
-            document.getElementById('upd-model').value = getKey(['Modelo', 'modelo']);
-            document.getElementById('upd-serie').value = getKey(['Numero de Serie', 'Serie', 'serie']);
-            document.getElementById('upd-dept').value = getKey(['Departamento', 'departamento']);
-            document.getElementById('upd-resp').value = getKey(['Responsable', 'responsable']);
-            document.getElementById('upd-obs').value = getKey(['Observaciones', 'observaciones']);
+            setVal('upd-code', ['Codigo', 'codigo', 'id']);
+            setVal('upd-name', ['Nombre', 'nombre']);
+            setVal('upd-brand', ['Marca', 'marca']);
+            setVal('upd-model', ['Modelo', 'modelo']);
+            setVal('upd-serie', ['Numero de Serie', 'Serie', 'serie']);
+            setVal('upd-dept', ['Departamento', 'departamento']);
+            setVal('upd-resp', ['Responsable', 'responsable']);
+            setVal('upd-obs', ['Observaciones', 'observaciones']);
 
-            // Status requires mapping
-            const status = getKey(['Estado', 'estado']).toString().trim();
+            // Robust Status Selection
+            const statusRaw = (item.Estado || item.estado || '').toString().trim().toLowerCase();
             const statusSelect = document.getElementById('upd-status');
-            let matched = false;
-            for (let opt of statusSelect.options) {
-                if (opt.value.toLowerCase() === status.toLowerCase() || opt.text.toLowerCase() === status.toLowerCase()) {
-                    statusSelect.value = opt.value;
-                    matched = true;
-                    break;
+            if (statusSelect) {
+                let matched = false;
+                for (let opt of statusSelect.options) {
+                    if (opt.value.toLowerCase() === statusRaw || opt.text.toLowerCase() === statusRaw) {
+                        statusSelect.value = opt.value;
+                        matched = true;
+                        break;
+                    }
+                }
+                if (!matched && statusRaw) {
+                    console.warn("Estado detectado sin coincidencia exacta:", statusRaw);
                 }
             }
-            if (!matched && status) {
-                console.log("No match for status:", status);
-            }
 
-            // Clear previews and file inputs
-            document.getElementById('photo-preview').innerHTML = '';
-            document.getElementById('pdf-preview').textContent = '';
+            // Reset Previews and Files safely
+            const photoPrev = document.getElementById('photo-preview');
+            const pdfPrev = document.getElementById('pdf-preview');
             const photoInput = document.getElementById('file-photo');
             const pdfInput = document.getElementById('file-pdf');
+            const qrDisp = document.getElementById('qr-display');
+
+            if (photoPrev) photoPrev.innerHTML = '';
+            if (pdfPrev) pdfPrev.textContent = '';
             if (photoInput) photoInput.value = '';
             if (pdfInput) pdfInput.value = '';
-            document.getElementById('qr-display').style.display = 'none';
+            if (qrDisp) qrDisp.style.display = 'none';
         }
 
         function previewImage(input) {
