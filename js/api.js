@@ -69,9 +69,12 @@ const API = {
 
     async addItem(itemData) {
         try {
-            Logger.log('Iniciando registro de nuevo artículo (POST)...', itemData);
+            Logger.log('Iniciando registro de nuevo artículo (Hybrid POST)...', itemData);
 
-            const response = await fetch(CONFIG.scriptUrl, {
+            // Hybrid approach: Action in URL + Data in Body for maximum compatibility
+            const url = `${CONFIG.scriptUrl}?action=addItem&t=${Date.now()}`;
+
+            const response = await fetch(url, {
                 method: 'POST',
                 headers: { 'Content-Type': 'text/plain' },
                 body: JSON.stringify({
@@ -80,6 +83,8 @@ const API = {
                 })
             });
 
+            // Wait for Google Sheets to finish writing before cache clear
+            await new Promise(r => setTimeout(r, 2000));
             localStorage.removeItem('sibim_cache_timestamp');
             return { success: true };
         } catch (error) {
@@ -90,21 +95,21 @@ const API = {
 
     async updateItem(data) {
         try {
-            Logger.log('Iniciando actualización de artículo (POST)...', data);
+            Logger.log('Iniciando actualización de artículo (Hybrid POST)...', data);
+
+            // Hybrid approach: Action in URL + Data in Body
+            const url = `${CONFIG.scriptUrl}?action=updateItem&t=${Date.now()}`;
 
             const robustData = {
                 ...data,
                 "Estatus": data.Estado || data.estado,
-                "estatus": data.Estado || data.estado,
                 "Status": data.Estado || data.estado,
-                "status": data.Estado || data.estado,
                 "Notas": data.Observaciones || data.observaciones,
-                "notas": data.Observaciones || data.observaciones,
                 "Obs": data.Observaciones || data.observaciones,
-                "obs": data.Observaciones || data.observaciones
+                "Comentarios": data.Observaciones || data.observaciones
             };
 
-            const response = await fetch(CONFIG.scriptUrl, {
+            const response = await fetch(url, {
                 method: 'POST',
                 headers: { 'Content-Type': 'text/plain' },
                 body: JSON.stringify({
@@ -113,6 +118,8 @@ const API = {
                 })
             });
 
+            // Sync delay for cloud consistency before re-fetching
+            await new Promise(r => setTimeout(r, 2000));
             localStorage.removeItem('sibim_cache_timestamp');
             return { success: true };
         } catch (error) {

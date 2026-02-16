@@ -24,7 +24,7 @@
         // Registro adelantado del Service Worker para cumplimiento de PWA
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/sw.js').then(reg => {
+                navigator.serviceWorker.register('./sw.js').then(reg => {
                     console.log('SW: Registro exitoso desde el head', reg.scope);
                 }).catch(err => {
                     console.error('SW: Error en el registro desde el head', err);
@@ -48,8 +48,6 @@
         style="display: flex; justify-content: space-between; align-items: center; padding: 10px 5%; height: 100px;">
         <div class="header-left" style="display: flex; align-items: center; gap: 20px;">
             <img src="assets/images/logo_municipio.png" style="height: 75px; width: auto;" alt="Logo Municipio">
-            <img src="assets/images/escudo.png" style="height: 65px; width: auto;" alt="Escudo Tzompantepec"
-                onerror="this.style.display='none'">
         </div>
 
         <div class="main-title-container" style="padding: 0; margin: 0; text-align: center;">
