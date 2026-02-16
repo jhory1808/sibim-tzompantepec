@@ -104,9 +104,13 @@ const API = {
                 ...data,
                 "Estatus": data.Estado || data.estado,
                 "Status": data.Estado || data.estado,
+                "estado": data.Estado || data.estado,
+                "status": data.Estado || data.estado,
                 "Notas": data.Observaciones || data.observaciones,
                 "Obs": data.Observaciones || data.observaciones,
-                "Comentarios": data.Observaciones || data.observaciones
+                "Comentarios": data.Observaciones || data.observaciones,
+                "observaciones": data.Observaciones || data.observaciones,
+                "notas": data.Observaciones || data.observaciones
             };
 
             const response = await fetch(url, {
@@ -118,13 +122,25 @@ const API = {
                 })
             });
 
+            if (!response.ok) {
+                Logger.error('Error en respuesta de red:', response.status);
+                return { success: false, error: `HTTP ${response.status}` };
+            }
+
+            const result = await response.json().catch(() => null);
+            Logger.log('Respuesta del servidor:', result);
+
             // Sync delay for cloud consistency before re-fetching
             await new Promise(r => setTimeout(r, 2000));
             localStorage.removeItem('sibim_cache_timestamp');
-            return { success: true };
+
+            return {
+                success: result ? result.success !== false : true,
+                message: result ? result.message : 'Actualización enviada'
+            };
         } catch (error) {
             Logger.error('Error updating item:', error);
-            return { success: false, error };
+            return { success: false, error: error.message || 'Error desconocido' };
         }
     },
 

@@ -397,10 +397,10 @@
             setVal('upd-serie', ['Numero de Serie', 'Serie', 'serie']);
             setVal('upd-dept', ['Departamento', 'departamento']);
             setVal('upd-resp', ['Responsable', 'responsable']);
-            setVal('upd-obs', ['Observaciones', 'observaciones']);
+            setVal('upd-obs', ['Observaciones', 'observaciones', 'Notas', 'notas', 'Comentarios', 'comentarios', 'Obs', 'obs']);
 
             // Robust Status Selection
-            const statusRaw = (item.Estado || item.estado || '').toString().trim().toLowerCase();
+            const statusRaw = (item.Estado || item.estado || item.Estatus || item.estatus || item.Status || item.status || '').toString().trim().toLowerCase();
             const statusSelect = document.getElementById('upd-status');
             if (statusSelect) {
                 let matched = false;
@@ -484,6 +484,8 @@
 
             // Gather all data with Redundant Keys for maximum backend compatibility
             const data = {
+                "id": currentItem ? (currentItem.id || currentItem.ID || currentItem.Codigo || currentItem.codigo) : code,
+                "ID": currentItem ? (currentItem.id || currentItem.ID || currentItem.Codigo || currentItem.codigo) : code,
                 "Codigo": code, "codigo": code,
                 "Nombre": document.getElementById('upd-name').value, "nombre": document.getElementById('upd-name').value,
                 "Marca": document.getElementById('upd-brand').value, "marca": document.getElementById('upd-brand').value,

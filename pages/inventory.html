@@ -98,6 +98,21 @@
             color: #e74c3c;
         }
 
+        .badge-extraviado {
+            background: rgba(243, 156, 18, 0.2);
+            color: #f39c12;
+        }
+
+        .badge-comodato {
+            background: rgba(52, 152, 219, 0.2);
+            color: #3498db;
+        }
+
+        .badge-warning {
+            background: rgba(241, 196, 15, 0.2);
+            color: #f1c40f;
+        }
+
         .action-btn {
             background: none;
             border: none;
@@ -538,9 +553,10 @@
 
                 let badgeClass = 'badge-active';
                 if (status.includes('baja')) badgeClass = 'badge-baja';
-                if (status.includes('inactivo') || status.includes('malo')) badgeClass = 'badge-inactive';
-                if (status.includes('extraviado')) badgeClass = 'badge-extraviado';
-                if (status.includes('encomodato')) badgeClass = 'badge-comodato';
+                else if (status.includes('inactivo') || status.includes('malo')) badgeClass = 'badge-inactive';
+                else if (status.includes('extraviado')) badgeClass = 'badge-extraviado';
+                else if (status.includes('comodato')) badgeClass = 'badge-comodato';
+                else if (status.includes('no recibido') || status.includes('desvinculacion')) badgeClass = 'badge-warning';
 
                 return `
                 <tr class="item-row">
