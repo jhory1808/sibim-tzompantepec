@@ -64,6 +64,12 @@
                 <label>Marca / Modelo</label>
                 <span id="item-brand">---</span>
             </div>
+            <div class="data-item"
+                style="grid-column: span 2; margin-top: 15px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 15px;">
+                <label>Observaciones del Bien</label>
+                <span id="item-obs"
+                    style="font-weight: normal; font-style: italic; font-size: 0.95rem; color: #ddd;">---</span>
+            </div>
         </div>
 
         <div style="margin-top: 40px;">
@@ -124,6 +130,7 @@
                 document.getElementById('item-dept').textContent = departamento;
                 document.getElementById('item-resp').textContent = responsable;
                 document.getElementById('item-status').textContent = estado;
+                document.getElementById('item-obs').textContent = item.Observaciones || item.observaciones || item.Notas || 'Sin observaciones registradas.';
 
             } catch (error) {
                 console.error('Error al cargar el activo:', error);
