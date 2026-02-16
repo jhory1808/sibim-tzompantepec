@@ -69,20 +69,16 @@ const API = {
 
     async addItem(itemData) {
         try {
-            const response = await fetch(CONFIG.scriptUrl, {
-                method: 'POST',
-                mode: 'no-cors',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    action: 'addItem',
-                    data: itemData
-                })
-            });
-            // Al agregar, invalidamos el caché para forzar actualización
-            localStorage.removeItem('sibim_cache_timestamp');
-            return { success: true };
+            Logger.log('Iniciando registro de nuevo artículo...', itemData);
+            // Usamos gasFetch para tener visibilidad de la respuesta y evitar "no-cors"
+            // GAS procesa los parámetros de URL tanto en doGet como en doPost usualmente
+            const response = await this.gasFetch('addItem', { data: JSON.stringify(itemData) });
+
+            if (response && (response.success || !response.error)) {
+                localStorage.removeItem('sibim_cache_timestamp');
+                return { success: true };
+            }
+            return { success: false, error: 'Respuesta negativa del servidor' };
         } catch (error) {
             Logger.error('Error adding item:', error);
             return { success: false, error };
@@ -91,19 +87,27 @@ const API = {
 
     async updateItem(data) {
         try {
-            const response = await fetch(CONFIG.scriptUrl, {
-                method: 'POST',
-                mode: 'no-cors',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    action: 'updateItem',
-                    data: data
-                })
-            });
-            localStorage.removeItem('sibim_cache_timestamp');
-            return { success: true };
+            Logger.log('Iniciando actualización de artículo...', data);
+            // Estandarización de llaves agresiva para asegurar que caiga en la columna correcta
+            const robustData = {
+                ...data,
+                "Estatus": data.Estado || data.estado,
+                "estatus": data.Estado || data.estado,
+                "Status": data.Estado || data.estado,
+                "status": data.Estado || data.estado,
+                "Notas": data.Observaciones || data.observaciones,
+                "notas": data.Observaciones || data.observaciones,
+                "Obs": data.Observaciones || data.observaciones,
+                "obs": data.Observaciones || data.observaciones
+            };
+
+            const response = await this.gasFetch('updateItem', { data: JSON.stringify(robustData) });
+
+            if (response && (response.success || !response.error)) {
+                localStorage.removeItem('sibim_cache_timestamp');
+                return { success: true };
+            }
+            return { success: false, error: 'Error al procesar actualización en el servidor' };
         } catch (error) {
             Logger.error('Error updating item:', error);
             return { success: false, error };
