@@ -405,9 +405,11 @@
                 console.log("No match for status:", status);
             }
 
-            // Clear previews
+            // Clear previews and file inputs
             document.getElementById('photo-preview').innerHTML = '';
             document.getElementById('pdf-preview').textContent = '';
+            document.getElementById('upd-photo').value = '';
+            document.getElementById('upd-pdf').value = '';
             document.getElementById('qr-display').style.display = 'none';
         }
 
