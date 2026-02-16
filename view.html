@@ -122,6 +122,7 @@
                 const departamento = item.Departamento || item.departamento || item.Area || item.Área || item.area || item.Ubicacion || item.Ubicación || item.ubicacion || 'Sin Asignar';
                 const responsable = item.Responsable || item.responsable || item.Usuario || item.usuario || item.Encargado || item.encargado || 'No asignado';
                 const estado = item.Estado || item.estado || item.Estatus || item.estatus || 'ACTIVO';
+                const observaciones = item.Observaciones || item.observaciones || item.Notas || item.notas || 'Sin observaciones registradas.';
 
                 // Actualizar la interfaz
                 document.getElementById('item-name').textContent = nombre;
@@ -130,7 +131,7 @@
                 document.getElementById('item-dept').textContent = departamento;
                 document.getElementById('item-resp').textContent = responsable;
                 document.getElementById('item-status').textContent = estado;
-                document.getElementById('item-obs').textContent = item.Observaciones || item.observaciones || item.Notas || 'Sin observaciones registradas.';
+                document.getElementById('item-obs').textContent = observaciones;
 
             } catch (error) {
                 console.error('Error al cargar el activo:', error);

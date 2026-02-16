@@ -226,7 +226,8 @@
                                 <option value="Inactivo">Inactivo</option>
                                 <option value="Baja">Baja</option>
                                 <option value="Extraviado">Extraviado</option>
-                                <option value="encomodato">En Comodato</option>
+                                <option value="Baja / Extraviado">Baja / Extraviado</option>
+                                <option value="En Comodato">En Comodato</option>
                                 <option value="No recibido en E.R">No recibido en E.R</option>
                                 <option value="Desvinculación">Desvinculación</option>
                             </select>
@@ -249,7 +250,7 @@
                         style="padding: 20px 0; margin-top: 20px; border-top: 1px solid var(--glass-border); display: flex; justify-content: flex-end; gap: 15px;">
                         <button type="button" class="btn btn-outline" style="color: #e74c3c; border-color: #e74c3c;"
                             onclick="document.getElementById('result-container').style.display='none'">Cancelar</button>
-                        <button type="button" class="btn btn-primary" onclick="submitUpdate()">
+                        <button type="button" class="btn btn-primary" onclick="submitUpdate(this)">
                             <i class="fas fa-save"></i> ACTUALIZAR ARTÍCULO
                         </button>
                     </div>
@@ -346,6 +347,8 @@
                     return UI.showToast("Error de conexión con el inventario", "error");
                 }
 
+                fullInventory = items; // Sync global state
+
                 const found = items.find(i => {
                     const code = (i.Codigo || i.codigo || i.id || '').toString().toLowerCase();
                     const name = (i.Nombre || i.nombre || '').toString().toLowerCase();
@@ -388,19 +391,18 @@
             document.getElementById('upd-obs').value = getKey(['Observaciones', 'observaciones']);
 
             // Status requires mapping
-            const status = getKey(['Estado', 'estado']);
+            const status = getKey(['Estado', 'estado']).toString().trim();
             const statusSelect = document.getElementById('upd-status');
             let matched = false;
             for (let opt of statusSelect.options) {
-                if (opt.value.toLowerCase() === status.toLowerCase()) {
+                if (opt.value.toLowerCase() === status.toLowerCase() || opt.text.toLowerCase() === status.toLowerCase()) {
                     statusSelect.value = opt.value;
                     matched = true;
                     break;
                 }
             }
-            if (!matched) {
-                // If status not in list, maybe add it or default to Activo
-                statusSelect.value = 'Activo';
+            if (!matched && status) {
+                console.log("No match for status:", status);
             }
 
             // Clear previews
@@ -448,25 +450,24 @@
             legend.textContent = code;
         }
 
-        async function submitUpdate() {
+        async function submitUpdate(btn) {
             const code = document.getElementById('upd-code').value;
             if (!code) return;
 
-            // Gather all data with Correct Capitalized Keys
+            // Gather all data with Redundant Keys for maximum backend compatibility
             const data = {
-                "Codigo": code,
-                "Nombre": document.getElementById('upd-name').value,
-                "Marca": document.getElementById('upd-brand').value,
-                "Modelo": document.getElementById('upd-model').value,
-                "Serie": document.getElementById('upd-serie').value,
-                "Estado": document.getElementById('upd-status').value,
-                "Departamento": document.getElementById('upd-dept').value,
-                "Responsable": document.getElementById('upd-resp').value,
-                "Observaciones": document.getElementById('upd-obs').value,
+                "Codigo": code, "codigo": code,
+                "Nombre": document.getElementById('upd-name').value, "nombre": document.getElementById('upd-name').value,
+                "Marca": document.getElementById('upd-brand').value, "marca": document.getElementById('upd-brand').value,
+                "Modelo": document.getElementById('upd-model').value, "modelo": document.getElementById('upd-model').value,
+                "Serie": document.getElementById('upd-serie').value, "serie": document.getElementById('upd-serie').value,
+                "Estado": document.getElementById('upd-status').value, "estado": document.getElementById('upd-status').value,
+                "Departamento": document.getElementById('upd-dept').value, "departamento": document.getElementById('upd-dept').value,
+                "Responsable": document.getElementById('upd-resp').value, "responsable": document.getElementById('upd-resp').value,
+                "Observaciones": document.getElementById('upd-obs').value, "observaciones": document.getElementById('upd-obs').value,
                 "Codigo QR": `${window.location.host.includes('localhost') ? 'https://sibimtzomp.netlify.app' : window.location.origin}/view.html?id=${code}`
             };
 
-            const btn = event.currentTarget;
             const originalText = btn.innerHTML;
             btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...';
             btn.disabled = true;
@@ -491,8 +492,11 @@
                     }
 
                     UI.showToast("Artículo actualizado correctamente", "success");
-                    // Refresh data
+                    // Important: Refresh data from cloud and wait for it
+                    localStorage.removeItem('sibim_cache_timestamp');
                     await API.fetchItems();
+                    // Reload form from the fresh data to confirm it was saved
+                    await performSearch();
                 } else {
                     UI.showToast("Error al actualizar: " + (res.error || "Desconocido"), "error");
                 }
