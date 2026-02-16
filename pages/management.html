@@ -227,6 +227,8 @@
                                 <option value="Baja">Baja</option>
                                 <option value="Extraviado">Extraviado</option>
                                 <option value="encomodato">En Comodato</option>
+                                <option value="No recibido en E.R">No recibido en E.R</option>
+                                <option value="Desvinculación">Desvinculación</option>
                             </select>
                         </div>
                         <div class="form-group">
@@ -305,6 +307,9 @@
     <script src="../js/app.js"></script>
 
     <script>
+        let currentItem = null;
+        let fullInventory = [];
+
         document.addEventListener('DOMContentLoaded', () => {
             const urlParams = new URLSearchParams(window.location.search);
             const searchParam = urlParams.get('search') || urlParams.get('id');
@@ -350,6 +355,7 @@
                 });
 
                 if (found) {
+                    currentItem = found; // Guardamos estado actual para comparar
                     populateForm(found);
                     document.getElementById('result-container').style.display = 'block';
                     UI.showToast("Artículo encontrado", "success");
@@ -446,19 +452,18 @@
             const code = document.getElementById('upd-code').value;
             if (!code) return;
 
-            // Gather all data
+            // Gather all data with Correct Capitalized Keys
             const data = {
-                codigo: code,
-                nombre: document.getElementById('upd-name').value,
-                marca: document.getElementById('upd-brand').value,
-                modelo: document.getElementById('upd-model').value,
-                serie: document.getElementById('upd-serie').value,
-                estado: document.getElementById('upd-status').value,
-                departamento: document.getElementById('upd-dept').value,
-                responsable: document.getElementById('upd-resp').value,
-                observaciones: document.getElementById('upd-obs').value,
-                "Codigo QR": `${window.location.host.includes('localhost') ? 'https://sibimtzomp.netlify.app' : window.location.origin}/view.html?id=${code}`,
-                "Observaciones": document.getElementById('upd-obs').value
+                "Codigo": code,
+                "Nombre": document.getElementById('upd-name').value,
+                "Marca": document.getElementById('upd-brand').value,
+                "Modelo": document.getElementById('upd-model').value,
+                "Serie": document.getElementById('upd-serie').value,
+                "Estado": document.getElementById('upd-status').value,
+                "Departamento": document.getElementById('upd-dept').value,
+                "Responsable": document.getElementById('upd-resp').value,
+                "Observaciones": document.getElementById('upd-obs').value,
+                "Codigo QR": `${window.location.host.includes('localhost') ? 'https://sibimtzomp.netlify.app' : window.location.origin}/view.html?id=${code}`
             };
 
             const btn = event.currentTarget;
@@ -473,6 +478,18 @@
                 const res = await API.updateItem(data);
 
                 if (res.success) {
+                    // Log specific changes to Audit Trail
+                    if (typeof currentItem === 'object' && currentItem !== null) {
+                        const fields = ["Nombre", "Marca", "Modelo", "Serie", "Estado", "Departamento", "Responsable", "Observaciones"];
+                        fields.forEach(f => {
+                            const oldVal = currentItem[f] || currentItem[f.toLowerCase()] || "";
+                            const newVal = data[f] || "";
+                            if (oldVal.toString() !== newVal.toString()) {
+                                Auth.logActivity('ACTUALIZA', `Cambio en ${f} (${code}): de "${oldVal}" a "${newVal}"`);
+                            }
+                        });
+                    }
+
                     UI.showToast("Artículo actualizado correctamente", "success");
                     // Refresh data
                     await API.fetchItems();
