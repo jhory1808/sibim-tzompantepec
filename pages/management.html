@@ -408,8 +408,10 @@
             // Clear previews and file inputs
             document.getElementById('photo-preview').innerHTML = '';
             document.getElementById('pdf-preview').textContent = '';
-            document.getElementById('upd-photo').value = '';
-            document.getElementById('upd-pdf').value = '';
+            const photoInput = document.getElementById('file-photo');
+            const pdfInput = document.getElementById('file-pdf');
+            if (photoInput) photoInput.value = '';
+            if (pdfInput) pdfInput.value = '';
             document.getElementById('qr-display').style.display = 'none';
         }
 
@@ -480,8 +482,8 @@
             };
 
             // Capture Files (Photography and Document)
-            const photoInput = document.getElementById('upd-photo');
-            const pdfInput = document.getElementById('upd-pdf');
+            const photoInput = document.getElementById('file-photo');
+            const pdfInput = document.getElementById('file-pdf');
 
             try {
                 if (photoInput.files && photoInput.files[0]) {
