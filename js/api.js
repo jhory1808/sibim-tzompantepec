@@ -95,13 +95,21 @@ const API = {
 
     async updateItem(data) {
         try {
-            Logger.log('Iniciando actualización de artículo (Hybrid POST)...', data);
+            Logger.log('Iniciando actualización de artículo (Robust POST)...', data);
 
-            // Hybrid approach: Action in URL + Data in Body
+            // Hybrid approach: Action in URL + Body
             const url = `${CONFIG.scriptUrl}?action=updateItem&t=${Date.now()}`;
+
+            // Ensure we have a valid ID from any possible source
+            const itemId = data.id || data.ID || data.Codigo || data.codigo || data.id_articulo;
 
             const robustData = {
                 ...data,
+                "id": itemId,
+                "ID": itemId,
+                "id_articulo": itemId,
+                "codigo": data.Codigo || data.codigo || itemId,
+                "Codigo": data.Codigo || data.codigo || itemId,
                 "Estatus": data.Estado || data.estado,
                 "Status": data.Estado || data.estado,
                 "estado": data.Estado || data.estado,
@@ -110,16 +118,25 @@ const API = {
                 "Obs": data.Observaciones || data.observaciones,
                 "Comentarios": data.Observaciones || data.observaciones,
                 "observaciones": data.Observaciones || data.observaciones,
-                "notas": data.Observaciones || data.observaciones
+                "notas": data.Observaciones || data.observaciones,
+                "Comentario": data.Observaciones || data.observaciones
+            };
+
+            // Payload flat AND nested for maximum compatibility with different GAS versions
+            const payload = {
+                action: 'updateItem',
+                id: itemId,
+                ID: itemId,
+                id_articulo: itemId,
+                codigo: robustData.codigo,
+                data: robustData,
+                ...robustData // Flattened properties at top level too
             };
 
             const response = await fetch(url, {
                 method: 'POST',
                 headers: { 'Content-Type': 'text/plain' },
-                body: JSON.stringify({
-                    action: 'updateItem',
-                    data: robustData
-                })
+                body: JSON.stringify(payload)
             });
 
             if (!response.ok) {
@@ -136,7 +153,7 @@ const API = {
 
             return {
                 success: result ? result.success !== false : true,
-                message: result ? result.message : 'Actualización enviada'
+                message: result ? (result.message || result.msg) : 'Actualización enviada'
             };
         } catch (error) {
             Logger.error('Error updating item:', error);
