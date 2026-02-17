@@ -69,7 +69,9 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Check authentication if not on home/login
-    if (window.location.pathname.includes('index.html') || window.location.pathname.includes('/pages/')) {
+    const isRoot = window.location.pathname === '/' || window.location.pathname === '' || window.location.pathname.endsWith('index.html');
+
+    if (isRoot || window.location.pathname.includes('index.html') || window.location.pathname.includes('/pages/')) {
         Auth.checkAccess();
         Auth.initTimeout(); // 10m inactivity logout
         Auth.initTheme();   // Load saved theme
@@ -78,9 +80,7 @@ document.addEventListener('DOMContentLoaded', () => {
         handleRolePermissions();
 
         // Show Welcome Greeting and Init Notifications
-        const isDashboard = window.location.pathname.endsWith('/') ||
-            window.location.pathname.includes('index.html') ||
-            window.location.pathname === '';
+        const isDashboard = isRoot || window.location.pathname.includes('index.html');
 
         if (isDashboard) {
             showGreeting();

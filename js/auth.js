@@ -59,24 +59,35 @@ const Auth = {
             const user = this.getCurrentUser();
             if (!user) return;
 
-            // Usamos el endpoint de actualización existente (si existe) o simulamos una
-            // Para propósitos de este sistema, registramos en el trail de auditoría
+            Logger.log(`Registrando Actividad: ${action}`, details);
+
+            // Payload robusto para asegurar que el backend lo reciba correctamente
+            const payload = {
+                action: 'registerAudit',
+                data: {
+                    fecha: new Date().toISOString(),
+                    usuario: user.username,
+                    rol: user.role,
+                    accion: action.toUpperCase(),
+                    detalles: details,
+                    ip: 'PWA/Local'
+                },
+                // Duplicamos al nivel superior para compatibilidad
+                usuario: user.username,
+                accion: action.toUpperCase()
+            };
+
             await fetch(CONFIG.scriptUrl, {
                 method: 'POST',
-                mode: 'no-cors',
-                body: JSON.stringify({
-                    action: 'registerAudit', // Asumimos que este endpoint maneja logs genéricos
-                    data: {
-                        fecha: new Date().toISOString(),
-                        usuario: user.username,
-                        rol: user.role,
-                        accion: action,
-                        detalles: details,
-                        ip: 'Local/PWA'
-                    }
-                })
+                headers: { 'Content-Type': 'text/plain' },
+                body: JSON.stringify(payload)
             });
-        } catch (e) { console.warn('Activity Log failed', e); }
+
+            return true;
+        } catch (e) {
+            Logger.warn('Activity Log failed', e);
+            return false;
+        }
     },
 
     trackPresence() {

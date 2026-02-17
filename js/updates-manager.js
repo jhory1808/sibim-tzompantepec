@@ -73,10 +73,11 @@ const UpdatesManager = {
 
             const result = await API.updateItem(updatedData);
             if (result.success) {
+                Auth.logActivity('ACTUALIZA', `Edición rápida de artículo: ${updatedData.descripcion || updatedData.id} (#${updatedData.id})`);
                 UI.showToast('Actualizado con éxito (Sincronización enviada)', 'success');
                 localStorage.removeItem('sibim_cache_timestamp'); // Clear cache
             } else {
-                UI.showToast('Error al actualizar', 'error');
+                UI.showToast('Error al actualizar: ' + (result.error || 'Desconocido'), 'error');
             }
         });
     }

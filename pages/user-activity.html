@@ -163,17 +163,21 @@
                 });
 
                 // Process logs for stats and presence
-                // Process logs for stats and presence
                 if (Array.isArray(logs)) {
                     logs.forEach(log => {
-                        const user = log.Usuario || log.usuario;
-                        if (!stats[user]) return;
+                        const user = log.Usuario || log.usuario || log.User || log.user;
+                        if (!user || !stats[user]) return;
 
-                        const logDate = new Date(log.Fecha || log.fecha);
+                        const rawDate = log.Fecha || log.fecha || log.Date || log.date || log.timestamp;
+                        if (!rawDate) return;
+
+                        const logDate = new Date(rawDate);
+                        if (isNaN(logDate.getTime())) return;
+
                         const diffMinutes = (now - logDate) / (1000 * 60);
 
-                        // Presence check (15 minutes window for more stability)
-                        if (diffMinutes <= 15) stats[user].online = true;
+                        // Presence check (20 minutes window for more stability)
+                        if (diffMinutes <= 20) stats[user].online = true;
 
                         if (!stats[user].lastSeen || logDate > stats[user].lastSeen) {
                             stats[user].lastSeen = logDate;

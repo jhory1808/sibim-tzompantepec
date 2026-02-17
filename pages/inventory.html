@@ -699,6 +699,8 @@
 
             const res = await API.addItem(data);
             if (res.success) {
+                // Log activity
+                Auth.logActivity('NUEVO', `Registro de artículo: ${data.Nombre} (${code})`);
                 UI.showToast("Artículo registrado exitosamente", "success");
                 toggleModal('new-article-modal');
                 loadInventory();
@@ -724,6 +726,7 @@
         }
 
         function printLabelFromData(id, desc) {
+            Auth.logActivity('ETIQUETA', `Impresión de etiqueta: ${desc} (#${id})`);
             window.location.href = `print-label.html?id=${id}&desc=${encodeURIComponent(desc)}`;
         }
 
