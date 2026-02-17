@@ -160,6 +160,29 @@
             <span>SIBIMTZOMP</span>
         </div>
         <div style="display: flex; align-items: center; gap: 15px;">
+            <!-- Hamburger Menu for States -->
+            <div class="user-profile-menu"
+                onclick="event.stopPropagation(); document.getElementById('state-menu').classList.toggle('active')">
+                <div class="user-header-btn" style="padding: 10px 20px;">
+                    <i class="fas fa-bars" style="font-size: 1.2rem; color: var(--accent-blue);"></i>
+                </div>
+                <div class="dropdown-box" id="state-menu" style="right: auto; left: 0;">
+                    <div
+                        style="padding: 10px 15px; font-size: 0.7rem; color: var(--text-secondary); text-transform: uppercase;">
+                        Estados Rápidos</div>
+                    <a href="inventory.html?filter=Buen Estado" class="dropdown-item"><i
+                            class="fas fa-check-circle"></i> Buen Estado</a>
+                    <a href="inventory.html?filter=Regular" class="dropdown-item"><i class="fas fa-adjust"></i>
+                        Regular</a>
+                    <a href="inventory.html?filter=Descompuesto" class="dropdown-item"><i class="fas fa-tools"></i>
+                        Descompuesto</a>
+                    <a href="inventory.html?filter=Inservible" class="dropdown-item"><i class="fas fa-times-circle"></i>
+                        Inservible</a>
+                    <a href="inventory.html?filter=Para Cambio" class="dropdown-item"><i
+                            class="fas fa-exchange-alt"></i> Para Cambio</a>
+                </div>
+            </div>
+
             <a href="inventory.html" class="btn btn-outline" style="padding: 10px 15px;">Ir al Inventario</a>
             <a href="../index.html" class="btn btn-outline" style="padding: 10px 15px;">Volver al Inicio</a>
         </div>
@@ -224,12 +247,13 @@
                             <select id="upd-status">
                                 <option value="Activo">Activo</option>
                                 <option value="Inactivo">Inactivo</option>
-                                <option value="Bueno">Bueno</option>
+                                <option value="Buen Estado">Buen Estado</option>
                                 <option value="Regular">Regular</option>
-                                <option value="Malo">Malo</option>
+                                <option value="Descompuesto">Descompuesto</option>
+                                <option value="Inservible">Inservible</option>
+                                <option value="Para Cambio">Para Cambio</option>
                                 <option value="Baja">Baja</option>
                                 <option value="Extraviado">Extraviado</option>
-                                <option value="Baja / Extraviado">Baja / Extraviado</option>
                                 <option value="En Comodato">En Comodato</option>
                                 <option value="No recibido en E.R">No recibido en E.R</option>
                                 <option value="Desvinculación">Desvinculación</option>
@@ -253,6 +277,10 @@
                         style="padding: 20px 0; margin-top: 20px; border-top: 1px solid var(--glass-border); display: flex; justify-content: flex-end; gap: 15px;">
                         <button type="button" class="btn btn-outline" style="color: #e74c3c; border-color: #e74c3c;"
                             onclick="document.getElementById('result-container').style.display='none'">Cancelar</button>
+                        <button type="button" class="btn glass" onclick="showCurrentStatus()"
+                            style="border-color: var(--accent-blue);">
+                            <i class="fas fa-info-circle"></i> ESTADO ACTUAL
+                        </button>
                         <button type="button" class="btn btn-primary" onclick="submitUpdate(this)">
                             <i class="fas fa-save"></i> ACTUALIZAR ARTÍCULO
                         </button>
@@ -558,6 +586,11 @@
                 btn.innerHTML = originalText;
                 btn.disabled = false;
             }
+        }
+        function showCurrentStatus() {
+            if (!currentItem) return;
+            const status = currentItem.Estado || currentItem.estado || currentItem.Estatus || 'No definido';
+            UI.showToast(`Estado actual en sistema: ${status}`, 'info');
         }
     </script>
 </body>

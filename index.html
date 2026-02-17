@@ -58,25 +58,51 @@
                 2024-2027</p>
         </div>
 
-        <div class="user-profile-menu" onclick="toggleUserDropdown()">
-            <div class="user-header-btn">
-                <div class="avatar-initial" id="user-avatar">A</div>
-                <div class="user-info-text">
-                    <span class="name" id="user-name-display">---</span>
-                    <span class="role" id="user-role-display">---</span>
+        <div style="display: flex; align-items: center; gap: 15px;">
+            <!-- Hamburger Menu for States -->
+            <div class="user-profile-menu"
+                onclick="event.stopPropagation(); document.getElementById('state-menu').classList.toggle('active')">
+                <div class="user-header-btn" style="padding: 10px 20px;">
+                    <i class="fas fa-bars" style="font-size: 1.2rem; color: var(--accent-blue);"></i>
                 </div>
-                <i class="fas fa-chevron-down" style="font-size: 0.8rem; margin-left: auto;"></i>
+                <div class="dropdown-box" id="state-menu" style="right: auto; left: 0;">
+                    <div
+                        style="padding: 10px 15px; font-size: 0.7rem; color: var(--text-secondary); text-transform: uppercase;">
+                        Estados Rápidos</div>
+                    <a href="pages/inventory.html?filter=Buen Estado" class="dropdown-item"><i
+                            class="fas fa-check-circle"></i> Buen Estado</a>
+                    <a href="pages/inventory.html?filter=Regular" class="dropdown-item"><i class="fas fa-adjust"></i>
+                        Regular</a>
+                    <a href="pages/inventory.html?filter=Descompuesto" class="dropdown-item"><i
+                            class="fas fa-tools"></i> Descompuesto</a>
+                    <a href="pages/inventory.html?filter=Inservible" class="dropdown-item"><i
+                            class="fas fa-times-circle"></i> Inservible</a>
+                    <a href="pages/inventory.html?filter=Para Cambio" class="dropdown-item"><i
+                            class="fas fa-exchange-alt"></i> Para Cambio</a>
+                </div>
             </div>
-            <div class="dropdown-box" id="user-dropdown">
-                <a href="#" class="dropdown-item"><i class="fas fa-user-circle"></i> Mi Perfil</a>
-                <a href="pages/scanner.html" class="dropdown-item"><i class="fas fa-search"></i> Consulta Rápida</a>
-                <div id="admin-only-tools">
-                    <a href="pages/user-activity.html" class="dropdown-item"><i class="fas fa-chart-line"></i>
-                        Desempeño</a>
-                    <a href="pages/config.html" class="dropdown-item"><i class="fas fa-key"></i> Cambiar Contraseña</a>
+
+            <div class="user-profile-menu" onclick="toggleUserDropdown()">
+                <div class="user-header-btn">
+                    <div class="avatar-initial" id="user-avatar">A</div>
+                    <div class="user-info-text">
+                        <span class="name" id="user-name-display">---</span>
+                        <span class="role" id="user-role-display">---</span>
+                    </div>
+                    <i class="fas fa-chevron-down" style="font-size: 0.8rem; margin-left: auto;"></i>
                 </div>
-                <a href="#" onclick="logout()" class="dropdown-item" style="color: #e74c3c;"><i
-                        class="fas fa-sign-out-alt"></i> Cerrar Sesión</a>
+                <div class="dropdown-box" id="user-dropdown">
+                    <a href="#" class="dropdown-item"><i class="fas fa-user-circle"></i> Mi Perfil</a>
+                    <a href="pages/scanner.html" class="dropdown-item"><i class="fas fa-search"></i> Consulta Rápida</a>
+                    <div id="admin-only-tools">
+                        <a href="pages/user-activity.html" class="dropdown-item"><i class="fas fa-chart-line"></i>
+                            Desempeño</a>
+                        <a href="pages/config.html" class="dropdown-item"><i class="fas fa-key"></i> Cambiar
+                            Contraseña</a>
+                    </div>
+                    <a href="#" onclick="logout()" class="dropdown-item" style="color: #e74c3c;"><i
+                            class="fas fa-sign-out-alt"></i> Cerrar Sesión</a>
+                </div>
             </div>
         </div>
     </header>
