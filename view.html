@@ -32,6 +32,7 @@
         .data-item span {
             font-size: 1.1rem;
             font-weight: bold;
+            color: #fff;
         }
     </style>
 </head>
@@ -39,14 +40,23 @@
 <body class="theme-blue">
     <div class="view-card glass fade-in">
         <img src="assets/images/logo_municipio.png" style="max-width: 250px; margin-bottom: 30px;">
+        <h1 id="item-name" style="color: #fff; font-size: 1.6rem; margin-bottom: 5px;">Cargando...</h1>
         <p id="item-code"
-            style="color: var(--accent-blue); font-weight: 800; font-size: 2rem; margin: 20px 0; letter-spacing: 2px;">
+            style="color: var(--accent-blue); font-weight: 800; font-size: 1.4rem; margin: 10px 0; letter-spacing: 2px;">
         </p>
 
         <div class="data-grid">
-            <div class="data-item" style="grid-column: span 2;">
-                <label>Nombre del Artículo</label>
-                <span id="item-name" style="color: #fff; font-size: 1.4rem;">Cargando...</span>
+            <div class="data-item">
+                <label>Marca / Modelo</label>
+                <span id="item-brand">---</span>
+            </div>
+            <div class="data-item">
+                <label>Número de Serie</label>
+                <span id="item-serial">---</span>
+            </div>
+            <div class="data-item">
+                <label>Departamento</label>
+                <span id="item-dept">---</span>
             </div>
             <div class="data-item">
                 <label>Responsable</label>
@@ -57,86 +67,75 @@
                 <span id="item-status">---</span>
             </div>
             <div class="data-item">
-                <label>Departamento</label>
-                <span id="item-dept">---</span>
-            </div>
-            <div class="data-item">
-                <label>Marca / Modelo</label>
-                <span id="item-brand">---</span>
+                <label>Categoría</label>
+                <span id="item-cat">---</span>
             </div>
             <div class="data-item"
                 style="grid-column: span 2; margin-top: 15px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 15px;">
-                <label>Observaciones del Bien</label>
-                <span id="item-obs"
-                    style="font-weight: normal; font-style: italic; font-size: 0.95rem; color: #ddd;">---</span>
+                <label>Observaciones</label>
+                <span id="item-obs" style="font-weight: normal; font-size: 0.9rem; color: #ccc;">---</span>
             </div>
         </div>
 
         <div style="margin-top: 40px;">
-            <a href="login.html" class="btn btn-primary" style="width: 100%;">Acceder al Sistema</a>
+            <a href="login.html" class="btn btn-primary"
+                style="width: 100%; border-radius: 50px; font-weight: bold; background: linear-gradient(to right, #00d2ff, #3a7bd5);">ACCEDER
+                AL SISTEMA</a>
         </div>
     </div>
 
     <script src="js/config.js"></script>
     <script src="js/api.js"></script>
-    <script src="js/auth.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', async () => {
-            // Security Check: Redirect to login if not authenticated
-            if (!Auth.isAuthenticated()) {
-                window.location.href = 'login.html?redirect=' + encodeURIComponent(window.location.href);
-                return;
-            }
-
             const params = new URLSearchParams(window.location.search);
             const id = params.get('id');
 
             if (!id) {
                 document.getElementById('item-name').textContent = "ID de activo no proporcionado";
-                document.getElementById('item-code').textContent = "ERROR";
                 return;
             }
 
-            // Mostrar el código inmediatamente
+            // UI feedback
             document.getElementById('item-code').textContent = id;
             document.getElementById('item-name').innerHTML = '<i class="fas fa-spinner fa-spin"></i> Cargando...';
 
             try {
                 const item = await API.getItemById(id);
+                if (item) {
+                    // Helper robusto para obtener valores sin importar mayúsculas/minúsculas
+                    const getV = (obj, ...keys) => {
+                        if (!obj) return null;
+                        const lowKeys = keys.map(k => k.toLowerCase());
+                        const found = Object.keys(obj).find(k => lowKeys.includes(k.toLowerCase()));
+                        return found ? obj[found] : null;
+                    };
 
-                if (!item) {
+                    const nombre = getV(item, 'Nombre', 'nombre', 'Articulo', 'Descripción', 'descripcion') || id;
+                    const marca = getV(item, 'Marca', 'marca', 'Brand') || '';
+                    const modelo = getV(item, 'Modelo', 'modelo', 'Model') || '';
+                    const serie = getV(item, 'Serie', 'serie', 'S/N', 'Serial', 'Número de Serie', 'N. Serie') || 'N/A';
+                    const depto = getV(item, 'Departamento', 'departamento', 'Area', 'Depto', 'Ubicación', 'Ubicacion') || 'Sin Asignar';
+                    const resp = getV(item, 'Responsable', 'responsable', 'Usuario', 'Encargado') || 'No asignado';
+                    const estado = getV(item, 'Estado', 'estado', 'Estatus', 'Status') || 'Activo';
+                    const cat = getV(item, 'Categoria', 'Categoría', 'category', 'Cat') || 'General';
+                    const obs = getV(item, 'Observaciones', 'observaciones', 'Notas', 'notas') || 'Sin observaciones.';
+
+                    document.getElementById('item-name').textContent = nombre;
+                    document.getElementById('item-brand').textContent = `${marca} ${modelo}`.trim() || '---';
+                    document.getElementById('item-serial').textContent = serie;
+                    document.getElementById('item-dept').textContent = depto;
+                    document.getElementById('item-resp').textContent = resp;
+                    document.getElementById('item-status').textContent = estado;
+                    document.getElementById('item-cat').textContent = cat;
+                    document.getElementById('item-obs').textContent = obs;
+                } else {
                     document.getElementById('item-name').textContent = "Activo no encontrado";
-                    document.getElementById('item-code').textContent = id;
-                    console.error('No se encontró el item con ID:', id);
-                    return;
+                    document.getElementById('item-name').style.color = "#ff4d4d";
                 }
-
-                console.log('Item encontrado:', item);
-
-                // Extraer datos con múltiples fallbacks para diferentes formatos de columnas
-                const nombre = item.Nombre || item.nombre || item.Descripción || item.descripcion || item.Articulo || item.articulo || 'Sin Nombre';
-                const codigo = item.Codigo || item.codigo || item.Código || item.id || item.ID || id;
-                const marca = item.Marca || item.marca || '';
-                const modelo = item.Modelo || item.modelo || '';
-                const brandModel = `${marca} ${modelo}`.trim() || '---';
-                const departamento = item.Departamento || item.departamento || item.Area || item.Área || item.area || item.Ubicacion || item.Ubicación || item.ubicacion || 'Sin Asignar';
-                const responsable = item.Responsable || item.responsable || item.Usuario || item.usuario || item.Encargado || item.encargado || 'No asignado';
-                const estado = item.Estado || item.estado || item.Estatus || item.estatus || 'ACTIVO';
-                const observaciones = item.Observaciones || item.observaciones || item.Notas || item.notas || 'Sin observaciones registradas.';
-
-                // Actualizar la interfaz
-                document.getElementById('item-name').textContent = nombre;
-                document.getElementById('item-code').textContent = codigo;
-                document.getElementById('item-brand').textContent = brandModel;
-                document.getElementById('item-dept').textContent = departamento;
-                document.getElementById('item-resp').textContent = responsable;
-                document.getElementById('item-status').textContent = estado;
-                document.getElementById('item-obs').textContent = observaciones;
-
             } catch (error) {
-                console.error('Error al cargar el activo:', error);
-                document.getElementById('item-name').textContent = "Error al cargar datos";
-                document.getElementById('item-code').textContent = id;
+                console.error("Error cargando view:", error);
+                document.getElementById('item-name').textContent = "Error de conexión";
             }
         });
     </script>

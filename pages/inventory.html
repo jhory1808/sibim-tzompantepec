@@ -664,8 +664,10 @@
             const previewDiv = document.getElementById('modal-qr-preview');
             const canvasDiv = document.getElementById('qr-modal-canvas');
             previewDiv.style.display = 'block';
-            canvasDiv.innerHTML = '';
-            const fullUrl = `${window.location.origin}/view.html?id=${code}`;
+            const baseUrl = window.location.origin.includes('localhost') || window.location.origin.includes('127.0.0.1')
+                ? 'https://sibimtzomp.netlify.app'
+                : window.location.origin;
+            const fullUrl = `${baseUrl}/view.html?id=${code}`;
             new QRCode(canvasDiv, { text: fullUrl, width: 128, height: 128 });
         }
 

@@ -287,9 +287,13 @@
             document.getElementById('qr-code').innerHTML = '';
             document.getElementById('brother-qr').innerHTML = '';
 
-            // Generate Standard QR
+            // Generate Standard QR - Fixed Base URL for Netlify / Production
+            const baseUrl = window.location.origin.includes('localhost') || window.location.origin.includes('127.0.0.1')
+                ? 'https://sibimtzomp.netlify.app'
+                : window.location.origin;
+
             new QRCode(document.getElementById("qr-code"), {
-                text: `${window.location.origin}/view.html?id=${code}`,
+                text: `${baseUrl}/view.html?id=${code}`,
                 width: 150,
                 height: 150,
                 colorDark: "#000000",

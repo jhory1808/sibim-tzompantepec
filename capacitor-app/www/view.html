@@ -86,18 +86,44 @@
                 return;
             }
 
-            const item = await API.getItemById(id);
-            if (item) {
-                document.getElementById('item-name').textContent = item.nombre || item.descripcion;
-                document.getElementById('item-code').textContent = item.codigo || id;
-                document.getElementById('item-brand').textContent = `${item.marca || ''} ${item.modelo || ''}`;
-                document.getElementById('item-serial').textContent = item.serie || item.numero_serie || 'N/A';
-                document.getElementById('item-dept').textContent = item.departamento || 'Sin Asignar';
-                document.getElementById('item-resp').textContent = item.responsable || 'No asignado';
-                document.getElementById('item-status').textContent = item.estado || 'Activo';
-                document.getElementById('item-cat').textContent = item.categoria || 'General';
-            } else {
-                document.getElementById('item-name').textContent = "Activo no encontrado";
+            // UI Feedback
+            document.getElementById('item-code').textContent = id;
+            document.getElementById('item-name').innerHTML = '<i class="fas fa-spinner fa-spin"></i> Cargando...';
+
+            try {
+                const item = await API.getItemById(id);
+                if (item) {
+                    // Constant robust extraction helper
+                    const getV = (obj, ...keys) => {
+                        if (!obj) return null;
+                        const lowKeys = keys.map(k => k.toLowerCase());
+                        const found = Object.keys(obj).find(k => lowKeys.includes(k.toLowerCase()));
+                        return found ? obj[found] : null;
+                    };
+
+                    const nombre = getV(item, 'Nombre', 'nombre', 'Articulo', 'Descripción', 'descripcion') || id;
+                    const marca = getV(item, 'Marca', 'marca', 'Brand') || '';
+                    const modelo = getV(item, 'Modelo', 'modelo', 'Model') || '';
+                    const serie = getV(item, 'Serie', 'serie', 'S/N', 'Serial', 'Número de Serie', 'N. Serie') || 'N/A';
+                    const depto = getV(item, 'Departamento', 'departamento', 'Area', 'Depto', 'Ubicación', 'Ubicacion') || 'Sin Asignar';
+                    const resp = getV(item, 'Responsable', 'responsable', 'Usuario', 'Encargado') || 'No asignado';
+                    const estado = getV(item, 'Estado', 'estado', 'Estatus', 'Status') || 'Activo';
+                    const cat = getV(item, 'Categoria', 'Categoría', 'category', 'Cat') || 'General';
+
+                    document.getElementById('item-name').textContent = nombre;
+                    document.getElementById('item-code').textContent = id;
+                    document.getElementById('item-brand').textContent = `${marca} ${modelo}`.trim() || '---';
+                    document.getElementById('item-serial').textContent = serie;
+                    document.getElementById('item-dept').textContent = depto;
+                    document.getElementById('item-resp').textContent = resp;
+                    document.getElementById('item-status').textContent = estado;
+                    document.getElementById('item-cat').textContent = cat;
+                } else {
+                    document.getElementById('item-name').textContent = "Activo no encontrado";
+                }
+            } catch (err) {
+                console.error("View Error:", err);
+                document.getElementById('item-name').textContent = "Error de conexión";
             }
         });
     </script>
