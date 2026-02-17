@@ -97,22 +97,26 @@
                 <h1 class="glow-text"><i class="fas fa-users-cog"></i> Actividad y Desempeño</h1>
                 <p style="color: var(--text-secondary);">Monitoreo de usuarios y productividad en tiempo real</p>
             </div>
-            <button class="btn glass" onclick="location.reload()"><i class="fas fa-sync"></i> Sincronizar</button>
+            <div style="display: flex; gap: 10px;">
+                <button class="btn glass" onclick="location.href='../index.html'"><i class="fas fa-arrow-left"></i>
+                    Volver al Sistema</button>
+                <button class="btn glass" onclick="location.reload()"><i class="fas fa-sync"></i> Sincronizar</button>
+            </div>
         </header>
 
         <div class="stats-row"
             style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 40px;">
-            <div class="stat-card glass">
+            <div class="stat-card glass" style="border-left: 4px solid #2ecc71;">
                 <p>En Línea</p>
                 <h2 id="total-online">0</h2>
                 <i class="fas fa-satellite"></i>
             </div>
-            <div class="stat-card glass">
+            <div class="stat-card glass" style="border-left: 4px solid var(--accent-blue);">
                 <p>Total Capturas</p>
                 <h2 id="total-records">0</h2>
                 <i class="fas fa-plus-circle"></i>
             </div>
-            <div class="stat-card glass">
+            <div class="stat-card glass" style="border-left: 4px solid #f1c40f;">
                 <p>Total Étiquetas</p>
                 <h2 id="total-prints">0</h2>
                 <i class="fas fa-print"></i>
@@ -158,7 +162,8 @@
                         records: 0,
                         updates: 0,
                         prints: 0,
-                        online: false
+                        online: false,
+                        device: '---'
                     };
                 });
 
@@ -176,11 +181,14 @@
 
                         const diffMinutes = (now - logDate) / (1000 * 60);
 
-                        // Presence check (20 minutes window for more stability)
-                        if (diffMinutes <= 20) stats[user].online = true;
+                        // Presence check (5 minutes window for more stability with 1m heartbeat)
+                        if (diffMinutes <= 5) stats[user].online = true;
 
                         if (!stats[user].lastSeen || logDate > stats[user].lastSeen) {
                             stats[user].lastSeen = logDate;
+                            // Capture latest device from 'IP' or 'Version' column (where we save it)
+                            const dev = log.IP || log.ip || log.Versions || log.Versión || '---';
+                            if (dev !== '---') stats[user].device = dev;
                         }
 
                         // Activity aggregation
@@ -210,10 +218,8 @@
             grid.innerHTML = '';
 
             const options = {
-                weekday: 'long',
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric',
+                day: '2-digit',
+                month: 'short',
                 hour: '2-digit',
                 minute: '2-digit'
             };
@@ -223,20 +229,33 @@
                     u.lastSeen.toLocaleDateString('es-MX', options) :
                     'Sin actividad';
 
+                let deviceIcon = '<i class="fas fa-desktop"></i>';
+                if (u.device.includes('Móvil')) deviceIcon = '<i class="fas fa-mobile-alt"></i>';
+                if (u.device.includes('Tablet')) deviceIcon = '<i class="fas fa-tablet-alt"></i>';
+
                 const card = `
                     <div class="user-card glass">
                         <div class="user-info">
-                            <div class="user-avatar">${u.name.charAt(0).toUpperCase()}</div>
+                            <div class="user-avatar" style="background: ${u.online ? 'var(--accent-blue)' : '#333'}">${u.name.charAt(0).toUpperCase()}</div>
                             <div style="text-align: left;">
                                 <h3 style="margin: 0; color: white;">${u.name}</h3>
                                 <p style="margin: 0; font-size: 0.8rem; color: var(--text-secondary);">${u.role}</p>
+                            </div>
+                            <div style="margin-left: auto; font-size: 1.2rem; color: var(--accent-blue);" title="Dispositivo">
+                                ${deviceIcon}
                             </div>
                         </div>
 
                         <div style="display: flex; align-items: center; margin-bottom: 20px;">
                             <span class="status-dot ${u.online ? 'status-online' : 'status-offline'}"></span>
-                            <span style="font-size: 0.9rem;">${u.online ? 'EN LÍNEA' : 'DESCONECTADO'}</span>
+                            <span style="font-size: 0.9rem; font-weight: bold; color: ${u.online ? '#2ecc71' : '#8892b0'}">
+                                ${u.online ? 'EN LÍNEA' : 'DESCONECTADO'}
+                            </span>
                             <span style="margin-left: auto; font-size: 0.75rem; color: var(--text-secondary);">${lastSeenText}</span>
+                        </div>
+
+                        <div style="font-size: 0.7rem; color: var(--text-secondary); margin-bottom: 15px; text-transform: uppercase; letter-spacing: 1px;">
+                            Dispositivo: <span style="color: white;">${u.device}</span>
                         </div>
 
                         <div class="stat-item">

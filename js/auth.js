@@ -54,12 +54,17 @@ const Auth = {
         }
     },
 
+    getDeviceInfo() {
+        const ua = navigator.userAgent;
+        if (/(tablet|ipad|playbook|silk)|(android(?!.*mobi))/i.test(ua)) return "Tablet";
+        if (/Mobile|Android|iP(hone|od)|IEMobile|BlackBerry|Kindle|Silk-Accelerated|(hpw|web)OS|Opera M(obi|ini)/.test(ua)) return "Móvil";
+        return "PC / Web";
+    },
+
     async logActivity(action, details = '') {
         try {
             const user = this.getCurrentUser();
             if (!user) return;
-
-            Logger.log(`Registrando Actividad: ${action}`, details);
 
             // Payload robusto para asegurar que el backend lo reciba correctamente
             const payload = {
@@ -70,7 +75,7 @@ const Auth = {
                     rol: user.role,
                     accion: action.toUpperCase(),
                     detalles: details,
-                    ip: 'PWA/Local'
+                    ip: this.getDeviceInfo() // Usamos el tipo de dispositivo aquí
                 },
                 // Duplicamos al nivel superior para compatibilidad
                 usuario: user.username,
@@ -85,7 +90,6 @@ const Auth = {
 
             return true;
         } catch (e) {
-            Logger.warn('Activity Log failed', e);
             return false;
         }
     },
@@ -93,12 +97,15 @@ const Auth = {
     trackPresence() {
         if (!this.isAuthenticated()) return;
 
-        // Heartbeat cada 3 minutos
+        // Primer latido al cargar
+        this.logActivity('PRESENCE', 'Usuario activo en el sistema');
+
+        // Heartbeat cada 60 segundos para mayor precisión
         setInterval(() => {
             if (document.visibilityState === 'visible') {
-                this.logActivity('PRESENCE', 'Usuario en línea');
+                this.logActivity('PRESENCE', 'Usuario manteniendo conexión');
             }
-        }, 3 * 60 * 1000);
+        }, 60 * 1000);
     },
 
     logout() {
