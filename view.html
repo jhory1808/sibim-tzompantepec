@@ -4,83 +4,222 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Visor de Activo - SIBIMTZOMP</title>
-    <link rel="stylesheet" href="css/futuristic.css">
+    <title>Visor de Activo - SIBIM TZOMP</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
+        :root {
+            --bg-color: #1a3b5d;
+            --accent-blue: #00d2ff;
+            --text-label: #8db2d9;
+            --text-value: #ffffff;
+            --card-glass: rgba(255, 255, 255, 0.05);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', 'Segoe UI', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: #fff;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
         .view-card {
-            max-width: 600px;
-            margin: 50px auto;
-            padding: 40px;
+            width: 100%;
+            max-width: 450px;
             text-align: center;
+            animation: fadeIn 0.6s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .logo-container {
+            width: 280px;
+            height: 280px;
+            background: white;
+            border-radius: 50%;
+            margin: 0 auto 40px auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .logo-container img {
+            width: 100%;
+            height: auto;
+            object-fit: contain;
+        }
+
+        h1 {
+            font-size: 1.8rem;
+            font-weight: 800;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .item-code {
+            color: var(--accent-blue);
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: 40px;
+            letter-spacing: 1.5px;
         }
 
         .data-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 20px;
+            gap: 30px;
             text-align: left;
-            margin-top: 30px;
+            margin-bottom: 40px;
         }
 
         .data-item label {
-            color: var(--text-secondary);
-            font-size: 0.8rem;
+            color: var(--text-label);
+            font-size: 0.85rem;
             display: block;
+            margin-bottom: 5px;
+            font-weight: 400;
         }
 
         .data-item span {
-            font-size: 1.1rem;
-            font-weight: bold;
-            color: #fff;
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--text-value);
+            display: block;
+            word-break: break-word;
+        }
+
+        .observations-container {
+            text-align: left;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            padding-top: 20px;
+            margin-bottom: 30px;
+        }
+
+        .update-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 15px;
+            border-radius: 50px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+        }
+
+        .update-badge.updated {
+            background: rgba(46, 204, 113, 0.2);
+            color: #2ecc71;
+            border: 1px solid #2ecc71;
+        }
+
+        .update-badge.not-updated {
+            background: rgba(241, 196, 15, 0.2);
+            color: #f1c40f;
+            border: 1px solid #f1c40f;
+        }
+
+        .btn-access {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(to right, var(--accent-blue), #3a7bd5);
+            color: white;
+            text-decoration: none;
+            border-radius: 50px;
+            font-weight: 800;
+            font-size: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            box-shadow: 0 5px 15px rgba(0, 210, 255, 0.3);
+            transition: transform 0.2s;
+        }
+
+        .btn-access:active {
+            transform: scale(0.98);
+        }
+
+        .loading-spinner {
+            font-size: 2rem;
+            color: var(--accent-blue);
         }
     </style>
 </head>
 
-<body class="theme-blue">
-    <div class="view-card glass fade-in">
-        <img src="assets/images/logo_municipio.png" style="max-width: 250px; margin-bottom: 30px;">
-        <h1 id="item-name" style="color: #fff; font-size: 1.6rem; margin-bottom: 5px;">Cargando...</h1>
-        <p id="item-code"
-            style="color: var(--accent-blue); font-weight: 800; font-size: 1.4rem; margin: 10px 0; letter-spacing: 2px;">
-        </p>
-
-        <div class="data-grid">
-            <div class="data-item">
-                <label>Marca / Modelo</label>
-                <span id="item-brand">---</span>
-            </div>
-            <div class="data-item">
-                <label>Número de Serie</label>
-                <span id="item-serial">---</span>
-            </div>
-            <div class="data-item">
-                <label>Departamento</label>
-                <span id="item-dept">---</span>
-            </div>
-            <div class="data-item">
-                <label>Responsable</label>
-                <span id="item-resp">---</span>
-            </div>
-            <div class="data-item">
-                <label>Estado del Bien</label>
-                <span id="item-status">---</span>
-            </div>
-            <div class="data-item">
-                <label>Categoría</label>
-                <span id="item-cat">---</span>
-            </div>
-            <div class="data-item"
-                style="grid-column: span 2; margin-top: 15px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 15px;">
-                <label>Observaciones</label>
-                <span id="item-obs" style="font-weight: normal; font-size: 0.9rem; color: #ccc;">---</span>
-            </div>
+<body>
+    <div class="view-card" id="main-content">
+        <div class="logo-container">
+            <img src="assets/images/logo_municipio.png" alt="Logo Municipio">
         </div>
 
-        <div style="margin-top: 40px;">
-            <a href="login.html" class="btn btn-primary"
-                style="width: 100%; border-radius: 50px; font-weight: bold; background: linear-gradient(to right, #00d2ff, #3a7bd5);">ACCEDER
-                AL SISTEMA</a>
+        <div id="loader" style="padding: 50px;">
+            <i class="fas fa-spinner fa-spin loading-spinner"></i>
+            <p style="margin-top: 20px; color: var(--text-label);">Buscando información del activo...</p>
+        </div>
+
+        <div id="item-details" style="display: none;">
+            <div id="status-container"></div>
+
+            <h1 id="item-name">---</h1>
+            <p class="item-code" id="item-code">---</p>
+
+            <div class="data-grid">
+                <div class="data-item">
+                    <label>Departamento</label>
+                    <span id="item-dept">---</span>
+                </div>
+                <div class="data-item">
+                    <label>Responsable</label>
+                    <span id="item-resp">---</span>
+                </div>
+                <div class="data-item">
+                    <label>Estado del Bien</label>
+                    <span id="item-status">---</span>
+                </div>
+                <div class="data-item">
+                    <label>Sincronizado</label>
+                    <span id="item-sync">SÍ</span>
+                </div>
+            </div>
+
+            <div class="observations-container">
+                <label
+                    style="color: var(--text-label); font-size: 0.85rem; display: block; margin-bottom: 5px;">Observaciones</label>
+                <span id="item-obs" style="font-size: 1rem; color: #ccc;">Sin observaciones.</span>
+            </div>
+
+            <a href="login.html" class="btn-access">ACCEDER AL SISTEMA</a>
+        </div>
+
+        <div id="error-message" style="display: none; padding: 40px;">
+            <i class="fas fa-exclamation-triangle" style="font-size: 3rem; color: #e74c3c; margin-bottom: 20px;"></i>
+            <h2 style="margin-bottom: 10px;">Activo No Encontrado</h2>
+            <p style="color: var(--text-label); margin-bottom: 30px;">El código escaneado no existe en nuestra base de
+                datos oficial.</p>
+            <a href="index.html" class="btn-access"
+                style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2);">VOLVER</a>
         </div>
     </div>
 
@@ -89,55 +228,72 @@
     <script>
         document.addEventListener('DOMContentLoaded', async () => {
             const params = new URLSearchParams(window.location.search);
-            const id = params.get('id');
+            const id = params.get('id') || params.get('qr') || params.get('code');
 
             if (!id) {
-                document.getElementById('item-name').textContent = "ID de activo no proporcionado";
+                showError("No se proporcionó un ID válido");
                 return;
             }
-
-            // UI feedback
-            document.getElementById('item-code').textContent = id;
-            document.getElementById('item-name').innerHTML = '<i class="fas fa-spinner fa-spin"></i> Cargando...';
 
             try {
                 const item = await API.getItemById(id);
                 if (item) {
-                    // Helper robusto para obtener valores sin importar mayúsculas/minúsculas
-                    const getV = (obj, ...keys) => {
-                        if (!obj) return null;
-                        const lowKeys = keys.map(k => k.toLowerCase());
-                        const found = Object.keys(obj).find(k => lowKeys.includes(k.toLowerCase()));
-                        return found ? obj[found] : null;
-                    };
-
-                    const nombre = getV(item, 'Nombre', 'nombre', 'Articulo', 'Descripción', 'descripcion') || id;
-                    const marca = getV(item, 'Marca', 'marca', 'Brand') || '';
-                    const modelo = getV(item, 'Modelo', 'modelo', 'Model') || '';
-                    const serie = getV(item, 'Serie', 'serie', 'S/N', 'Serial', 'Número de Serie', 'N. Serie') || 'N/A';
-                    const depto = getV(item, 'Departamento', 'departamento', 'Area', 'Depto', 'Ubicación', 'Ubicacion') || 'Sin Asignar';
-                    const resp = getV(item, 'Responsable', 'responsable', 'Usuario', 'Encargado') || 'No asignado';
-                    const estado = getV(item, 'Estado', 'estado', 'Estatus', 'Status') || 'Activo';
-                    const cat = getV(item, 'Categoria', 'Categoría', 'category', 'Cat') || 'General';
-                    const obs = getV(item, 'Observaciones', 'observaciones', 'Notas', 'notas') || 'Sin observaciones.';
-
-                    document.getElementById('item-name').textContent = nombre;
-                    document.getElementById('item-brand').textContent = `${marca} ${modelo}`.trim() || '---';
-                    document.getElementById('item-serial').textContent = serie;
-                    document.getElementById('item-dept').textContent = depto;
-                    document.getElementById('item-resp').textContent = resp;
-                    document.getElementById('item-status').textContent = estado;
-                    document.getElementById('item-cat').textContent = cat;
-                    document.getElementById('item-obs').textContent = obs;
+                    renderItem(item, id);
                 } else {
-                    document.getElementById('item-name').textContent = "Activo no encontrado";
-                    document.getElementById('item-name').style.color = "#ff4d4d";
+                    showError("Activo no encontrado");
                 }
             } catch (error) {
                 console.error("Error cargando view:", error);
-                document.getElementById('item-name').textContent = "Error de conexión";
+                showError("Error de conexión con la base de datos");
             }
         });
+
+        function renderItem(item, id) {
+            document.getElementById('loader').style.display = 'none';
+            document.getElementById('item-details').style.display = 'block';
+
+            // Helper para obtener valores sin importar mayúsculas/minúsculas
+            const getV = (obj, ...keys) => {
+                if (!obj) return null;
+                const lowKeys = keys.map(k => k.toLowerCase());
+                const found = Object.keys(obj).find(k => lowKeys.includes(k.toLowerCase()));
+                return found ? obj[found] : null;
+            };
+
+            const nombre = getV(item, 'Nombre', 'nombre', 'Articulo', 'Descripción', 'descripcion') || id;
+            const depto = getV(item, 'Departamento', 'departamento', 'Area', 'Depto', 'Ubicación') || 'Sin Asignar';
+            const resp = getV(item, 'Responsable', 'responsable', 'Usuario', 'Encargado') || 'No asignado';
+            const estado = getV(item, 'Estado', 'estado', 'Estatus', 'Status') || 'Activo';
+            const obs = getV(item, 'Observaciones', 'observaciones', 'Notas', 'notas') || 'Sin observaciones.';
+
+            // Lógica para determinar si ha sido actualizado
+            // Buscamos cualquier campo que indique actualización o si tiene una fecha reciente
+            const actualizadoRaw = getV(item, 'Actualizado', 'Updated', 'Sincronizado', 'status_update', 'Actualizado 2024');
+            const esActualizado = actualizadoRaw && (actualizadoRaw.toString().toLowerCase() === 'si' || actualizadoRaw.toString().toLowerCase() === 'true' || actualizadoRaw.toString().toLowerCase() === 'yes');
+
+            document.getElementById('item-name').textContent = nombre;
+            document.getElementById('item-code').textContent = id;
+            document.getElementById('item-dept').textContent = depto;
+            document.getElementById('item-resp').textContent = resp;
+            document.getElementById('item-status').textContent = estado;
+            document.getElementById('item-obs').textContent = obs;
+            document.getElementById('item-sync').textContent = esActualizado ? "SÍ" : "PENDIENTE";
+            document.getElementById('item-sync').style.color = esActualizado ? "#2ecc71" : "#f1c40f";
+
+            // Agregar badge superior
+            const statusBadge = document.createElement('div');
+            statusBadge.className = `update-badge ${esActualizado ? 'updated' : 'not-updated'}`;
+            statusBadge.innerHTML = esActualizado ?
+                '<i class="fas fa-check-circle"></i> Item Actualizado' :
+                '<i class="fas fa-clock"></i> Pendiente de Actualización';
+            document.getElementById('status-container').appendChild(statusBadge);
+        }
+
+        function showError(msg) {
+            document.getElementById('loader').style.display = 'none';
+            document.getElementById('error-message').style.display = 'block';
+            console.warn(msg);
+        }
     </script>
 </body>
 

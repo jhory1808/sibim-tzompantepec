@@ -110,6 +110,8 @@ const API = {
                 "id_articulo": itemId,
                 "codigo": data.Codigo || data.codigo || itemId,
                 "Codigo": data.Codigo || data.codigo || itemId,
+                "Actualizado": "SI",
+                "status_update": "SI",
                 "Estatus": data.Estado || data.estado,
                 "Status": data.Estado || data.estado,
                 "estado": data.Estado || data.estado,
