@@ -8,7 +8,7 @@ const CONFIG = {
     // Metadatos de la aplicación
     appName: 'SIBIM TZOMPANTEPEC',
     version: '2.1.0',
-    productionUrl: 'https://sibimtzomp.netlify.app',
+    productionUrl: 'https://jhory1808.github.io/sibim-tzompantepec',
     lastUpdate: '2026-02-20 15:45',
 
     // Configuración de Escalabilidad
