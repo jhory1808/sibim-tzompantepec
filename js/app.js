@@ -844,12 +844,15 @@ async function loadDepartmentsMenu() {
     }
 }
 
+// Global state to avoid multiple API calls
+let fullInventory = [];
+
 // Inicializar carga de departamentos si existen los elementos
 document.addEventListener('DOMContentLoaded', () => {
-    // Si hay dropdowns de departamentos, cargarlos
-    if (document.querySelector('.departments-dropdown-list')) {
-        setTimeout(loadDepartmentsMenu, 1000); // Pequeño delay para asegurar que API esté lista
-    }
+    // Escuchar clicks fuera para cerrar dropdowns
+    document.addEventListener('click', () => {
+        document.querySelectorAll('.dropdown-box').forEach(d => d.classList.remove('active'));
+    });
 
     // Si hay selectores de departamentos para formularios, cargarlos
     if (document.querySelector('.departments-selector-list')) {
@@ -890,18 +893,23 @@ async function loadDepartmentsSelector() {
 }
 
 /**
- * Inserta el valor seleccionado en el input y cierra el dropdown.
+ * Inserta el valor seleccionado en cualquier input y cierra el dropdown respectivo.
  */
-function selectDeptValue(inputId, value, dropdownId) {
+function selectDropdownValue(inputId, value, dropdownId) {
     const input = document.getElementById(inputId);
     if (input) {
         input.value = value;
         input.dispatchEvent(new Event('input')); // Notificar cambios
-        UI.showToast(`Área seleccionada: ${value}`, 'info');
+        UI.showToast(`Seleccionado: ${value}`, 'info');
     }
     const dropdown = document.getElementById(dropdownId);
     if (dropdown) dropdown.classList.remove('active');
 }
+
+// Mantener compatibilidad con llamadas existentes
+const selectDeptValue = selectDropdownValue;
+const setResponsible = (name) => selectDropdownValue('upd-resp', name, 'upd-resp-dropdown');
+const setSituacion = (val) => selectDropdownValue('upd-situation', val, 'upd-situation-dropdown');
 
 /**
  * Sincroniza todos los códigos QR de la base de datos con la URL de producción actual.
