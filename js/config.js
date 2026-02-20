@@ -38,7 +38,8 @@ const CONFIG = {
         estado: 'O',
         observaciones: 'P',
         fotografia: 'Q',
-        resguardo: 'R'
+        resguardo: 'R',
+        situacion_actual: 'S'
     },
 
     // Endpoint de Actualizaciones (Simulado)

@@ -195,12 +195,12 @@
                     <span id="item-resp">---</span>
                 </div>
                 <div class="data-item">
-                    <label>Estado del Bien</label>
+                    <label>Estado Inicial</label>
                     <span id="item-status">---</span>
                 </div>
                 <div class="data-item">
-                    <label>Sincronizado</label>
-                    <span id="item-sync">SÍ</span>
+                    <label>Situación Actual</label>
+                    <span id="item-situation" style="color: var(--accent-blue);">---</span>
                 </div>
             </div>
 
@@ -272,6 +272,7 @@
             const depto = getV(item, 'Departamento', 'departamento', 'Area', 'Depto', 'Ubicación') || 'Sin Asignar';
             const resp = getV(item, 'Responsable', 'responsable', 'Usuario', 'Encargado') || 'No asignado';
             const estado = getV(item, 'Estado', 'estado', 'Estatus', 'Status') || 'Activo';
+            const situacion = getV(item, 'Situacion Actual', 'situación actual', 'Situacion', 'situacion_actual', 'Situación') || 'Pendiente de Validar';
             const obs = getV(item, 'Observaciones', 'observaciones', 'Notas', 'notas') || 'Sin observaciones.';
 
             // Lógica para determinar si ha sido actualizado
@@ -284,9 +285,8 @@
             document.getElementById('item-dept').textContent = depto;
             document.getElementById('item-resp').textContent = resp;
             document.getElementById('item-status').textContent = estado;
+            document.getElementById('item-situation').textContent = situacion;
             document.getElementById('item-obs').textContent = obs;
-            document.getElementById('item-sync').textContent = esActualizado ? "SÍ" : "PENDIENTE";
-            document.getElementById('item-sync').style.color = esActualizado ? "#2ecc71" : "#f1c40f";
 
             // Agregar badge superior
             const statusBadge = document.createElement('div');

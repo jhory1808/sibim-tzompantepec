@@ -276,33 +276,47 @@
                             <input type="text" id="upd-serie">
                         </div>
                         <div class="form-group">
-                            <label>Estado</label>
+                            <label>Estado de Bien del Activo</label>
                             <select id="upd-status">
-                                <option value="Activo">Activo</option>
-                                <option value="Inactivo">Inactivo</option>
-                                <option value="Buen Estado">Buen Estado</option>
+                                <option value="Bueno">Bueno</option>
                                 <option value="Regular">Regular</option>
-                                <option value="Descompuesto">Descompuesto</option>
-                                <option value="Inservible">Inservible</option>
-                                <option value="Para Cambio">Para Cambio</option>
+                                <option value="Malo">Malo</option>
                                 <option value="Baja">Baja</option>
                                 <option value="Extraviado">Extraviado</option>
-                                <option value="En Comodato">En Comodato</option>
-                                <option value="No recibido en E.R">No recibido en E.R</option>
-                                <option value="Desvinculación">Desvinculación</option>
+                                <option value="Para Cambio">Para Cambio</option>
                             </select>
                         </div>
-                        <div class="form-group" style="position: relative;">
+                        <div class="form-group">
+                            <label>Situación Actual Artículo</label>
+                            <div style="display: flex; gap: 8px;">
+                                <input type="text" id="upd-situation" placeholder="Estado actual...">
+                                <button type="button" class="btn"
+                                    style="padding: 10px; background: #e67e22; color: white; border-radius: 8px; font-size: 0.8rem;"
+                                    onclick="event.stopPropagation(); document.getElementById('upd-situation-dropdown').classList.toggle('active')">
+                                    <i class="fas fa-bars"></i>
+                                </button>
+                            </div>
+                            <div class="dropdown-box" id="upd-situation-dropdown"
+                                style="width: 100%; top: 100%; left: 0;">
+                                <div class="dropdown-item" onclick="setSituacion('Bueno')">Bueno</div>
+                                <div class="dropdown-item" onclick="setSituacion('Regular')">Regular</div>
+                                <div class="dropdown-item" onclick="setSituacion('Malo')">Malo</div>
+                                <div class="dropdown-item" onclick="setSituacion('Baja')">Baja</div>
+                                <div class="dropdown-item" onclick="setSituacion('No recibido en E.R')">No recibido en
+                                    E.R</div>
+                                <div class="dropdown-item" onclick="setSituacion('Desvinculación')">Desvinculación</div>
+                            </div>
+                        </div>
+                        <div class="form-group">
                             <label>Departamento</label>
                             <div style="display: flex; gap: 8px;">
-                                <input type="text" id="upd-dept" placeholder="Seleccione o escriba...">
+                                <input type="text" id="upd-dept" placeholder="Seleccione área...">
                                 <button type="button" class="btn"
                                     style="padding: 10px; background: #2ea39a; color: white; border-radius: 8px; font-size: 0.8rem;"
                                     onclick="event.stopPropagation(); document.getElementById('upd-dept-dropdown').classList.toggle('active')">
                                     <i class="fas fa-bars"></i>
                                 </button>
                             </div>
-                            <!-- Selector dinámico -->
                             <div class="dropdown-box" id="upd-dept-dropdown"
                                 style="width: 100%; top: 100%; left: 0; max-height: 250px; overflow-y: auto;">
                                 <div class="departments-selector-list" data-target="upd-dept">
@@ -313,30 +327,18 @@
                         </div>
                         <div class="form-group">
                             <label>Responsable</label>
-                            <div style="display: flex; gap: 5px;">
-                                <input type="text" id="upd-resp" style="flex: 1;">
-                                <div class="dropdown-container" style="position: relative;">
-                                    <button type="button" class="btn-icon"
-                                        style="padding: 0 15px; background: #3498db; color: white; border-radius: 8px; font-size: 0.75rem; white-space: nowrap; height: 100%; display: flex; align-items: center; gap: 8px; border: none; cursor: pointer;"
-                                        onclick="event.stopPropagation(); document.getElementById('upd-status-dropdown-resp').classList.toggle('active')">
-                                        <i class="fas fa-bars"></i> ESTADO ACTUAL
-                                    </button>
-                                    <!-- Selector de Estado Estilo Hamburguesa -->
-                                    <div class="dropdown-box" id="upd-status-dropdown-resp"
-                                        style="right: 0; width: 220px; top: 110%;">
-                                        <div class="dropdown-item" onclick="selectStatusFromMenu('Bueno')"><i
-                                                class="fas fa-check-circle" style="color:#2ecc71;"></i> Bueno</div>
-                                        <div class="dropdown-item" onclick="selectStatusFromMenu('Regular')"><i
-                                                class="fas fa-adjust" style="color:#f1c40f;"></i> Regular</div>
-                                        <div class="dropdown-item" onclick="selectStatusFromMenu('Malo')"><i
-                                                class="fas fa-times-circle" style="color:#e74c3c;"></i> Malo</div>
-                                        <div class="dropdown-item" onclick="selectStatusFromMenu('Baja')"><i
-                                                class="fas fa-arrow-down" style="color:#95a5a6;"></i> Baja</div>
-                                        <div class="dropdown-item" onclick="selectStatusFromMenu('No recibido en E.R')">
-                                            <i class="fas fa-question-circle"></i> No recibido en E.R</div>
-                                        <div class="dropdown-item" onclick="selectStatusFromMenu('Desvinculación')"><i
-                                                class="fas fa-unlink"></i> Desvinculación</div>
-                                    </div>
+                            <div style="display: flex; gap: 8px;">
+                                <input type="text" id="upd-resp" placeholder="Nombre del responsable...">
+                                <button type="button" class="btn"
+                                    style="padding: 10px; background: #3498db; color: white; border-radius: 8px; font-size: 0.8rem;"
+                                    onclick="event.stopPropagation(); loadResponsibleMenu(); document.getElementById('upd-resp-dropdown').classList.toggle('active')">
+                                    <i class="fas fa-bars"></i>
+                                </button>
+                            </div>
+                            <div class="dropdown-box" id="upd-resp-dropdown"
+                                style="width: 100%; top: 100%; left: 0; max-height: 250px; overflow-y: auto;">
+                                <div id="responsible-list">
+                                    <div class="dropdown-item" style="opacity:0.5;">Cargando responsables...</div>
                                 </div>
                             </div>
                         </div>
@@ -501,6 +503,7 @@
             setVal('upd-serie', ['Numero de Serie', 'Serie', 'serie']);
             setVal('upd-dept', ['Departamento', 'departamento']);
             setVal('upd-resp', ['Responsable', 'responsable']);
+            setVal('upd-situation', ['Situacion Actual', 'situacion', 'Situacion', 'situacion_actual', 'Situación Actual']);
             setVal('upd-obs', ['Observaciones', 'observaciones', 'Notas', 'notas', 'Comentarios', 'comentarios', 'Obs', 'obs']);
 
             // Robust Status Selection
@@ -604,6 +607,8 @@
                 "Estado": document.getElementById('upd-status').value, "estado": document.getElementById('upd-status').value,
                 "Departamento": document.getElementById('upd-dept').value, "departamento": document.getElementById('upd-dept').value,
                 "Responsable": document.getElementById('upd-resp').value, "responsable": document.getElementById('upd-resp').value,
+                "Situacion Actual": document.getElementById('upd-situation').value,
+                "Situación Actual": document.getElementById('upd-situation').value,
                 "Observaciones": document.getElementById('upd-obs').value, "observaciones": document.getElementById('upd-obs').value,
                 "Codigo QR": `${CONFIG.productionUrl}view.html?id=${code}`,
                 "Actualizado": "SI"
@@ -677,14 +682,47 @@
             }
         }
 
-        // Función para seleccionar estado desde el nuevo menú hamburguesa
+        // Función para seleccionar situación
+        function setSituacion(val) {
+            document.getElementById('upd-situation').value = val;
+            document.getElementById('upd-situation-dropdown').classList.remove('active');
+        }
+
+        // Cargar responsables únicos de la base de datos
+        async function loadResponsibleMenu() {
+            const listDiv = document.getElementById('responsible-list');
+            if (fullInventory.length === 0) {
+                fullInventory = await API.fetchItems();
+            }
+
+            const uniqueResps = [...new Set(fullInventory.map(i => i.Responsable || i.responsable).filter(r => r))].sort();
+
+            if (uniqueResps.length === 0) {
+                listDiv.innerHTML = '<div class="dropdown-item" style="opacity:0.5;">No hay responsables registrados</div>';
+                return;
+            }
+
+            listDiv.innerHTML = uniqueResps.map(name => `
+                <div class="dropdown-item" onclick="setResponsible('${name}')">
+                    <i class="fas fa-user-tie"></i> ${name}
+                </div>
+            `).join('');
+        }
+
+        function setResponsible(name) {
+            document.getElementById('upd-resp').value = name;
+            document.getElementById('upd-resp-dropdown').classList.remove('active');
+        }
+
+        // Función para seleccionar estado desde el nuevo menú hamburguesa (Legacy compatibility if needed)
         function selectStatusFromMenu(value) {
             const select = document.getElementById('upd-status');
             if (select) {
                 select.value = value;
                 UI.showToast(`Estatus seleccionado: ${value}`, 'info');
             }
-            document.getElementById('upd-status-dropdown-resp').classList.remove('active');
+            const drop = document.getElementById('upd-status-dropdown-resp');
+            if (drop) drop.classList.remove('active');
         }
         function showCurrentStatus() {
             if (!currentItem) return;
