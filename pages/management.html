@@ -160,10 +160,30 @@
             <span>SIBIMTZOMP</span>
         </div>
         <div style="display: flex; align-items: center; gap: 15px;">
+            <!-- Botón de Departamentos (Formato Hamburguesa) -->
+            <div class="user-profile-menu"
+                onclick="event.stopPropagation(); document.getElementById('dept-menu-header').classList.toggle('active')">
+                <div class="user-header-btn"
+                    style="padding: 10px 20px; background: #2ea39a; min-width: auto; border-radius: 8px;">
+                    <i class="fas fa-bars" style="font-size: 1.2rem; color: white;"></i>
+                </div>
+                <div class="dropdown-box" id="dept-menu-header" style="right: auto; left: 0;">
+                    <div
+                        style="padding: 10px 15px; font-size: 0.7rem; color: var(--text-secondary); text-transform: uppercase; border-bottom: 1px solid rgba(255,255,255,0.1);">
+                        Departamentos de la Base
+                    </div>
+                    <div class="departments-dropdown-list">
+                        <!-- Se cargará dinámicamente desde la hoja de Google Sheets -->
+                        <div class="dropdown-item" style="opacity:0.5;"><i class="fas fa-spinner fa-spin"></i>
+                            Cargando...</div>
+                    </div>
+                </div>
+            </div>
+
             <!-- Hamburger Menu for States -->
             <div class="user-profile-menu"
                 onclick="event.stopPropagation(); document.getElementById('state-menu').classList.toggle('active')">
-                <div class="user-header-btn" style="padding: 10px 20px;">
+                <div class="user-header-btn" style="padding: 10px 20px; min-width: auto; border-radius: 8px;">
                     <i class="fas fa-bars" style="font-size: 1.2rem; color: var(--accent-blue);"></i>
                 </div>
                 <div class="dropdown-box" id="state-menu" style="right: auto; left: 0;">

@@ -799,3 +799,51 @@ function initCategoryChart(items) {
         });
     }
 }
+
+// ===== FUNCIONES PARA DEPARTAMENTOS EN DROPDOWN (HAMBURGUESA) =====
+
+/**
+ * Carga los departamentos desde el API y los renderiza en los contenedores designados.
+ * Se puede llamar desde cualquier página que incluya app.js y api.js
+ */
+async function loadDepartmentsMenu() {
+    console.log("[DEPT-MENU] Iniciando carga de departamentos para el menú...");
+    const containers = document.querySelectorAll('.departments-dropdown-list');
+    if (containers.length === 0) return;
+
+    try {
+        const departments = await API.getDepartments();
+        console.log(`[DEPT-MENU] ${departments ? departments.length : 0} departamentos obtenidos.`);
+
+        containers.forEach(container => {
+            if (!departments || departments.length === 0) {
+                container.innerHTML = '<div class="dropdown-item" style="opacity:0.5;">No hay departamentos cargados</div>';
+                return;
+            }
+
+            container.innerHTML = departments.map(dept => {
+                const name = dept['Nombre Departamento'] || dept.nombre || dept.Nombre || 'Sin nombre';
+                // Usamos inventory.html con filtro de departamento
+                const basePath = window.location.pathname.includes('/pages/') ? '' : 'pages/';
+                return `
+                    <a href="${basePath}inventory.html?filter=${encodeURIComponent(name)}" class="dropdown-item">
+                        <i class="fas fa-building"></i> ${name}
+                    </a>
+                `;
+            }).join('');
+        });
+    } catch (error) {
+        console.error("Error cargando menú de departamentos:", error);
+        containers.forEach(container => {
+            container.innerHTML = '<div class="dropdown-item" style="color:#e74c3c;">Error al cargar</div>';
+        });
+    }
+}
+
+// Inicializar carga de departamentos si existen los elementos
+document.addEventListener('DOMContentLoaded', () => {
+    // Si hay dropdowns de departamentos, cargarlos
+    if (document.querySelector('.departments-dropdown-list')) {
+        setTimeout(loadDepartmentsMenu, 1000); // Pequeño delay para asegurar que API esté lista
+    }
+});
