@@ -35,7 +35,10 @@ const CONFIG = {
         proveedor: 'L',
         valor: 'M',
         fecha_adquisicion: 'N',
-        estado: 'O'      // Estimado basado en desplazamiento
+        estado: 'O',
+        observaciones: 'P',
+        fotografia: 'Q',
+        resguardo: 'R'
     },
 
     // Endpoint de Actualizaciones (Simulado)

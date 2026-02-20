@@ -116,23 +116,15 @@ const API = {
                 "Status": data.Estado || data.estado,
                 "estado": data.Estado || data.estado,
                 "status": data.Estado || data.estado,
-                "Notas": data.Observaciones || data.observaciones,
-                "Obs": data.Observaciones || data.observaciones,
-                "Comentarios": data.Observaciones || data.observaciones,
+                "Observaciones": data.Observaciones || data.observaciones,
                 "observaciones": data.Observaciones || data.observaciones,
-                "notas": data.Observaciones || data.observaciones,
-                "Comentario": data.Observaciones || data.observaciones
             };
 
-            // Payload flat AND nested for maximum compatibility with different GAS versions
+            // Payload cleaned: We don't want to duplicate large base64 strings
             const payload = {
                 action: 'updateItem',
                 id: itemId,
-                ID: itemId,
-                id_articulo: itemId,
-                codigo: robustData.codigo,
-                data: robustData,
-                ...robustData // Flattened properties at top level too
+                ...robustData
             };
 
             const response = await fetch(url, {

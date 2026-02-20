@@ -562,12 +562,17 @@
             const code = document.getElementById('upd-code').value;
             if (!code) return;
 
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...';
+            btn.disabled = true;
+
             // Gather all data with Redundant Keys for maximum backend compatibility
             const data = {
                 "id": currentItem ? (currentItem.id || currentItem.ID || currentItem.Codigo || currentItem.codigo) : code,
                 "ID": currentItem ? (currentItem.id || currentItem.ID || currentItem.Codigo || currentItem.codigo) : code,
                 "Codigo": code, "codigo": code,
                 "Nombre": document.getElementById('upd-name').value, "nombre": document.getElementById('upd-name').value,
+                "Articulo": document.getElementById('upd-name').value,
                 "Marca": document.getElementById('upd-brand').value, "marca": document.getElementById('upd-brand').value,
                 "Modelo": document.getElementById('upd-model').value, "modelo": document.getElementById('upd-model').value,
                 "Serie": document.getElementById('upd-serie').value, "serie": document.getElementById('upd-serie').value,
@@ -575,61 +580,63 @@
                 "Departamento": document.getElementById('upd-dept').value, "departamento": document.getElementById('upd-dept').value,
                 "Responsable": document.getElementById('upd-resp').value, "responsable": document.getElementById('upd-resp').value,
                 "Observaciones": document.getElementById('upd-obs').value, "observaciones": document.getElementById('upd-obs').value,
-                "Codigo QR": `${CONFIG.productionUrl || window.location.origin}/view.html?id=${code}`
+                "Codigo QR": `${CONFIG.productionUrl}view.html?id=${code}`,
+                "Actualizado": "SI"
             };
 
-            // Capture Files (Photography and Document)
-            const photoInput = document.getElementById('file-photo');
-            const pdfInput = document.getElementById('file-pdf');
-
+            // Capture Multimedia Evidence
             try {
+                const photoInput = document.getElementById('file-photo');
+                const pdfInput = document.getElementById('file-pdf');
+
                 if (photoInput.files && photoInput.files[0]) {
+                    UI.showToast("Procesando imagen...", "info");
                     data["Fotografía"] = await toBase64(photoInput.files[0]);
-                    data["fotografia"] = data["Fotografía"];
                 }
                 if (pdfInput.files && pdfInput.files[0]) {
+                    UI.showToast("Procesando documento...", "info");
                     data["Resguardo"] = await toBase64(pdfInput.files[0]);
-                    data["resguardo"] = data["Resguardo"];
                 }
             } catch (e) {
                 console.warn("Error al procesar archivos:", e);
                 UI.showToast("Error al procesar archivos multimedia", "warning");
             }
 
-            const originalText = btn.innerHTML;
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...';
-            btn.disabled = true;
-
             try {
-                // Here we would handle file uploads if supported by GAS backend
-                // For now, we update text fields
-
+                UI.showToast("Sincronizando con la nube...", "info");
                 const res = await API.updateItem(data);
 
                 if (res.success) {
-                    // Log specific changes to Audit Trail
-                    if (typeof currentItem === 'object' && currentItem !== null) {
+                    // Batch audit logs into one single call for efficiency
+                    if (currentItem) {
+                        let logDetails = [];
                         const fields = ["Nombre", "Marca", "Modelo", "Serie", "Estado", "Departamento", "Responsable", "Observaciones"];
                         fields.forEach(f => {
-                            const oldVal = currentItem[f] || currentItem[f.toLowerCase()] || "";
-                            const newVal = data[f] || "";
-                            if (oldVal.toString() !== newVal.toString()) {
-                                Auth.logActivity('ACTUALIZA', `Cambio en ${f} (${code}): de "${oldVal}" a "${newVal}"`);
+                            const oldVal = (currentItem[f] || currentItem[f.toLowerCase()] || "").toString();
+                            const newVal = (data[f] || "").toString();
+                            if (oldVal !== newVal) {
+                                logDetails.push(`${f}: "${oldVal}" -> "${newVal}"`);
                             }
                         });
+
+                        if (logDetails.length > 0) {
+                            await Auth.logActivity('ACTUALIZA', `Edición de activo ${code}: ` + logDetails.join(' | '));
+                        }
                     }
 
-                    UI.showToast("Artículo actualizado correctamente", "success");
-                    // Important: Refresh data from cloud and wait for it
+                    UI.showToast("¡Artículo actualizado correctamente!", "success");
+
+                    // Force cache reset and wait for cloud to have the data
                     localStorage.removeItem('sibim_cache_timestamp');
-                    await API.fetchItems();
-                    // Reload form from the fresh data to confirm it was saved
+                    await new Promise(r => setTimeout(r, 1000));
+
+                    // Reload form with fresh data
                     await performSearch();
                 } else {
                     UI.showToast("Error al actualizar: " + (res.error || "Desconocido"), "error");
                 }
             } catch (e) {
-                console.error(e);
+                console.error("Critical error during update:", e);
                 UI.showToast("Error crítico al actualizar", "error");
             } finally {
                 btn.innerHTML = originalText;
