@@ -313,7 +313,32 @@
                         </div>
                         <div class="form-group">
                             <label>Responsable</label>
-                            <input type="text" id="upd-resp">
+                            <div style="display: flex; gap: 5px;">
+                                <input type="text" id="upd-resp" style="flex: 1;">
+                                <div class="dropdown-container" style="position: relative;">
+                                    <button type="button" class="btn-icon"
+                                        style="padding: 0 15px; background: #3498db; color: white; border-radius: 8px; font-size: 0.75rem; white-space: nowrap; height: 100%; display: flex; align-items: center; gap: 8px; border: none; cursor: pointer;"
+                                        onclick="event.stopPropagation(); document.getElementById('upd-status-dropdown-resp').classList.toggle('active')">
+                                        <i class="fas fa-bars"></i> ESTADO ACTUAL
+                                    </button>
+                                    <!-- Selector de Estado Estilo Hamburguesa -->
+                                    <div class="dropdown-box" id="upd-status-dropdown-resp"
+                                        style="right: 0; width: 220px; top: 110%;">
+                                        <div class="dropdown-item" onclick="selectStatusFromMenu('Bueno')"><i
+                                                class="fas fa-check-circle" style="color:#2ecc71;"></i> Bueno</div>
+                                        <div class="dropdown-item" onclick="selectStatusFromMenu('Regular')"><i
+                                                class="fas fa-adjust" style="color:#f1c40f;"></i> Regular</div>
+                                        <div class="dropdown-item" onclick="selectStatusFromMenu('Malo')"><i
+                                                class="fas fa-times-circle" style="color:#e74c3c;"></i> Malo</div>
+                                        <div class="dropdown-item" onclick="selectStatusFromMenu('Baja')"><i
+                                                class="fas fa-arrow-down" style="color:#95a5a6;"></i> Baja</div>
+                                        <div class="dropdown-item" onclick="selectStatusFromMenu('No recibido en E.R')">
+                                            <i class="fas fa-question-circle"></i> No recibido en E.R</div>
+                                        <div class="dropdown-item" onclick="selectStatusFromMenu('Desvinculación')"><i
+                                                class="fas fa-unlink"></i> Desvinculación</div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                         <div class="form-group" style="grid-column: 1 / -1;">
                             <label>Observaciones</label>
@@ -584,18 +609,26 @@
                 "Actualizado": "SI"
             };
 
-            // Capture Multimedia Evidence
+            // Capture Multimedia Evidence with Robust Keys
             try {
                 const photoInput = document.getElementById('file-photo');
                 const pdfInput = document.getElementById('file-pdf');
 
                 if (photoInput.files && photoInput.files[0]) {
                     UI.showToast("Procesando imagen...", "info");
-                    data["Fotografía"] = await toBase64(photoInput.files[0]);
+                    const base64Img = await toBase64(photoInput.files[0]);
+                    data["Fotografía"] = base64Img;
+                    data["fotografia"] = base64Img;
+                    data["Imagen"] = base64Img;
+                    data["imagen"] = base64Img;
                 }
                 if (pdfInput.files && pdfInput.files[0]) {
                     UI.showToast("Procesando documento...", "info");
-                    data["Resguardo"] = await toBase64(pdfInput.files[0]);
+                    const base64Pdf = await toBase64(pdfInput.files[0]);
+                    data["Resguardo"] = base64Pdf;
+                    data["resguardo"] = base64Pdf;
+                    data["PDF"] = base64Pdf;
+                    data["archivo_pdf"] = base64Pdf;
                 }
             } catch (e) {
                 console.warn("Error al procesar archivos:", e);
@@ -603,7 +636,7 @@
             }
 
             try {
-                UI.showToast("Sincronizando con la nube...", "info");
+                UI.showToast("Guardando cambios y archivos en la nube...", "info");
                 const res = await API.updateItem(data);
 
                 if (res.success) {
@@ -624,11 +657,11 @@
                         }
                     }
 
-                    UI.showToast("¡Artículo actualizado correctamente!", "success");
+                    UI.showToast("¡Artículo, imagen y PDF guardados correctamente!", "success");
 
                     // Force cache reset and wait for cloud to have the data
                     localStorage.removeItem('sibim_cache_timestamp');
-                    await new Promise(r => setTimeout(r, 1000));
+                    await new Promise(r => setTimeout(r, 2000)); // Wait extra for large files
 
                     // Reload form with fresh data
                     await performSearch();
@@ -642,6 +675,16 @@
                 btn.innerHTML = originalText;
                 btn.disabled = false;
             }
+        }
+
+        // Función para seleccionar estado desde el nuevo menú hamburguesa
+        function selectStatusFromMenu(value) {
+            const select = document.getElementById('upd-status');
+            if (select) {
+                select.value = value;
+                UI.showToast(`Estatus seleccionado: ${value}`, 'info');
+            }
+            document.getElementById('upd-status-dropdown-resp').classList.remove('active');
         }
         function showCurrentStatus() {
             if (!currentItem) return;

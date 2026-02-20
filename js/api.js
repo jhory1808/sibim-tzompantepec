@@ -118,9 +118,15 @@ const API = {
                 "status": data.Estado || data.estado,
                 "Observaciones": data.Observaciones || data.observaciones,
                 "observaciones": data.Observaciones || data.observaciones,
+                // Multimedia keys variations for different backend versions
+                "Fotografía": data.Fotografía || data.fotografia || data.Imagen || data.imagen,
+                "fotografia": data.Fotografía || data.fotografia || data.Imagen || data.imagen,
+                "Resguardo": data.Resguardo || data.resguardo || data.PDF || data.archivo_pdf,
+                "resguardo": data.Resguardo || data.resguardo || data.PDF || data.archivo_pdf
             };
 
             // Payload cleaned: We don't want to duplicate large base64 strings
+            // We use a flat structure for maximum compatibility
             const payload = {
                 action: 'updateItem',
                 id: itemId,
