@@ -378,6 +378,10 @@ function updateUIForUser() {
         if (adminTools) {
             adminTools.style.display = Auth.isAdmin() ? 'block' : 'none';
         }
+        const maintenanceTools = document.getElementById('admin-maintenance-tools');
+        if (maintenanceTools) {
+            maintenanceTools.style.display = Auth.isAdmin() ? 'block' : 'none';
+        }
     } else {
         if (userNameElem) userNameElem.textContent = 'Invitado';
         if (userRoleElem) userRoleElem.textContent = 'Sin Sesión';
@@ -897,4 +901,57 @@ function selectDeptValue(inputId, value, dropdownId) {
     }
     const dropdown = document.getElementById(dropdownId);
     if (dropdown) dropdown.classList.remove('active');
+}
+
+/**
+ * Sincroniza todos los códigos QR de la base de datos con la URL de producción actual.
+ */
+async function syncAllQRCodes() {
+    if (!Auth.isAdmin()) {
+        UI.showToast("Solo administradores pueden realizar esta acción", "error");
+        return;
+    }
+
+    if (!confirm("¿Deseas actualizar TODOS los códigos QR en la base de datos para que apunten a GitHub? Esto puede tardar unos minutos.")) return;
+
+    UI.showToast("Iniciando sincronización masiva...", "info");
+
+    try {
+        const items = await API.fetchItems();
+        let updatedCount = 0;
+        const total = items.length;
+
+        for (let i = 0; i < items.length; i++) {
+            const item = items[i];
+            const id = item.id || item.codigo || item.ID || item.Codigo;
+
+            if (!id) continue;
+
+            // Aseguramos que la URL termine con / si no la tiene el productionUrl
+            const baseUrl = CONFIG.productionUrl.endsWith('/') ? CONFIG.productionUrl.slice(0, -1) : CONFIG.productionUrl;
+            const newQRUrl = `${baseUrl}/view.html?id=${id}`;
+
+            // Solo actualizamos si es diferente
+            const currentQR = (item['Codigo QR'] || item['codigo qr'] || '').toString();
+
+            if (currentQR !== newQRUrl) {
+                await API.updateItem({
+                    id: id,
+                    "Codigo QR": newQRUrl,
+                    "Actualizado": "SI"
+                });
+                updatedCount++;
+            }
+
+            if (i % 5 === 0) {
+                console.log(`Progreso: ${i + 1}/${total}`);
+            }
+        }
+
+        UI.showToast(`Sincronización completada. ${updatedCount} artículos actualizados.`, "success");
+        localStorage.removeItem('sibim_cache_timestamp');
+    } catch (error) {
+        console.error("Error en sincronización masiva:", error);
+        UI.showToast("Error durante la sincronización masiva", "error");
+    }
 }

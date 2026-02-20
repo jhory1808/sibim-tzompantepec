@@ -223,6 +223,19 @@
                     <i class="fas fa-search"></i> Buscar
                 </button>
             </div>
+
+            <!-- Herramientas de Administración (Solo visibles para admin) -->
+            <div id="admin-maintenance-tools"
+                style="display: none; margin-top: 25px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.1);">
+                <p
+                    style="font-size: 0.8rem; color: var(--accent-blue); margin-bottom: 10px; text-transform: uppercase; font-weight: 700;">
+                    Herramientas de Mantenimiento</p>
+                <button class="btn btn-outline" onclick="syncAllQRCodes()"
+                    style="border-color: #f1c40f; color: #f1c40f;">
+                    <i class="fas fa-sync-alt"></i> Sincronizar Todos los QR con GitHub
+                </button>
+            </div>
+
             <p style="margin-top: 15px; font-size: 0.9rem; color: var(--text-secondary);">
                 <i class="fas fa-info-circle"></i> La búsqueda consultará la base de datos en tiempo real.
             </p>

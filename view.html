@@ -225,8 +225,16 @@
 
     <script src="js/config.js"></script>
     <script src="js/api.js"></script>
+    <script src="js/auth.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', async () => {
+            // VERIFICACIÓN DE SEGURIDAD
+            if (!Auth.isAuthenticated()) {
+                const currentUrl = window.location.href;
+                window.location.href = 'login.html?redirect=' + encodeURIComponent(currentUrl);
+                return;
+            }
+
             const params = new URLSearchParams(window.location.search);
             const id = params.get('id') || params.get('qr') || params.get('code');
 
