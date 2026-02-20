@@ -435,9 +435,25 @@
                                         <option value="Desvinculación">Desvinculación</option>
                                     </select>
                                 </div>
-                                <div class="filter-group">
+                                <div class="filter-group" style="position: relative;">
                                     <label>Departamento</label>
-                                    <input type="text" id="art-depto" class="form-control" placeholder="Ej: Secretaría">
+                                    <div style="display: flex; gap: 8px;">
+                                        <input type="text" id="art-depto" class="form-control"
+                                            placeholder="Seleccione o escriba...">
+                                        <button type="button" class="btn"
+                                            style="padding: 10px; background: #2ea39a; color: white; border-radius: 8px; font-size: 0.8rem; border: none; cursor: pointer;"
+                                            onclick="event.stopPropagation(); document.getElementById('new-art-dept-dropdown').classList.toggle('active')">
+                                            <i class="fas fa-bars"></i>
+                                        </button>
+                                    </div>
+                                    <!-- Selector dinámico -->
+                                    <div class="dropdown-box" id="new-art-dept-dropdown"
+                                        style="width: 100%; top: 100%; left: 0; max-height: 200px; overflow-y: auto;">
+                                        <div class="departments-selector-list" data-target="art-depto">
+                                            <div class="dropdown-item" style="opacity:0.5;"><i
+                                                    class="fas fa-spinner fa-spin"></i> Cargando áreas...</div>
+                                        </div>
+                                    </div>
                                 </div>
                                 <div class="filter-group">
                                     <label>Responsable</label>

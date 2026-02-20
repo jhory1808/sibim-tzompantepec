@@ -846,4 +846,55 @@ document.addEventListener('DOMContentLoaded', () => {
     if (document.querySelector('.departments-dropdown-list')) {
         setTimeout(loadDepartmentsMenu, 1000); // Pequeño delay para asegurar que API esté lista
     }
+
+    // Si hay selectores de departamentos para formularios, cargarlos
+    if (document.querySelector('.departments-selector-list')) {
+        setTimeout(loadDepartmentsSelector, 1200);
+    }
 });
+
+/**
+ * Carga los departamentos para ser seleccionados en campos de texto de formularios.
+ */
+async function loadDepartmentsSelector() {
+    console.log("[DEPT-SELECTOR] Cargando departamentos para selectores de formulario...");
+    const containers = document.querySelectorAll('.departments-selector-list');
+    if (containers.length === 0) return;
+
+    try {
+        const departments = await API.getDepartments();
+
+        containers.forEach(container => {
+            const targetId = container.getAttribute('data-target');
+            if (!departments || departments.length === 0) {
+                container.innerHTML = '<div class="dropdown-item" style="opacity:0.5;">No hay departamentos</div>';
+                return;
+            }
+
+            container.innerHTML = departments.map(dept => {
+                const name = dept['Nombre Departamento'] || dept.nombre || dept.Nombre || 'Sin nombre';
+                return `
+                    <div class="dropdown-item" onclick="selectDeptValue('${targetId}', '${name}', '${container.parentElement.id}')">
+                        <i class="fas fa-building"></i> ${name}
+                    </div>
+                `;
+            }).join('');
+        });
+    } catch (error) {
+        console.error("Error cargando selector de departamentos:", error);
+    }
+}
+
+/**
+ * Inserta el valor seleccionado en el input y cierra el dropdown.
+ */
+function selectDeptValue(inputId, value, dropdownId) {
+    const input = document.getElementById(inputId);
+    if (input) {
+        input.value = value;
+        input.dispatchEvent(new Event('input')); // Notificar cambios
+        UI.showToast(`Área seleccionada: ${value}`, 'info');
+    }
+    const dropdown = document.getElementById(dropdownId);
+    if (dropdown) dropdown.classList.remove('active');
+}

@@ -279,9 +279,24 @@
                                 <option value="Desvinculación">Desvinculación</option>
                             </select>
                         </div>
-                        <div class="form-group">
+                        <div class="form-group" style="position: relative;">
                             <label>Departamento</label>
-                            <input type="text" id="upd-dept">
+                            <div style="display: flex; gap: 8px;">
+                                <input type="text" id="upd-dept" placeholder="Seleccione o escriba...">
+                                <button type="button" class="btn"
+                                    style="padding: 10px; background: #2ea39a; color: white; border-radius: 8px; font-size: 0.8rem;"
+                                    onclick="event.stopPropagation(); document.getElementById('upd-dept-dropdown').classList.toggle('active')">
+                                    <i class="fas fa-bars"></i>
+                                </button>
+                            </div>
+                            <!-- Selector dinámico -->
+                            <div class="dropdown-box" id="upd-dept-dropdown"
+                                style="width: 100%; top: 100%; left: 0; max-height: 250px; overflow-y: auto;">
+                                <div class="departments-selector-list" data-target="upd-dept">
+                                    <div class="dropdown-item" style="opacity:0.5;"><i
+                                            class="fas fa-spinner fa-spin"></i> Cargando áreas...</div>
+                                </div>
+                            </div>
                         </div>
                         <div class="form-group">
                             <label>Responsable</label>
