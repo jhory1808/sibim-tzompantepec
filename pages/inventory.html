@@ -699,9 +699,7 @@
             const previewDiv = document.getElementById('modal-qr-preview');
             const canvasDiv = document.getElementById('qr-modal-canvas');
             previewDiv.style.display = 'block';
-            const baseUrl = window.location.origin.includes('localhost') || window.location.origin.includes('127.0.0.1')
-                ? 'https://sibimtzomp.netlify.app'
-                : window.location.origin;
+            const baseUrl = CONFIG.productionUrl || window.location.origin;
             const fullUrl = `${baseUrl}/view.html?id=${code}`;
             new QRCode(canvasDiv, { text: fullUrl, width: 128, height: 128 });
         }
@@ -746,7 +744,7 @@
                 "Estado": document.getElementById('art-estado').value, "estado": document.getElementById('art-estado').value,
                 "Departamento": document.getElementById('art-depto').value, "departamento": document.getElementById('art-depto').value,
                 "Responsable": document.getElementById('art-responsable').value, "responsable": document.getElementById('art-responsable').value,
-                "Codigo QR": `${window.location.host.includes('localhost') ? 'https://sibimtzomp.netlify.app' : window.location.origin}/view.html?id=${code}`,
+                "Codigo QR": `${CONFIG.productionUrl || window.location.origin}/view.html?id=${code}`,
                 "Observaciones": document.getElementById('art-obs').value, "observaciones": document.getElementById('art-obs').value
             };
 

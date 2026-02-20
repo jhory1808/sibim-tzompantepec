@@ -524,9 +524,7 @@
             display.style.display = 'flex';
 
             // URL that points to the public view of the item - Fixed production URL
-            const baseUrl = window.location.origin.includes('localhost') || window.location.origin.includes('127.0.0.1')
-                ? 'https://sibimtzomp.netlify.app'
-                : window.location.origin;
+            const baseUrl = CONFIG.productionUrl || window.location.origin;
             const url = `${baseUrl}/view.html?id=${code}`;
 
             new QRCode(canvas, {
@@ -564,7 +562,7 @@
                 "Departamento": document.getElementById('upd-dept').value, "departamento": document.getElementById('upd-dept').value,
                 "Responsable": document.getElementById('upd-resp').value, "responsable": document.getElementById('upd-resp').value,
                 "Observaciones": document.getElementById('upd-obs').value, "observaciones": document.getElementById('upd-obs').value,
-                "Codigo QR": `${window.location.host.includes('localhost') ? 'https://sibimtzomp.netlify.app' : window.location.origin}/view.html?id=${code}`
+                "Codigo QR": `${CONFIG.productionUrl || window.location.origin}/view.html?id=${code}`
             };
 
             // Capture Files (Photography and Document)
